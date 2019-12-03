@@ -1,6 +1,9 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using VivesRental.Repository.Contracts;
 using VivesRental.Repository.Core;
+using VivesRental.Repository.Includes;
 using VivesRental.Tests.Data.Factories;
 
 namespace VivesRental.Services.Tests
@@ -11,55 +14,60 @@ namespace VivesRental.Services.Tests
 		[TestMethod]
 		public void Remove_Deletes_RentalItem()
         {
-            var mock = new Mock<IUnitOfWork>();
-			//Arrange
-			var itemService = new ItemService(mock.Object);
-			var rentalItemService = new RentalItemService(mock.Object);
+            //Arrange
+            var itemToAdd = ItemFactory.CreateValidEntity();
+            var rentalItemToAdd = RentalItemFactory.CreateValidEntity(itemToAdd);
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
+            var rentalItemRepositoryMock = new Mock<IRentalItemRepository>();
 
-			var itemToAdd = ItemFactory.CreateValidEntity();
-			var newItem = itemService.Create(itemToAdd);
+            //Setup RentalItemRepository
+            rentalItemRepositoryMock.Setup(ir => ir.Get(It.IsAny<Guid>(), It.IsAny<RentalItemIncludes>())).Returns(rentalItemToAdd);
+            rentalItemRepositoryMock.Setup(ir => ir.Remove(It.IsAny<Guid>()));
 
-			var rentalItem = RentalItemFactory.CreateValidEntity(newItem);
-			var newRentalItem = rentalItemService.Create(rentalItem);
+            //Setup UnitOfWork
+            unitOfWorkMock.Setup(uow => uow.RentalItems).Returns(rentalItemRepositoryMock.Object);
+            unitOfWorkMock.Setup(uow => uow.Complete()).Returns(1);
 
-			//Act
-			var result = rentalItemService.Remove(newRentalItem.Id);
+            var rentalItemService = new RentalItemService(unitOfWorkMock.Object);
 
-			//Assert
-			Assert.IsTrue(result);
+            //Act
+            var result = rentalItemService.Remove(rentalItemToAdd.Id);
 
-		}
+            //Assert
+            Assert.IsTrue(result);
+        }
 
 		[TestMethod]
 		public void Remove_Deletes_RentalItem_With_RentalOrderLines()
 		{
-            var mock = new Mock<IUnitOfWork>();
             //Arrange
-            var customerService = new CustomerService(mock.Object);
-			var itemService = new ItemService(mock.Object);
-			var rentalItemService = new RentalItemService(mock.Object);
-			var rentalOrderService = new RentalOrderService(mock.Object);
-			var rentalOrderLineService = new RentalOrderLineService(mock.Object);
+            var customer = CustomerFactory.CreateValidEntity();
+            var itemToAdd = ItemFactory.CreateValidEntity();
+            var rentalItem = RentalItemFactory.CreateValidEntity(itemToAdd);
+            var rentalOrder = RentalOrderFactory.CreateValidEntity(customer);
+            var rentalOrderLine = RentalOrderLineFactory.CreateValidEntity(rentalOrder, rentalItem);
 
-			var customerToAdd = CustomerFactory.CreateValidEntity();
-			var customer = customerService.Create(customerToAdd);
-			var itemToAdd = ItemFactory.CreateValidEntity();
-			var item = itemService.Create(itemToAdd);
+            rentalItem.RentalOrderLines.Add(rentalOrderLine);
+            itemToAdd.RentalItems.Add(rentalItem);
 
-			var rentalItemToAdd = RentalItemFactory.CreateValidEntity(item);
-			var rentalItem = rentalItemService.Create(rentalItemToAdd);
 
-			var rentalOrder = rentalOrderService.Create(customer.Id);
+            //Setup RentalItemRepository
+            var rentalItemRepositoryMock = new Mock<IRentalItemRepository>();
+            rentalItemRepositoryMock.Setup(ir => ir.Get(It.IsAny<Guid>(), It.IsAny<RentalItemIncludes>())).Returns(rentalItem);
+            rentalItemRepositoryMock.Setup(rir => rir.Remove(It.IsAny<Guid>()));
 
-			//var rentalOrderLineToAdd = RentalOrderLineFactory.CreateValidEntity(rentalOrder, rentalItem);
-			var rentalOrderLine = rentalOrderLineService.Rent(rentalOrder.Id, rentalItem.Id);
+            //Setup UnitOfWork
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
+            unitOfWorkMock.Setup(uow => uow.RentalItems).Returns(rentalItemRepositoryMock.Object);
+            unitOfWorkMock.Setup(uow => uow.Complete()).Returns(1);
 
-			//Act
-			var result = rentalItemService.Remove(rentalItem.Id);
+            var rentalItemService = new RentalItemService(unitOfWorkMock.Object);
 
-			//Assert
-			Assert.IsTrue(result);
+            //Act
+            var result = rentalItemService.Remove(itemToAdd.Id);
 
-		}
+            //Assert
+            Assert.IsTrue(result);
+        }
 	}
 }

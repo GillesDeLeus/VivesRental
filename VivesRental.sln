@@ -15,11 +15,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{13
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{03F1DDCF-EE78-4D5D-98CB-39B06AEA855B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VivesRental.Repository.Tests", "VivesRental.Repository.Tests\VivesRental.Repository.Tests.csproj", "{BBDE2172-01E2-4263-92EC-A7791E63B98D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VivesRental.Repository.Tests", "VivesRental.Repository.Tests\VivesRental.Repository.Tests.csproj", "{BBDE2172-01E2-4263-92EC-A7791E63B98D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VivesRental.Tests.Data", "VivesRental.Tests.Data\VivesRental.Tests.Data.csproj", "{1D923E57-00A7-4D42-B855-8D493300F1C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VivesRental.Tests.Data", "VivesRental.Tests.Data\VivesRental.Tests.Data.csproj", "{1D923E57-00A7-4D42-B855-8D493300F1C4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VivesRental.Services.Tests", "VivesRental.Services.Tests\VivesRental.Services.Tests.csproj", "{CC38CD6A-2FAC-4732-91E1-AC1C30B305DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VivesRental.Services.Tests", "VivesRental.Services.Tests\VivesRental.Services.Tests.csproj", "{CC38CD6A-2FAC-4732-91E1-AC1C30B305DD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{B006E2AF-70F7-4349-909D-2AA4847D60F6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VivesRental.RestApi", "VivesRental.RestApi\VivesRental.RestApi.csproj", "{9125D9E1-1AF3-4B30-9457-4FA6F4D75B5A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VivesRental.RestApi.Contracts", "VivesRental.RestApi.Contracts\VivesRental.RestApi.Contracts.csproj", "{F60C2DBE-0A8E-4D90-BE05-C6EF32812100}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +57,14 @@ Global
 		{CC38CD6A-2FAC-4732-91E1-AC1C30B305DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CC38CD6A-2FAC-4732-91E1-AC1C30B305DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CC38CD6A-2FAC-4732-91E1-AC1C30B305DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9125D9E1-1AF3-4B30-9457-4FA6F4D75B5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9125D9E1-1AF3-4B30-9457-4FA6F4D75B5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9125D9E1-1AF3-4B30-9457-4FA6F4D75B5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9125D9E1-1AF3-4B30-9457-4FA6F4D75B5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F60C2DBE-0A8E-4D90-BE05-C6EF32812100}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F60C2DBE-0A8E-4D90-BE05-C6EF32812100}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F60C2DBE-0A8E-4D90-BE05-C6EF32812100}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F60C2DBE-0A8E-4D90-BE05-C6EF32812100}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,6 +76,8 @@ Global
 		{BBDE2172-01E2-4263-92EC-A7791E63B98D} = {03F1DDCF-EE78-4D5D-98CB-39B06AEA855B}
 		{1D923E57-00A7-4D42-B855-8D493300F1C4} = {03F1DDCF-EE78-4D5D-98CB-39B06AEA855B}
 		{CC38CD6A-2FAC-4732-91E1-AC1C30B305DD} = {03F1DDCF-EE78-4D5D-98CB-39B06AEA855B}
+		{9125D9E1-1AF3-4B30-9457-4FA6F4D75B5A} = {B006E2AF-70F7-4349-909D-2AA4847D60F6}
+		{F60C2DBE-0A8E-4D90-BE05-C6EF32812100} = {B006E2AF-70F7-4349-909D-2AA4847D60F6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8597BBC0-749A-49A3-A0E6-3DCE877EDBA5}

@@ -13,11 +13,13 @@ namespace VivesRental.Repository.Core
         DbSet<Order> RentalOrders { get; set; }
         DbSet<RentalOrderLine> RentalOrderLines { get; set; }
         DbSet<Customer> Customers { get; set; }
+        DbSet<RefreshToken> RefreshTokens { get; set; }
         
         //Expose DbContext functionality through interface
         int SaveChanges();
         int SaveChanges(bool acceptAllChangesOnSuccess);
-        Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken);
+       
     }
 }

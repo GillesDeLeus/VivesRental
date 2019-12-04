@@ -15,6 +15,8 @@ namespace VivesRental.Repository.Core
         public DbSet<Order> RentalOrders { get; set; }
         public DbSet<RentalOrderLine> RentalOrderLines { get; set; }
         public DbSet<Customer> Customers { get; set; }
+
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
     }
 
     

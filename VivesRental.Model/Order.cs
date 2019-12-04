@@ -10,7 +10,7 @@ namespace VivesRental.Model
     {
         public Order()
         {
-            RentalOrderLines = new List<RentalOrderLine>();
+            OrderLines = new List<OrderLine>();
         }
         [Key]
         public Guid Id { get; set; }
@@ -22,6 +22,6 @@ namespace VivesRental.Model
         public string CustomerEmail { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        public IList<RentalOrderLine> RentalOrderLines { get; set; }
+        public IList<OrderLine> OrderLines { get; set; }
     }
 }

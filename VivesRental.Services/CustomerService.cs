@@ -59,7 +59,7 @@ namespace VivesRental.Services
                 return null;
             }
 
-            //Get Item from unitOfWork
+            //Get Product from unitOfWork
             var customer = _unitOfWork.Customers.Get(entity.Id);
             if (customer == null)
             {

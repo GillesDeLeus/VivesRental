@@ -7,24 +7,24 @@ namespace VivesRental.Repository.Core
         private readonly IVivesRentalDbContext _context;
 
         public UnitOfWork(IVivesRentalDbContext context,
-            IItemRepository itemRepository,
-            IRentalItemRepository rentalItemRepository,
-            IRentalOrderRepository rentalOrderRepository,
-            IRentalOrderLineRepository rentalOrderLineRepository,
+            IProductRepository productRepository,
+            IArticleRepository articleRepository,
+            IOrderRepository orderRepository,
+            IOrderLineRepository orderLineRepository,
             ICustomerRepository customerRepository)
         {
             _context = context;
-            Items = itemRepository;
-            RentalItems = rentalItemRepository;
-            RentalOrders = rentalOrderRepository;
-            RentalOrderLines = rentalOrderLineRepository;
+            Products = productRepository;
+            Articles = articleRepository;
+            Orders = orderRepository;
+            OrderLines = orderLineRepository;
             Customers = customerRepository;
         }
 
-        public IItemRepository Items { get; }
-        public IRentalItemRepository RentalItems { get; }
-        public IRentalOrderRepository RentalOrders { get; }
-        public IRentalOrderLineRepository RentalOrderLines { get; }
+        public IProductRepository Products { get; }
+        public IArticleRepository Articles { get; }
+        public IOrderRepository Orders { get; }
+        public IOrderLineRepository OrderLines { get; }
         public ICustomerRepository Customers { get; }
         public int Complete()
         {

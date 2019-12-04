@@ -5,57 +5,57 @@ namespace VivesRental.Services.Extensions
 {
     public static class ValidationExtensions
     {
-        public static bool IsValid(this Item item)
+        public static bool IsValid(this Product product)
         {
-            if (string.IsNullOrWhiteSpace(item.Name))
+            if (string.IsNullOrWhiteSpace(product.Name))
                 return false;
 
             return true;
         }
 
-        public static bool IsValid(this RentalItem rentalItem)
+        public static bool IsValid(this Article article)
         {
-            if (rentalItem.ItemId == Guid.Empty)
+            if (article.ProductId == Guid.Empty)
                 return false;
             
             return true;
         }
 
-        public static bool IsValid(this Order rentalOrder)
+        public static bool IsValid(this Order order)
         {
-            if (rentalOrder.CustomerId == Guid.Empty)
+            if (order.CustomerId == Guid.Empty)
                 return false;
 
-            if (string.IsNullOrWhiteSpace(rentalOrder.CustomerFirstName))
+            if (string.IsNullOrWhiteSpace(order.CustomerFirstName))
                 return false;
 
-            if (string.IsNullOrWhiteSpace(rentalOrder.CustomerLastName))
+            if (string.IsNullOrWhiteSpace(order.CustomerLastName))
                 return false;
 
-            if (string.IsNullOrWhiteSpace(rentalOrder.CustomerEmail))
+            if (string.IsNullOrWhiteSpace(order.CustomerEmail))
                 return false;
 
-            if (rentalOrder.CreatedAt == DateTime.MinValue)
+            if (order.CreatedAt == DateTime.MinValue)
                 return false;
 
             return true;
         }
 
-        public static bool IsValid(this RentalOrderLine rentalOrderLine)
+        public static bool IsValid(this OrderLine orderLine)
         {
-            if (rentalOrderLine.RentalOrderId == Guid.Empty)
+            if (orderLine.OrderId == Guid.Empty)
                 return false;
 
-            if (rentalOrderLine.RentalItemId == Guid.Empty)
+            if (orderLine.ArticleId == Guid.Empty)
                 return false;
 
-            if (string.IsNullOrWhiteSpace(rentalOrderLine.ItemName))
+            if (string.IsNullOrWhiteSpace(orderLine.ProductName))
                 return false;
 
-            if (rentalOrderLine.RentedAt == DateTime.MinValue)
+            if (orderLine.RentedAt == DateTime.MinValue)
                 return false;
 
-            if (rentalOrderLine.ExpiresAt == DateTime.MinValue)
+            if (orderLine.ExpiresAt == DateTime.MinValue)
                 return false;
 
             return true;

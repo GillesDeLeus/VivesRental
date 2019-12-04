@@ -5,10 +5,10 @@ namespace VivesRental.Repository.Core
 {
     public interface IUnitOfWork : IDisposable
     {
-        IItemRepository Items { get; }
-        IRentalItemRepository RentalItems { get; }
-        IRentalOrderRepository RentalOrders { get; }
-        IRentalOrderLineRepository RentalOrderLines { get; }
+        IProductRepository Products { get; }
+        IArticleRepository Articles { get; }
+        IOrderRepository Orders { get; }
+        IOrderLineRepository OrderLines { get; }
         ICustomerRepository Customers { get; }
         int Complete();
     }

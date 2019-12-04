@@ -10,13 +10,11 @@ namespace VivesRental.Repository.Core
             
         }
 
-        public DbSet<Item> Items { get; set; }
-        public DbSet<RentalItem> RentalItems { get; set; }
-        public DbSet<Order> RentalOrders { get; set; }
-        public DbSet<RentalOrderLine> RentalOrderLines { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<Article> Articles { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderLine> OrderLines { get; set; }
         public DbSet<Customer> Customers { get; set; }
-
-        public DbSet<RefreshToken> RefreshTokens { get; set; }
     }
 
     

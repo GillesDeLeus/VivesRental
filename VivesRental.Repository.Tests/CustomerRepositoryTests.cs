@@ -12,7 +12,7 @@ namespace VivesRental.Repository.Tests
 
 
         [TestMethod]
-        public void Add_Returns_1_When_Adding_Valid_Item()
+        public void Add_Returns_1_When_Adding_Valid_Customer()
         {
             var databaseName = Guid.NewGuid().ToString();
             using (var context = DbContextFactory.CreateInstance(databaseName))
@@ -49,7 +49,7 @@ namespace VivesRental.Repository.Tests
         }
 
         [TestMethod]
-        public void Get_Returns_Item_When_Found()
+        public void Get_Returns_Customer_When_Found()
         {
             var databaseName = Guid.NewGuid().ToString();
             using (var context = DbContextFactory.CreateInstance(databaseName))
@@ -69,7 +69,7 @@ namespace VivesRental.Repository.Tests
         }
 
         [TestMethod]
-        public void GetAll_Returns_10_Items()
+        public void GetAll_Returns_10_Customers()
         {
             var databaseName = Guid.NewGuid().ToString();
             using (var context = DbContextFactory.CreateInstance(databaseName))
@@ -115,7 +115,7 @@ namespace VivesRental.Repository.Tests
         }
 
         [TestMethod]
-        public void Remove_Deletes_Item()
+        public void Remove_Deletes_Customer()
         {
             //Arrange
             var databaseName = Guid.NewGuid().ToString();

@@ -9,26 +9,26 @@ namespace VivesRental.Services.Tests
     public class ValidationExtensionsTests
     {
         [TestMethod]
-        public void Item_IsValid_Returns_True_When_Valid()
+        public void Product_IsValid_Returns_True_When_Valid()
         {
             //Arrange
-            var item = ItemFactory.CreateValidEntity();
+            var product = ProductFactory.CreateValidEntity();
 
             //Act
-            var result = item.IsValid();
+            var result = product.IsValid();
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void Item_IsValid_Returns_False_When_Invalid()
+        public void Product_IsValid_Returns_False_When_Invalid()
         {
             //Arrange
-            var item = ItemFactory.CreateInvalidEntity();
+            var product = ProductFactory.CreateInvalidEntity();
 
             //Act
-            var result = item.IsValid();
+            var result = product.IsValid();
 
             //Assert
             Assert.IsFalse(result);
@@ -61,93 +61,93 @@ namespace VivesRental.Services.Tests
         }
 
         [TestMethod]
-        public void RentalItem_IsValid_Returns_True_When_Valid()
+        public void Article_IsValid_Returns_True_When_Valid()
         {
             //Arrange
-            var item = ItemFactory.CreateValidEntity();
-            item.Id = Guid.NewGuid();
-            var rentalItem = RentalItemFactory.CreateValidEntity(item);
-            rentalItem.Id = Guid.NewGuid();
+            var product = ProductFactory.CreateValidEntity();
+            product.Id = Guid.NewGuid();
+            var article = ArticleFactory.CreateValidEntity(product);
+            article.Id = Guid.NewGuid();
 
             //Act
-            var result = rentalItem.IsValid();
+            var result = article.IsValid();
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void RentalItem_IsValid_Returns_False_When_Invalid()
+        public void Article_IsValid_Returns_False_When_Invalid()
         {
             //Arrange
-            var rentalItem = RentalItemFactory.CreateInvalidEntity();
+            var article = ArticleFactory.CreateInvalidEntity();
 
             //Act
-            var result = rentalItem.IsValid();
+            var result = article.IsValid();
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void RentalOrder_IsValid_Returns_True_When_Valid()
+        public void Order_IsValid_Returns_True_When_Valid()
         {
             //Arrange
             var customer = CustomerFactory.CreateValidEntity();
             customer.Id = Guid.NewGuid();
-            var rentalOrder = RentalOrderFactory.CreateValidEntity(customer);
-            rentalOrder.Id = Guid.NewGuid();
+            var order = OrderFactory.CreateValidEntity(customer);
+            order.Id = Guid.NewGuid();
 
             //Act
-            var result = rentalOrder.IsValid();
+            var result = order.IsValid();
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void RentalOrder_IsValid_Returns_False_When_Invalid()
+        public void Order_IsValid_Returns_False_When_Invalid()
         {
             //Arrange
-            var rentalOrder = RentalOrderFactory.CreateInvalidEntity();
+            var order = OrderFactory.CreateInvalidEntity();
 
             //Act
-            var result = rentalOrder.IsValid();
+            var result = order.IsValid();
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void RentalOrderLine_IsValid_Returns_True_When_Valid()
+        public void OrderLine_IsValid_Returns_True_When_Valid()
         {
             //Arrange
             var customer = CustomerFactory.CreateValidEntity();
             customer.Id = Guid.NewGuid();
-            var rentalOrder = RentalOrderFactory.CreateValidEntity(customer);
-            rentalOrder.Id = Guid.NewGuid();
-            var item = ItemFactory.CreateValidEntity();
-            item.Id = Guid.NewGuid();
-            var rentalItem = RentalItemFactory.CreateValidEntity(item);
-            rentalItem.Id = Guid.NewGuid();
-            var rentalOrderLine = RentalOrderLineFactory.CreateValidEntity(rentalOrder, rentalItem);
-            rentalOrderLine.Id = Guid.NewGuid();
+            var order = OrderFactory.CreateValidEntity(customer);
+            order.Id = Guid.NewGuid();
+            var product = ProductFactory.CreateValidEntity();
+            product.Id = Guid.NewGuid();
+            var article = ArticleFactory.CreateValidEntity(product);
+            article.Id = Guid.NewGuid();
+            var orderLine = OrderLineFactory.CreateValidEntity(order, article);
+            orderLine.Id = Guid.NewGuid();
 
             //Act
-            var result = rentalOrderLine.IsValid();
+            var result = orderLine.IsValid();
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void RentalOrderLine_IsValid_Returns_False_When_Invalid()
+        public void OrderLine_IsValid_Returns_False_When_Invalid()
         {
             //Arrange
-            var rentalOrder = RentalOrderFactory.CreateInvalidEntity();
+            var order = OrderFactory.CreateInvalidEntity();
 
             //Act
-            var result = rentalOrder.IsValid();
+            var result = order.IsValid();
 
             //Assert
             Assert.IsFalse(result);

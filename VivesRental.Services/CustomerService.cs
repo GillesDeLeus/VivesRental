@@ -38,7 +38,7 @@ namespace VivesRental.Services
             var customer = new Customer
             {
                 FirstName = entity.FirstName,
-                Name = entity.Name,
+                LastName = entity.LastName,
                 Email = entity.Email,
                 PhoneNumber = entity.PhoneNumber
             };
@@ -68,7 +68,7 @@ namespace VivesRental.Services
 
             //Only update the properties we want to update
             customer.FirstName = entity.FirstName;
-            customer.Name = entity.Name;
+            customer.LastName = entity.LastName;
             customer.Email = entity.Email;
             customer.PhoneNumber = entity.PhoneNumber;
 

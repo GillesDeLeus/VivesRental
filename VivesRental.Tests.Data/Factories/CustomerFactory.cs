@@ -9,7 +9,7 @@ namespace VivesRental.Tests.Data.Factories
             return new Customer
             {
                 FirstName = "TestFirstName",
-                Name = "TestName",
+                LastName = "TestName",
                 Email = "TestEmail",
                 PhoneNumber = "TestPhoneNumber"
             };

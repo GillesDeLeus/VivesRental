@@ -30,6 +30,7 @@ namespace VivesRental.Services
         public Order Create(Guid customerId)
         {
             var customer = _unitOfWork.Customers.Get(customerId);
+
             if (customer == null)
             {
                 return null;
@@ -39,8 +40,9 @@ namespace VivesRental.Services
             {
                 CustomerId = customer.Id,
                 CustomerFirstName = customer.FirstName,
-                CustomerLastName = customer.Name,
+                CustomerLastName = customer.LastName,
                 CustomerEmail = customer.Email,
+                CustomerPhoneNumber = customer.PhoneNumber,
                 CreatedAt = DateTime.Now
             };
 

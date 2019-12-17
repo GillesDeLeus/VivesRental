@@ -66,7 +66,7 @@ namespace VivesRental.Services.Extensions
             if (string.IsNullOrWhiteSpace(customer.FirstName))
                 return false;
 
-            if (string.IsNullOrWhiteSpace(customer.Name))
+            if (string.IsNullOrWhiteSpace(customer.LastName))
                 return false;
 
             if (string.IsNullOrWhiteSpace(customer.Email))

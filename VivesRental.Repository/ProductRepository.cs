@@ -68,10 +68,12 @@ namespace VivesRental.Repository
 		    if (includes.Articles)
 			    query = query.Include(i => i.Articles);
 
-		    if (includes.ArticleOrderLines)
-		    {
-			    query = query.Include(i => i.Articles.Select(ri => ri.OrderLines));
-		    }
+            if (includes.ArticleOrderLines)
+            {
+	            query = query
+                    .Include(p => p.Articles)
+                    .ThenInclude(a => a.OrderLines);
+            }
 
 		    return query;
 	    }

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using VivesRental.Repository.Includes;
 using VivesRental.Tests.Data.Factories;
 
 namespace VivesRental.Repository.Tests
@@ -37,17 +38,32 @@ namespace VivesRental.Repository.Tests
         public void Get_Returns_Null_When_Not_Found()
         {
             var databaseName = Guid.NewGuid().ToString();
-            using (var context = DbContextFactory.CreateInstance(databaseName))
-            {
-                //Arrange
-                var productRepository = new ProductRepository(context);
+            using var context = DbContextFactory.CreateInstance(databaseName);
 
-                //Act
-                var product = productRepository.Get(Guid.NewGuid());
+            //Arrange
+            var productRepository = new ProductRepository(context);
 
-                //Assert
-                Assert.IsNull(product);
-            }
+            //Act
+            var product = productRepository.Get(Guid.NewGuid());
+
+            //Assert
+            Assert.IsNull(product);
+        }
+
+        [TestMethod]
+        public void Get_Returns_Null_When_Not_Found_With_Includes()
+        {
+            var databaseName = Guid.NewGuid().ToString();
+            using var context = DbContextFactory.CreateInstance(databaseName);
+
+            //Arrange
+            var productRepository = new ProductRepository(context);
+
+            //Act
+            var product = productRepository.Get(Guid.NewGuid(), new ProductIncludes{ArticleOrderLines = true});
+
+            //Assert
+            Assert.IsNull(product);
         }
 
         [TestMethod]
@@ -69,6 +85,30 @@ namespace VivesRental.Repository.Tests
                 //Act
                 var productRepository = new ProductRepository(context);
                 var product = productRepository.Get(addedProductId);
+                //Assert
+                Assert.IsNotNull(product);
+            }
+        }
+
+        [TestMethod]
+        public void Get_Returns_Product_When_Found_With_Includes()
+        {
+            var databaseName = Guid.NewGuid().ToString();
+            Guid addedProductId;
+            using (var context = DbContextFactory.CreateInstance(databaseName))
+            {
+                //Arrange
+                var productToAdd = ProductFactory.CreateValidEntity();
+                context.Products.Add(productToAdd);
+                context.SaveChanges();
+                addedProductId = productToAdd.Id;
+            }
+
+            using (var context = DbContextFactory.CreateInstance(databaseName))
+            {
+                //Act
+                var productRepository = new ProductRepository(context);
+                var product = productRepository.Get(addedProductId, new ProductIncludes { ArticleOrderLines = true });
                 //Assert
                 Assert.IsNotNull(product);
             }

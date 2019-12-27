@@ -19,9 +19,8 @@ namespace VivesRental.Repository
 
         public Order Get(Guid id)
         {
-            return _context.Orders
-                .AsNoTracking()
-                .SingleOrDefault(o => o.Id == id);
+            var query = _context.Orders.AsQueryable();
+            return query.SingleOrDefault(o => o.Id == id);
         }
 
         public IEnumerable<Order> GetAll()

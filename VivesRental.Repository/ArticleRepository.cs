@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
 using VivesRental.Repository.Contracts;
 using VivesRental.Repository.Core;
+using VivesRental.Repository.Extensions;
 using VivesRental.Repository.Includes;
 
 namespace VivesRental.Repository
@@ -25,9 +26,7 @@ namespace VivesRental.Repository
 
         public Article Get(Guid id, ArticleIncludes includes)
         {
-            var query = _context.Articles
-                .AsNoTracking()
-                .AsQueryable(); //It needs to be a queryable to be able to build the expression
+            var query = _context.Articles.AsQueryable(); //It needs to be a queryable to be able to build the expression
             query = AddIncludes(query, includes);
             query = query.Where(i => i.Id == id); //Add the where clause
             return query.FirstOrDefault();
@@ -36,7 +35,10 @@ namespace VivesRental.Repository
         public void Remove(Guid id)
         {
             var entity = new Article { Id = id };
-            _context.Articles.Attach(entity);
+            if (!_context.Exists(entity))
+            {
+                _context.Articles.Attach(entity);
+            }
             _context.Articles.Remove(entity);
         }
 

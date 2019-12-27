@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
 using VivesRental.Repository.Contracts;
 using VivesRental.Repository.Core;
+using VivesRental.Repository.Extensions;
 
 namespace VivesRental.Repository
 {
@@ -24,9 +25,8 @@ namespace VivesRental.Repository
 
         public Customer Get(Guid id)
         {
-            return _context.Customers
-                .AsNoTracking()
-                .SingleOrDefault(c => c.Id== id);
+            var query = _context.Customers.AsQueryable();
+            return query.SingleOrDefault(c => c.Id== id);
         }
 
         public IEnumerable<Customer> GetAll()
@@ -39,7 +39,10 @@ namespace VivesRental.Repository
         public void Remove(Guid id)
         {
             var entity = new Customer {Id = id};
-            _context.Customers.Attach(entity);
+            if (!_context.Exists(entity))
+            {
+                _context.Customers.Attach(entity);
+            }
             _context.Customers.Remove(entity);
         }
     }

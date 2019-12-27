@@ -20,7 +20,8 @@ namespace VivesRental.Repository
 
         public OrderLine Get(Guid id)
         {
-            var query = _context.OrderLines.AsQueryable(); //It needs to be a queryable to be able to build the expression
+            var query = _context.OrderLines
+                .AsQueryable(); //It needs to be a queryable to be able to build the expression
             query = query.Where(i => i.Id == id); //Add the where clause
             return query.FirstOrDefault();
         }
@@ -28,7 +29,6 @@ namespace VivesRental.Repository
         public IEnumerable<OrderLine> Find(Expression<Func<OrderLine, bool>> predicate)
         {
             return _context.OrderLines
-                .AsNoTracking()
                 .Where(predicate).AsQueryable();
         }
 
@@ -36,5 +36,6 @@ namespace VivesRental.Repository
         {
             _context.OrderLines.Add(orderLine);
         }
+
     }
 }

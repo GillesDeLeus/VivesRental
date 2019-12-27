@@ -6,7 +6,6 @@ using System.Linq.Expressions;
 using VivesRental.Model;
 using VivesRental.Repository.Contracts;
 using VivesRental.Repository.Core;
-using VivesRental.Repository.Extensions;
 using VivesRental.Repository.Includes;
 
 namespace VivesRental.Repository
@@ -22,7 +21,8 @@ namespace VivesRental.Repository
 
         public Product Get(Guid id, ProductIncludes includes = null)
 	    {
-		    var query = _context.Products.AsQueryable(); //It needs to be a queryable to be able to build the expression
+		    var query = _context.Products
+                .AsQueryable(); //It needs to be a queryable to be able to build the expression
             query = AddIncludes(query, includes);
 		    query = query.Where(i => i.Id == id); //Add the where clause
 		    return query.FirstOrDefault(); 
@@ -31,7 +31,6 @@ namespace VivesRental.Repository
         public IEnumerable<Product> GetAll(ProductIncludes includes = null)
 		{
 			var query = _context.Products
-                .AsNoTracking()
                 .AsQueryable(); //It needs to be a queryable to be able to build the expression
 			query = AddIncludes(query, includes);
 			return query.AsEnumerable(); 
@@ -40,7 +39,6 @@ namespace VivesRental.Repository
 		public IEnumerable<Product> Find(Expression<Func<Product, bool>> predicate, ProductIncludes includes = null)
 		{
 			var query = _context.Products
-                .AsNoTracking()
                 .AsQueryable(); //It needs to be a queryable to be able to build the expression
 			query = AddIncludes(query, includes);
 			return query.Where(predicate).AsEnumerable(); //Add the where clause and return IEnumerable<Product>
@@ -53,13 +51,19 @@ namespace VivesRental.Repository
 
         public void Remove(Guid id)
         {
-            var entity = new Product { Id = id };
-            if (!_context.Exists(entity))
+            var localEntity = _context.Products.Local.SingleOrDefault(e => e.Id == id);
+            if (localEntity == null)
             {
+                var entity = new Product { Id = id };
                 _context.Products.Attach(entity);
+                _context.Products.Remove(entity);
             }
-            _context.Products.Remove(entity);
+            else
+            {
+                _context.Products.Remove(localEntity);
+            }
         }
+
 
 
         /// <summary>

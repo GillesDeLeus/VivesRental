@@ -5,6 +5,11 @@ namespace VivesRental.Repository.Core
 {
     public class VivesRentalDbContext: DbContext, IVivesRentalDbContext
     {
+        public VivesRentalDbContext()
+        {
+            
+        }
+
         public VivesRentalDbContext(DbContextOptions options): base(options)
         {
             

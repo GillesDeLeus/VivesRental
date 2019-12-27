@@ -19,14 +19,14 @@ namespace VivesRental.Repository
 
         public Order Get(Guid id)
         {
-            var query = _context.Orders.AsQueryable();
+            var query = _context.Orders
+                .AsQueryable();
             return query.SingleOrDefault(o => o.Id == id);
         }
 
         public IEnumerable<Order> GetAll()
         {
             return _context.Orders
-                .AsNoTracking()
                 .AsEnumerable();
         }
 
@@ -34,5 +34,6 @@ namespace VivesRental.Repository
         {
             _context.Orders.Add(order);
         }
+
     }
 }

@@ -25,7 +25,9 @@ namespace VivesRental.Repository
 
         public Article Get(Guid id, ArticleIncludes includes)
         {
-            var query = _context.Articles.AsQueryable(); //It needs to be a queryable to be able to build the expression
+            var query = _context.Articles
+                .AsNoTracking()
+                .AsQueryable(); //It needs to be a queryable to be able to build the expression
             query = AddIncludes(query, includes);
             query = query.Where(i => i.Id == id); //Add the where clause
             return query.FirstOrDefault();
@@ -50,7 +52,9 @@ namespace VivesRental.Repository
 
         public IEnumerable<Article> Find(Expression<Func<Article, bool>> predicate, ArticleIncludes includes)
         {
-            var query = _context.Articles.AsQueryable(); //It needs to be a queryable to be able to build the expression
+            var query = _context.Articles
+                .AsNoTracking()
+                .AsQueryable(); //It needs to be a queryable to be able to build the expression
             query = AddIncludes(query, includes);
             return query.Where(predicate).AsEnumerable(); //Add the where clause and return IEnumerable<Article>
         }
@@ -62,7 +66,9 @@ namespace VivesRental.Repository
 
         public IEnumerable<Article> GetAll(ArticleIncludes includes)
         {
-            var query = _context.Articles.AsQueryable(); //It needs to be a queryable to be able to build the expression
+            var query = _context.Articles
+                .AsNoTracking()
+                .AsQueryable(); //It needs to be a queryable to be able to build the expression
             query = AddIncludes(query, includes);
             return query.AsEnumerable();
         }

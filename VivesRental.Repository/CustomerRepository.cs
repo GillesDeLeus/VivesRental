@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
 using VivesRental.Repository.Contracts;
 using VivesRental.Repository.Core;
@@ -23,12 +24,16 @@ namespace VivesRental.Repository
 
         public Customer Get(Guid id)
         {
-            return _context.Customers.Find(id);
+            return _context.Customers
+                .AsNoTracking()
+                .SingleOrDefault(c => c.Id== id);
         }
 
         public IEnumerable<Customer> GetAll()
         {
-            return _context.Customers.AsEnumerable();
+            return _context.Customers
+                .AsNoTracking()
+                .AsEnumerable();
         }
 
         public void Remove(Guid id)

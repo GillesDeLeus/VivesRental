@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
 using VivesRental.Repository.Contracts;
 using VivesRental.Repository.Core;
@@ -18,12 +19,16 @@ namespace VivesRental.Repository
 
         public Order Get(Guid id)
         {
-            return _context.Orders.Find(id);
+            return _context.Orders
+                .AsNoTracking()
+                .SingleOrDefault(o => o.Id == id);
         }
 
         public IEnumerable<Order> GetAll()
         {
-            return _context.Orders.AsEnumerable();
+            return _context.Orders
+                .AsNoTracking()
+                .AsEnumerable();
         }
 
         public void Add(Order order)

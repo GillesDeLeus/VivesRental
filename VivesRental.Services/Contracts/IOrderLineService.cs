@@ -8,6 +8,7 @@ namespace VivesRental.Services.Contracts
     {
         OrderLine Get(Guid id);
         bool Rent(Guid orderId, Guid articleId);
+        bool Rent(Guid orderId, IList<Guid> articleIds);
         bool Return(Guid orderLineId, DateTime returnedAt);
 	    IList<OrderLine> FindByOrderId(Guid orderId);
 

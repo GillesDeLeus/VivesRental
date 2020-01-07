@@ -117,10 +117,14 @@ namespace VivesRental.Services.Tests
             var articleRepositoryMock = new Mock<IArticleRepository>();
             articleRepositoryMock.Setup(rir => rir.Remove(It.IsAny<Guid>()));
 
+            //Setup OrderLineRepository
+            var orderLineRepositoryMock = new Mock<IOrderLineRepository>();
+
             //Setup UnitOfWork
             var unitOfWorkMock = new Mock<IUnitOfWork>();
             unitOfWorkMock.Setup(uow => uow.Products).Returns(productRepositoryMock.Object);
             unitOfWorkMock.Setup(uow => uow.Articles).Returns(articleRepositoryMock.Object);
+            unitOfWorkMock.Setup(uow => uow.OrderLines).Returns(orderLineRepositoryMock.Object);
             unitOfWorkMock.Setup(uow => uow.Complete()).Returns(1);
 
             var productService = new ProductService(unitOfWorkMock.Object);

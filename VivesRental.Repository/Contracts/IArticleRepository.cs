@@ -19,6 +19,5 @@ namespace VivesRental.Repository.Contracts
 
         void Remove(Guid id);
         void Add(Article article);
-        
     }
 }

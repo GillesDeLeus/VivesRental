@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using VivesRental.Model;
 using VivesRental.Repository.Core;
+using VivesRental.Repository.Includes;
 using VivesRental.Services.Contracts;
+using VivesRental.Services.Extensions;
 
 namespace VivesRental.Services
 {
@@ -28,19 +30,24 @@ namespace VivesRental.Services
 
         public bool Rent(Guid orderId, Guid articleId)
         {
-            var article = _unitOfWork.Articles.Get(articleId);
-            var product = _unitOfWork.Products.Get(article.ProductId);
-            var orderLine = new OrderLine
-            {
-                ArticleId = articleId,
-                OrderId = orderId,
-                ProductName = product.Name,
-                ProductDescription = product.Description,
-                ExpiresAt = DateTime.Now.AddDays(product.RentalExpiresAfterDays),
-                RentedAt = DateTime.Now
-            };
+            var article = _unitOfWork.Articles.Get(articleId, new ArticleIncludes{Product = true});
+            var orderLine = article.CreateOrderLine(orderId);
 
             _unitOfWork.OrderLines.Add(orderLine);
+            var numberOfObjectsUpdated = _unitOfWork.Complete();
+            return numberOfObjectsUpdated > 0;
+        }
+
+        public bool Rent(Guid orderId, IList<Guid> articleIds)
+        {
+            var articles = _unitOfWork.Articles.Find(a => articleIds.Contains(a.Id), new ArticleIncludes{Product = true});
+
+            foreach (var article in articles)
+            {
+                var orderLine = article.CreateOrderLine(orderId);
+                _unitOfWork.OrderLines.Add(orderLine);
+            }
+
             var numberOfObjectsUpdated = _unitOfWork.Complete();
             return numberOfObjectsUpdated > 0;
         }

@@ -25,7 +25,8 @@ namespace VivesRental.Repository
 
         public Article Get(Guid id, ArticleIncludes includes)
         {
-            var query = _context.Articles.AsQueryable(); //It needs to be a queryable to be able to build the expression
+            var query = _context.Articles
+                .AsQueryable(); //It needs to be a queryable to be able to build the expression
             query = AddIncludes(query, includes);
             query = query.Where(i => i.Id == id); //Add the where clause
             return query.FirstOrDefault();
@@ -33,16 +34,24 @@ namespace VivesRental.Repository
 
         public void Remove(Guid id)
         {
-            var entity = new Article { Id = id };
-            _context.Articles.Attach(entity);
-            _context.Articles.Remove(entity);
+            var localEntity = _context.Articles.Local.SingleOrDefault(e => e.Id == id);
+            if (localEntity == null)
+            {
+                var entity = new Article { Id = id };
+                _context.Articles.Attach(entity);
+                _context.Articles.Remove(entity);
+            }
+            else
+            {
+                _context.Articles.Remove(localEntity);
+            }
         }
 
         public void Add(Article article)
         {
             _context.Articles.Add(article);
         }
-
+        
         public IEnumerable<Article> Find(Expression<Func<Article, bool>> predicate)
         {
             return Find(predicate, null);
@@ -50,7 +59,8 @@ namespace VivesRental.Repository
 
         public IEnumerable<Article> Find(Expression<Func<Article, bool>> predicate, ArticleIncludes includes)
         {
-            var query = _context.Articles.AsQueryable(); //It needs to be a queryable to be able to build the expression
+            var query = _context.Articles
+                .AsQueryable(); //It needs to be a queryable to be able to build the expression
             query = AddIncludes(query, includes);
             return query.Where(predicate).AsEnumerable(); //Add the where clause and return IEnumerable<Article>
         }
@@ -62,7 +72,8 @@ namespace VivesRental.Repository
 
         public IEnumerable<Article> GetAll(ArticleIncludes includes)
         {
-            var query = _context.Articles.AsQueryable(); //It needs to be a queryable to be able to build the expression
+            var query = _context.Articles
+                .AsQueryable(); //It needs to be a queryable to be able to build the expression
             query = AddIncludes(query, includes);
             return query.AsEnumerable();
         }
@@ -75,8 +86,8 @@ namespace VivesRental.Repository
             if (includes.Product)
                 query = query.Include(i => i.Product);
 
-	        if (includes.OrderLines)
-		        query = query.Include(i => i.OrderLines);
+            if (includes.OrderLines)
+                query = query.Include(i => i.OrderLines);
 
             return query;
         }

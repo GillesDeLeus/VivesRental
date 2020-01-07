@@ -91,6 +91,7 @@ namespace VivesRental.Services
             var numberOfObjectsUpdated = _unitOfWork.Complete();
             if (numberOfObjectsUpdated > 0)
             {
+                //Detach and return
                 return article;
             }
             return null;
@@ -113,7 +114,7 @@ namespace VivesRental.Services
             //Only update the properties we want to update
             article.ProductId = entity.ProductId;
             article.Status = entity.Status;
-
+            
             var numberOfObjectsUpdated = _unitOfWork.Complete();
             if (numberOfObjectsUpdated > 0)
             {

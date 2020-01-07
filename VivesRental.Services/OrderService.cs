@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using VivesRental.Model;
 using VivesRental.Repository.Core;
+using VivesRental.Repository.Results;
 using VivesRental.Services.Contracts;
 
 namespace VivesRental.Services
@@ -24,7 +25,16 @@ namespace VivesRental.Services
 
         public IList<Order> All()
         {
-            return _unitOfWork.Orders.GetAll().ToList();
+            return _unitOfWork.Orders
+                .GetAll()
+                .ToList();
+        }
+
+        public IList<OrderResult> AllResult()
+        {
+            return _unitOfWork.Orders
+                .GetAllResult()
+                .ToList();
         }
 
         public Order Create(Guid customerId)

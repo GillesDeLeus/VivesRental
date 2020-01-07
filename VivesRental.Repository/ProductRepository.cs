@@ -7,6 +7,8 @@ using VivesRental.Model;
 using VivesRental.Repository.Contracts;
 using VivesRental.Repository.Core;
 using VivesRental.Repository.Includes;
+using VivesRental.Repository.Mappers;
+using VivesRental.Repository.Results;
 
 namespace VivesRental.Repository
 {
@@ -43,6 +45,17 @@ namespace VivesRental.Repository
 			query = AddIncludes(query, includes);
 			return query.Where(predicate).AsEnumerable(); //Add the where clause and return IEnumerable<Product>
 		}
+
+        public IEnumerable<ProductResult> FindResult(Expression<Func<Product, bool>> predicate, ProductIncludes includes = null)
+        {
+            var query = _context.Products
+                .AsQueryable(); //It needs to be a queryable to be able to build the expression
+            query = AddIncludes(query, includes);
+            return query
+                .Where(predicate)
+                .MapToResults()
+                .AsEnumerable(); //Add the where clause and return IEnumerable<Product>
+        }
 
         public void Add(Product product)
         {

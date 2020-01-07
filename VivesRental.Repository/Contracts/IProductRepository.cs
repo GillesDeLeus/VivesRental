@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using VivesRental.Model;
 using VivesRental.Repository.Includes;
+using VivesRental.Repository.Results;
 
 namespace VivesRental.Repository.Contracts
 {
@@ -12,6 +13,8 @@ namespace VivesRental.Repository.Contracts
 
 		IEnumerable<Product> Find(Expression<Func<Product, bool>> predicate, ProductIncludes includes = null);
 
+        IEnumerable<ProductResult> FindResult(Expression<Func<Product, bool>> predicate,
+            ProductIncludes includes = null);
         Product Get(Guid id, ProductIncludes includes = null);
 
         void Add(Product product);

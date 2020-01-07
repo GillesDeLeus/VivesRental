@@ -14,6 +14,7 @@ namespace VivesRental.Services.Contracts
         Product Create(Product entity);
         Product Edit(Product entity);
         bool Remove(Guid id);
+        bool GenerateArticles(Guid productId, int amount);
 
     }
 }

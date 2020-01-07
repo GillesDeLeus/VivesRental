@@ -16,7 +16,9 @@ namespace VivesRental.Services.Contracts
 	    IList<Article> GetRentedArticles(Guid customerId);
 
 		Article Create(Article entity);
+        [Obsolete("Edit has been replaced by the UpdateStatus method. Use the UpdateStatus method in stead.")]
         Article Edit(Article entity);
+        bool UpdateStatus(Guid articleId, ArticleStatus status);
         bool Remove(Guid id);
     }
 }

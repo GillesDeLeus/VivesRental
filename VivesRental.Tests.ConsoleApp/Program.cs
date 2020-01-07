@@ -47,10 +47,8 @@ namespace VivesRental.Tests.ConsoleApp
                 Status = ArticleStatus.Normal
             };
             var createdArticle = articleService.Create(article);
-
-            createdArticle.Status = ArticleStatus.Broken;
-
-            var editedArticle = articleService.Edit(createdArticle);
+            
+            var updateStatusResult = articleService.UpdateStatus(createdArticle.Id, ArticleStatus.Broken);
 
             productService.Remove(createdProduct.Id);
         }

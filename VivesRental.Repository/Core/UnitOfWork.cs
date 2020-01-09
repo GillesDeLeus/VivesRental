@@ -9,6 +9,7 @@ namespace VivesRental.Repository.Core
         public UnitOfWork(IVivesRentalDbContext context,
             IProductRepository productRepository,
             IArticleRepository articleRepository,
+            IArticleReservationRepository articleReservationRepository,
             IOrderRepository orderRepository,
             IOrderLineRepository orderLineRepository,
             ICustomerRepository customerRepository)
@@ -16,6 +17,7 @@ namespace VivesRental.Repository.Core
             _context = context;
             Products = productRepository;
             Articles = articleRepository;
+            ArticleReservations = articleReservationRepository;
             Orders = orderRepository;
             OrderLines = orderLineRepository;
             Customers = customerRepository;
@@ -23,6 +25,7 @@ namespace VivesRental.Repository.Core
 
         public IProductRepository Products { get; }
         public IArticleRepository Articles { get; }
+        public IArticleReservationRepository ArticleReservations { get; }
         public IOrderRepository Orders { get; }
         public IOrderLineRepository OrderLines { get; }
         public ICustomerRepository Customers { get; }

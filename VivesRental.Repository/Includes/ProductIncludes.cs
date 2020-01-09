@@ -4,5 +4,6 @@
 	{
 		public bool Articles { get; set; }
 		public bool ArticleOrderLines { get; set; }
+		public bool ArticleReservations { get; set; }
 	}
 }

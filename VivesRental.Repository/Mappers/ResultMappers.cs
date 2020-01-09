@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using VivesRental.Model;
+using VivesRental.Repository.Extensions;
 using VivesRental.Repository.Results;
 
 namespace VivesRental.Repository.Mappers
@@ -24,7 +26,7 @@ namespace VivesRental.Repository.Mappers
             });
         }
 
-        public static IQueryable<ProductResult> MapToResults(this IQueryable<Product> query)
+        public static IQueryable<ProductResult> MapToResults(this IQueryable<Product> query, DateTime fromDateTime, DateTime untilDateTime)
         {
             return query.Select(p => new ProductResult
             {
@@ -35,8 +37,7 @@ namespace VivesRental.Repository.Mappers
                 Publisher = p.Publisher,
                 RentalExpiresAfterDays = p.RentalExpiresAfterDays,
                 NumberOfArticles = p.Articles.Count,
-                NumberOfAvailableArticles = p.Articles.Count(a => a.Status == ArticleStatus.Normal &&
-                                                                  a.OrderLines.All(ol => ol.ReturnedAt.HasValue))
+                NumberOfAvailableArticles = p.Articles.Count(a => a.IsAvailable(fromDateTime, untilDateTime))
             });
         }
     }

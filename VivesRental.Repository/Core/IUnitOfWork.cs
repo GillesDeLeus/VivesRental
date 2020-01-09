@@ -7,6 +7,7 @@ namespace VivesRental.Repository.Core
     {
         IProductRepository Products { get; }
         IArticleRepository Articles { get; }
+        IArticleReservationRepository ArticleReservations { get; }
         IOrderRepository Orders { get; }
         IOrderLineRepository OrderLines { get; }
         ICustomerRepository Customers { get; }

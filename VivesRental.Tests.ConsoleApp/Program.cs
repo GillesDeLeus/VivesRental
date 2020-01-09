@@ -23,10 +23,11 @@ namespace VivesRental.Tests.ConsoleApp
 
             var productRepository = new ProductRepository(dbContext);
             var articleRepository = new ArticleRepository(dbContext);
+            var articleReservationRepository = new ArticleReservationRepository(dbContext);
             var orderRepository = new OrderRepository(dbContext);
             var orderLineRepository = new OrderLineRepository(dbContext);
             var customerRepository = new CustomerRepository(dbContext);
-            var unitOfWork = new UnitOfWork(dbContext, productRepository, articleRepository, orderRepository, orderLineRepository, customerRepository);
+            var unitOfWork = new UnitOfWork(dbContext, productRepository, articleRepository, articleReservationRepository, orderRepository, orderLineRepository, customerRepository);
             
             var productService = new ProductService(unitOfWork);
             

@@ -10,12 +10,12 @@ namespace VivesRental.Repository.Contracts
     public interface IProductRepository
     {
 	    IEnumerable<Product> GetAll(ProductIncludes includes = null);
-        IEnumerable<ProductResult> GetAllResult(ProductIncludes includes = null);
+        IEnumerable<ProductResult> GetAllResult(DateTime availableFromDateTime, DateTime availableUntilDateTime, ProductIncludes includes = null);
 
 
         IEnumerable<Product> Find(Expression<Func<Product, bool>> predicate, ProductIncludes includes = null);
 
-        IEnumerable<ProductResult> FindResult(Expression<Func<Product, bool>> predicate,
+        IEnumerable<ProductResult> FindResult(Expression<Func<Product, bool>> predicate, DateTime availableFromDateTime, DateTime availableUntilDateTime,
             ProductIncludes includes = null);
         Product Get(Guid id, ProductIncludes includes = null);
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using VivesRental.Model;
 using VivesRental.Repository.Core;
+using VivesRental.Repository.Extensions;
 using VivesRental.Repository.Includes;
 using VivesRental.Services.Contracts;
 using VivesRental.Services.Extensions;
@@ -37,40 +38,27 @@ namespace VivesRental.Services
             return _unitOfWork.Articles.GetAll(includes).ToList();
         }
 
-        public IList<Article> GetAvailableArticles()
+        public IList<Article> GetAvailableArticles(ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles.Find(ri => ri.Status == ArticleStatus.Normal &&
-                                                         ri.OrderLines.All(rol => rol.ReturnedAt.HasValue)).ToList();
+            var fromDateTime = DateTime.Now;
+            var untilDateTime = DateTime.MaxValue;
+
+            return GetAvailableArticles(fromDateTime, untilDateTime, includes);
         }
 
-        public IList<Article> GetAvailableArticles(ArticleIncludes includes)
+        public IList<Article> GetAvailableArticles(DateTime fromDateTime, DateTime untilDateTime, ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles.Find(ri => ri.Status == ArticleStatus.Normal &&
-                                                         ri.OrderLines.All(rol => rol.ReturnedAt.HasValue), includes).ToList();
+            return _unitOfWork.Articles.Find(a => a.IsAvailable(fromDateTime, untilDateTime), includes).ToList();
         }
 
-        public IList<Article> GetRentedArticles()
+        public IList<Article> GetRentedArticles(ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles.Find(ri => ri.Status == ArticleStatus.Normal &&
-                                                         ri.OrderLines.Any(rol => !rol.ReturnedAt.HasValue)).ToList();
+            return _unitOfWork.Articles.Find(a => a.IsRented(), includes).ToList();
         }
 
-        public IList<Article> GetRentedArticles(ArticleIncludes includes)
+        public IList<Article> GetRentedArticles(Guid customerId, ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles.Find(ri => ri.Status == ArticleStatus.Normal &&
-                                                         ri.OrderLines.Any(rol => !rol.ReturnedAt.HasValue), includes).ToList();
-        }
-
-        public IList<Article> GetRentedArticles(Guid customerId)
-        {
-            return _unitOfWork.Articles.Find(ri => ri.Status == ArticleStatus.Normal &&
-                                                         ri.OrderLines.Any(rol => !rol.ReturnedAt.HasValue && rol.Order.CustomerId == customerId)).ToList();
-        }
-
-        public IList<Article> GetRentedArticles(Guid customerId, ArticleIncludes includes)
-        {
-            return _unitOfWork.Articles.Find(ri => ri.Status == ArticleStatus.Normal &&
-                                                         ri.OrderLines.Any(rol => !rol.ReturnedAt.HasValue && rol.Order.CustomerId == customerId), includes).ToList();
+            return _unitOfWork.Articles.Find(a => a.IsRented(customerId), includes).ToList();
         }
 
         public Article Create(Article entity)
@@ -115,7 +103,7 @@ namespace VivesRental.Services
             //Only update the properties we want to update
             article.ProductId = entity.ProductId;
             article.Status = entity.Status;
-            
+
             var numberOfObjectsUpdated = _unitOfWork.Complete();
             if (numberOfObjectsUpdated > 0)
             {
@@ -142,7 +130,7 @@ namespace VivesRental.Services
 
         public bool Remove(Guid id)
         {
-            var article = _unitOfWork.Articles.Get(id, new ArticleIncludes { OrderLines = true });
+            var article = _unitOfWork.Articles.Get(id, new ArticleIncludes { OrderLines = true, ArticleReservations = true });
             if (article == null)
                 return false;
 
@@ -152,11 +140,19 @@ namespace VivesRental.Services
                 orderLine.ArticleId = null;
             }
 
+            //Remove ArticleReservations
+            foreach (var articleReservation in article.ArticleReservations.ToList())
+            {
+                _unitOfWork.ArticleReservations.Remove(articleReservation.Id);
+            }
+
             _unitOfWork.Articles.Remove(article.Id);
 
             var numberOfObjectsUpdated = _unitOfWork.Complete();
             return numberOfObjectsUpdated > 0;
         }
+
         
+
     }
 }

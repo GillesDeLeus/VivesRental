@@ -89,6 +89,9 @@ namespace VivesRental.Repository
             if (includes.OrderLines)
                 query = query.Include(i => i.OrderLines);
 
+            if (includes.ArticleReservations)
+                query = query.Include(i => i.ArticleReservations);
+
             return query;
         }
     }

@@ -11,6 +11,7 @@ namespace VivesRental.Model
         public Customer()
         {
             Orders = new List<Order>();
+            ArticleReservations = new List<ArticleReservation>();
         }
 
         [Key]
@@ -21,5 +22,6 @@ namespace VivesRental.Model
         public string PhoneNumber { get; set; }
 
         public IList<Order> Orders { get; set; }
+        public IList<ArticleReservation> ArticleReservations { get; set; }
     }
 }

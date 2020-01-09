@@ -40,11 +40,18 @@ namespace VivesRental.Repository
 
         public IEnumerable<ProductResult> GetAllResult(ProductIncludes includes = null)
         {
+            var fromDateTime = DateTime.Now;
+            var untilDateTIme = DateTime.MaxValue;
+            return GetAllResult(fromDateTime, untilDateTIme, includes);
+        }
+
+        public IEnumerable<ProductResult> GetAllResult(DateTime fromDateTime, DateTime untilDateTime, ProductIncludes includes = null)
+        {
             var query = _context.Products
                 .AsQueryable(); //It needs to be a queryable to be able to build the expression
             query = AddIncludes(query, includes);
             return query
-                .MapToResults()
+                .MapToResults(fromDateTime, untilDateTime)
                 .AsEnumerable();
         }
 
@@ -56,14 +63,14 @@ namespace VivesRental.Repository
 			return query.Where(predicate).AsEnumerable(); //Add the where clause and return IEnumerable<Product>
 		}
 
-        public IEnumerable<ProductResult> FindResult(Expression<Func<Product, bool>> predicate, ProductIncludes includes = null)
+        public IEnumerable<ProductResult> FindResult(Expression<Func<Product, bool>> predicate, DateTime availableFromDateTime, DateTime availableUntilDateTime, ProductIncludes includes = null)
         {
             var query = _context.Products
                 .AsQueryable(); //It needs to be a queryable to be able to build the expression
             query = AddIncludes(query, includes);
             return query
                 .Where(predicate)
-                .MapToResults()
+                .MapToResults(availableFromDateTime, availableUntilDateTime)
                 .AsEnumerable(); //Add the where clause and return IEnumerable<Product>
         }
 
@@ -87,8 +94,6 @@ namespace VivesRental.Repository
             }
         }
 
-
-
         /// <summary>
         /// Adds the DbContext includes based on the booleans set in the Includes object
         /// </summary>
@@ -110,9 +115,14 @@ namespace VivesRental.Repository
                     .ThenInclude(a => a.OrderLines);
             }
 
-		    return query;
-	    }
+            if (includes.ArticleReservations)
+            {
+                query = query
+                    .Include(p => p.Articles)
+                    .ThenInclude(a => a.ArticleReservations);
+            }
 
-       
+            return query;
+	    }
     }
 }

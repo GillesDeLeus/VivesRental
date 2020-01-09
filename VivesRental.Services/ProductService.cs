@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using VivesRental.Model;
 using VivesRental.Repository.Core;
+using VivesRental.Repository.Extensions;
 using VivesRental.Repository.Includes;
 using VivesRental.Repository.Results;
 using VivesRental.Services.Contracts;
@@ -34,19 +35,21 @@ namespace VivesRental.Services
             return All(null);
         }
 
-        public IList<ProductResult> AllResult()
-        {
-            return AllResult(null);
-        }
-
         public IList<Product> All(ProductIncludes includes)
         {
             return _unitOfWork.Products.GetAll(includes).ToList();
         }
 
-        public IList<ProductResult> AllResult(ProductIncludes includes)
+        public IList<ProductResult> AllResult(ProductIncludes includes = null)
         {
-            return _unitOfWork.Products.GetAllResult(includes).ToList();
+            var fromDateTime = DateTime.Now;
+            var untilDateTime = DateTime.MaxValue;
+            return AllResult(fromDateTime, untilDateTime, includes);
+        }
+
+        public IList<ProductResult> AllResult(DateTime fromDateTime, DateTime untilDateTime, ProductIncludes includes)
+        {
+            return _unitOfWork.Products.GetAllResult(fromDateTime, untilDateTime, includes).ToList();
         }
 
         public Product Create(Product entity)
@@ -106,7 +109,7 @@ namespace VivesRental.Services
 
         public bool Remove(Guid id)
         {
-            var product = _unitOfWork.Products.Get(id, new ProductIncludes { ArticleOrderLines = true });
+            var product = _unitOfWork.Products.Get(id, new ProductIncludes { ArticleOrderLines = true, ArticleReservations = true });
             if (product == null)
                 return false;
 
@@ -118,6 +121,11 @@ namespace VivesRental.Services
                 {
                     orderLine.Article = null;
                     orderLine.ArticleId = null;
+                }
+                //Remove ArticleReservations
+                foreach (var articleReservation in article.ArticleReservations.ToList())
+                {
+                    _unitOfWork.ArticleReservations.Remove(articleReservation.Id);
                 }
                 _unitOfWork.Articles.Remove(article.Id);
             }
@@ -148,9 +156,15 @@ namespace VivesRental.Services
 
         public IList<ProductResult> GetAvailableProductResults()
         {
+            var fromDateTime = DateTime.Now;
+            var untilDateTime = DateTime.MaxValue;
+            return GetAvailableProductResults(fromDateTime, untilDateTime);
+        }
+
+        public IList<ProductResult> GetAvailableProductResults(DateTime fromDateTime, DateTime untilDateTime)
+        {
             return _unitOfWork.Products
-                .FindResult(p => p.Articles.All(a => a.Status == ArticleStatus.Normal &&
-                                                   a.OrderLines.All(ol => ol.ReturnedAt.HasValue)))
+                .FindResult(p => p.Articles.All(a => a.IsAvailable(fromDateTime, untilDateTime)), fromDateTime, untilDateTime) //Only articles that are not reserved in this period
                 .ToList();
         }
     }

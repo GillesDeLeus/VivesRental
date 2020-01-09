@@ -12,10 +12,14 @@ namespace VivesRental.Services.Contracts
         IList<Article> All();
         IList<Article> All(ArticleIncludes includes);
         IList<Article> GetAvailableArticles();
-	    IList<Article> GetRentedArticles();
-	    IList<Article> GetRentedArticles(Guid customerId);
+        IList<Article> GetAvailableArticles(ArticleIncludes includes);
+        IList<Article> GetRentedArticles();
+        IList<Article> GetRentedArticles(ArticleIncludes includes);
 
-		Article Create(Article entity);
+        IList<Article> GetRentedArticles(Guid customerId);
+        IList<Article> GetRentedArticles(Guid customerId, ArticleIncludes includes);
+
+        Article Create(Article entity);
         [Obsolete("Edit has been replaced by the UpdateStatus method. Use the UpdateStatus method in stead.")]
         Article Edit(Article entity);
         bool UpdateStatus(Guid articleId, ArticleStatus status);

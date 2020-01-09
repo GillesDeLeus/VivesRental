@@ -24,5 +24,8 @@ namespace VivesRental.Services.Contracts
         Article Edit(Article entity);
         bool UpdateStatus(Guid articleId, ArticleStatus status);
         bool Remove(Guid id);
+
+        bool IsAvailable(Guid articleId, DateTime fromDateTime, DateTime? untilDateTime = null);
+        bool IsAvailable(IList<Guid> articleIds, DateTime fromDateTime, DateTime? untilDateTime = null);
     }
 }

@@ -87,6 +87,5 @@ namespace VivesRental.Services
             var numberOfObjectsUpdated = _unitOfWork.Complete();
             return numberOfObjectsUpdated > 0;
         }
-        
     }
 }

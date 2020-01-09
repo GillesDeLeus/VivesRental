@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using VivesRental.Model;
 using VivesRental.Repository.Core;
+using VivesRental.Repository.Extensions;
 using VivesRental.Repository.Includes;
 using VivesRental.Services.Contracts;
 using VivesRental.Services.Extensions;
@@ -12,10 +13,12 @@ namespace VivesRental.Services
     public class OrderLineService : IOrderLineService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IArticleService _articleService;
 
-        public OrderLineService(IUnitOfWork unitOfWork)
+        public OrderLineService(IUnitOfWork unitOfWork, IArticleService articleService)
         {
             _unitOfWork = unitOfWork;
+            _articleService = articleService;
         }
 
         public OrderLine Get(Guid id)
@@ -27,10 +30,22 @@ namespace VivesRental.Services
         {
             return _unitOfWork.OrderLines.Find(rol => rol.OrderId == orderId).ToList();
         }
-        
+
         public bool Rent(Guid orderId, Guid articleId)
         {
-            var article = _unitOfWork.Articles.Get(articleId, new ArticleIncludes{Product = true});
+            var fromDateTime = DateTime.Now;
+
+            var article = _unitOfWork.Articles
+                .Find(a => a.Id == articleId && a.IsAvailable(fromDateTime), new ArticleIncludes { Product = true })
+                .SingleOrDefault();
+
+            if (article == null)
+            {
+                //Article does not exist or is not available.
+                return false;
+            }
+
+
             var orderLine = article.CreateOrderLine(orderId);
 
             _unitOfWork.OrderLines.Add(orderLine);
@@ -40,7 +55,16 @@ namespace VivesRental.Services
 
         public bool Rent(Guid orderId, IList<Guid> articleIds)
         {
-            var articles = _unitOfWork.Articles.Find(a => articleIds.Contains(a.Id), new ArticleIncludes{Product = true});
+            var fromDateTime = DateTime.Now;
+            var articles = _unitOfWork.Articles
+                .Find(a => articleIds.Contains(a.Id) && a.IsAvailable(fromDateTime), new ArticleIncludes { Product = true })
+                .ToList();
+
+            //If the amount of articles is not the same as the requested ids, some articles are not available anymore
+            if (articleIds.Count != articles.Count)
+            {
+                return false;
+            }
 
             foreach (var article in articles)
             {
@@ -82,5 +106,7 @@ namespace VivesRental.Services
             _unitOfWork.Complete();
             return true;
         }
+
+
     }
 }

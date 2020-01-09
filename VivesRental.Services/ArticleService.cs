@@ -152,7 +152,15 @@ namespace VivesRental.Services
             return numberOfObjectsUpdated > 0;
         }
 
+        public bool IsAvailable(Guid articleId, DateTime fromDateTime, DateTime? untilDateTime = null)
+        {
+            return _unitOfWork.Articles.All(a => a.Id == articleId && a.IsAvailable(fromDateTime, untilDateTime));
+        }
         
+        public bool IsAvailable(IList<Guid> articleIds, DateTime fromDateTime, DateTime? untilDateTime = null)
+        {
+            return _unitOfWork.Articles.All(a => articleIds.Contains(a.Id) && a.IsAvailable(fromDateTime, untilDateTime));
+        }
 
-    }
+}
 }

@@ -77,6 +77,11 @@ namespace VivesRental.Repository
             query = AddIncludes(query, includes);
             return query.AsEnumerable();
         }
+        
+        public bool All(Expression<Func<Article, bool>> predicate)
+        {
+            return _context.Articles.All(predicate);
+        }
 
         private IQueryable<Article> AddIncludes(IQueryable<Article> query, ArticleIncludes includes)
         {

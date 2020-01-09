@@ -14,6 +14,8 @@ namespace VivesRental.Repository.Contracts
         IEnumerable<Article> Find(Expression<Func<Article, bool>> predicate);
         IEnumerable<Article> Find(Expression<Func<Article, bool>> predicate, ArticleIncludes includes);
 
+        bool All(Expression<Func<Article, bool>> predicate);
+
         Article Get(Guid id);
         Article Get(Guid id, ArticleIncludes includes);
 

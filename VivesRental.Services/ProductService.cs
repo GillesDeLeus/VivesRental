@@ -34,9 +34,19 @@ namespace VivesRental.Services
             return All(null);
         }
 
+        public IList<ProductResult> AllResult()
+        {
+            return AllResult(null);
+        }
+
         public IList<Product> All(ProductIncludes includes)
         {
             return _unitOfWork.Products.GetAll(includes).ToList();
+        }
+
+        public IList<ProductResult> AllResult(ProductIncludes includes)
+        {
+            return _unitOfWork.Products.GetAllResult(includes).ToList();
         }
 
         public Product Create(Product entity)

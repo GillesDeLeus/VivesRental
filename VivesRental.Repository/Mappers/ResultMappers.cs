@@ -34,6 +34,7 @@ namespace VivesRental.Repository.Mappers
                 Manufacturer = p.Manufacturer,
                 Publisher = p.Publisher,
                 RentalExpiresAfterDays = p.RentalExpiresAfterDays,
+                NumberOfArticles = p.Articles.Count,
                 NumberOfAvailableArticles = p.Articles.Count(a => a.Status == ArticleStatus.Normal &&
                                                                   a.OrderLines.All(ol => ol.ReturnedAt.HasValue))
             });

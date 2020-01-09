@@ -38,7 +38,17 @@ namespace VivesRental.Repository
 			return query.AsEnumerable(); 
 		}
 
-		public IEnumerable<Product> Find(Expression<Func<Product, bool>> predicate, ProductIncludes includes = null)
+        public IEnumerable<ProductResult> GetAllResult(ProductIncludes includes = null)
+        {
+            var query = _context.Products
+                .AsQueryable(); //It needs to be a queryable to be able to build the expression
+            query = AddIncludes(query, includes);
+            return query
+                .MapToResults()
+                .AsEnumerable();
+        }
+
+        public IEnumerable<Product> Find(Expression<Func<Product, bool>> predicate, ProductIncludes includes = null)
 		{
 			var query = _context.Products
                 .AsQueryable(); //It needs to be a queryable to be able to build the expression

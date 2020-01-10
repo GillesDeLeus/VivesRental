@@ -1,7 +1,9 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VivesRental.Model
 {
+    [Table("ArticleReservation")]
     public class ArticleReservation
     {
         public Guid Id { get; set; }

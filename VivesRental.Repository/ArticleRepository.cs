@@ -52,17 +52,18 @@ namespace VivesRental.Repository
             _context.Articles.Add(article);
         }
         
-        public IEnumerable<Article> Find(Expression<Func<Article, bool>> predicate)
+        public IEnumerable<Article> Find(Func<Article, bool> predicate)
         {
             return Find(predicate, null);
         }
 
-        public IEnumerable<Article> Find(Expression<Func<Article, bool>> predicate, ArticleIncludes includes)
+        public IEnumerable<Article> Find(Func<Article, bool> predicate, ArticleIncludes includes)
         {
             var query = _context.Articles
+                .Where(predicate)
                 .AsQueryable(); //It needs to be a queryable to be able to build the expression
             query = AddIncludes(query, includes);
-            return query.Where(predicate).AsEnumerable(); //Add the where clause and return IEnumerable<Article>
+            return query.AsEnumerable(); //Add the where clause and return IEnumerable<Article>
         }
 
         public IEnumerable<Article> GetAll()
@@ -78,9 +79,18 @@ namespace VivesRental.Repository
             return query.AsEnumerable();
         }
         
-        public bool All(Expression<Func<Article, bool>> predicate)
+        public bool All(Guid id, Func<Article, bool> predicate)
         {
-            return _context.Articles.All(predicate);
+            return _context.Articles
+                .Where(a => a.Id == id)
+                .All(predicate);
+        }
+
+        public bool All(IList<Guid> ids, Func<Article, bool> predicate)
+        {
+            return _context.Articles
+                .Where(a => ids.Contains(a.Id))
+                .All(predicate);
         }
 
         private IQueryable<Article> AddIncludes(IQueryable<Article> query, ArticleIncludes includes)

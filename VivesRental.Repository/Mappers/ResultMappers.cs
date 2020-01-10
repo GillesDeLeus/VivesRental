@@ -37,7 +37,7 @@ namespace VivesRental.Repository.Mappers
                 Publisher = p.Publisher,
                 RentalExpiresAfterDays = p.RentalExpiresAfterDays,
                 NumberOfArticles = p.Articles.Count,
-                NumberOfAvailableArticles = p.Articles.Count(a => a.IsAvailable(fromDateTime, untilDateTime))
+                NumberOfAvailableArticles = p.Articles.Count(ArticleExtensions.IsAvailable(fromDateTime, untilDateTime))
             });
         }
     }

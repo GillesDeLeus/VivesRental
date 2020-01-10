@@ -36,7 +36,7 @@ namespace VivesRental.Services
             var fromDateTime = DateTime.Now;
 
             var article = _unitOfWork.Articles
-                .Find(a => a.Id == articleId && a.IsAvailable(fromDateTime), new ArticleIncludes { Product = true })
+                .Find(ArticleExtensions.IsAvailable(articleId, fromDateTime), new ArticleIncludes { Product = true })
                 .SingleOrDefault();
 
             if (article == null)
@@ -57,7 +57,7 @@ namespace VivesRental.Services
         {
             var fromDateTime = DateTime.Now;
             var articles = _unitOfWork.Articles
-                .Find(a => articleIds.Contains(a.Id) && a.IsAvailable(fromDateTime), new ArticleIncludes { Product = true })
+                .Find(ArticleExtensions.IsAvailable(articleIds, fromDateTime), new ArticleIncludes { Product = true })
                 .ToList();
 
             //If the amount of articles is not the same as the requested ids, some articles are not available anymore

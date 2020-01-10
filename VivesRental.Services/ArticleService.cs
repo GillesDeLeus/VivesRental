@@ -48,7 +48,7 @@ namespace VivesRental.Services
 
         public IList<Article> GetAvailableArticles(DateTime fromDateTime, DateTime untilDateTime, ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles.Find(a => a.IsAvailable(fromDateTime, untilDateTime), includes).ToList();
+            return _unitOfWork.Articles.Find(ArticleExtensions.IsAvailable(fromDateTime, untilDateTime), includes).ToList();
         }
 
         public IList<Article> GetRentedArticles(ArticleIncludes includes = null)
@@ -154,12 +154,12 @@ namespace VivesRental.Services
 
         public bool IsAvailable(Guid articleId, DateTime fromDateTime, DateTime? untilDateTime = null)
         {
-            return _unitOfWork.Articles.All(a => a.Id == articleId && a.IsAvailable(fromDateTime, untilDateTime));
+            return _unitOfWork.Articles.All(articleId, ArticleExtensions.IsAvailable(articleId, fromDateTime, untilDateTime));
         }
         
         public bool IsAvailable(IList<Guid> articleIds, DateTime fromDateTime, DateTime? untilDateTime = null)
         {
-            return _unitOfWork.Articles.All(a => articleIds.Contains(a.Id) && a.IsAvailable(fromDateTime, untilDateTime));
+            return _unitOfWork.Articles.All(articleIds, ArticleExtensions.IsAvailable(articleIds, fromDateTime, untilDateTime));
         }
 
 }

@@ -55,21 +55,22 @@ namespace VivesRental.Repository
                 .AsEnumerable();
         }
 
-        public IEnumerable<Product> Find(Expression<Func<Product, bool>> predicate, ProductIncludes includes = null)
+        public IEnumerable<Product> Find(Func<Product, bool> predicate, ProductIncludes includes = null)
 		{
 			var query = _context.Products
+                .Where(predicate)
                 .AsQueryable(); //It needs to be a queryable to be able to build the expression
 			query = AddIncludes(query, includes);
-			return query.Where(predicate).AsEnumerable(); //Add the where clause and return IEnumerable<Product>
+			return query.AsEnumerable(); //Add the where clause and return IEnumerable<Product>
 		}
 
-        public IEnumerable<ProductResult> FindResult(Expression<Func<Product, bool>> predicate, DateTime availableFromDateTime, DateTime availableUntilDateTime, ProductIncludes includes = null)
+        public IEnumerable<ProductResult> FindResult(Func<Product, bool> predicate, DateTime availableFromDateTime, DateTime availableUntilDateTime, ProductIncludes includes = null)
         {
             var query = _context.Products
+                .Where(predicate)
                 .AsQueryable(); //It needs to be a queryable to be able to build the expression
             query = AddIncludes(query, includes);
             return query
-                .Where(predicate)
                 .MapToResults(availableFromDateTime, availableUntilDateTime)
                 .AsEnumerable(); //Add the where clause and return IEnumerable<Product>
         }

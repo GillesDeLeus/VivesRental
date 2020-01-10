@@ -13,9 +13,9 @@ namespace VivesRental.Repository.Contracts
         IEnumerable<ProductResult> GetAllResult(DateTime availableFromDateTime, DateTime availableUntilDateTime, ProductIncludes includes = null);
 
 
-        IEnumerable<Product> Find(Expression<Func<Product, bool>> predicate, ProductIncludes includes = null);
+        IEnumerable<Product> Find(Func<Product, bool> predicate, ProductIncludes includes = null);
 
-        IEnumerable<ProductResult> FindResult(Expression<Func<Product, bool>> predicate, DateTime availableFromDateTime, DateTime availableUntilDateTime,
+        IEnumerable<ProductResult> FindResult(Func<Product, bool> predicate, DateTime availableFromDateTime, DateTime availableUntilDateTime,
             ProductIncludes includes = null);
         Product Get(Guid id, ProductIncludes includes = null);
 

@@ -164,7 +164,7 @@ namespace VivesRental.Services
         public IList<ProductResult> GetAvailableProductResults(DateTime fromDateTime, DateTime untilDateTime)
         {
             return _unitOfWork.Products
-                .FindResult(p => p.Articles.All(a => a.IsAvailable(fromDateTime, untilDateTime)), fromDateTime, untilDateTime) //Only articles that are not reserved in this period
+                .FindResult(ProductExtensions.IsAvailable(fromDateTime, untilDateTime), fromDateTime, untilDateTime) //Only articles that are not reserved in this period
                 .ToList();
         }
     }

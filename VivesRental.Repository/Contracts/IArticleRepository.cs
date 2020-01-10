@@ -11,10 +11,11 @@ namespace VivesRental.Repository.Contracts
         IEnumerable<Article> GetAll();
         IEnumerable<Article> GetAll(ArticleIncludes includes);
 
-        IEnumerable<Article> Find(Expression<Func<Article, bool>> predicate);
-        IEnumerable<Article> Find(Expression<Func<Article, bool>> predicate, ArticleIncludes includes);
+        IEnumerable<Article> Find(Func<Article, bool> predicate);
+        IEnumerable<Article> Find(Func<Article, bool> predicate, ArticleIncludes includes);
 
-        bool All(Expression<Func<Article, bool>> predicate);
+        bool All(Guid articleId, Func<Article, bool> predicate);
+        bool All(IList<Guid> articleIds, Func<Article, bool> predicate);
 
         Article Get(Guid id);
         Article Get(Guid id, ArticleIncludes includes);

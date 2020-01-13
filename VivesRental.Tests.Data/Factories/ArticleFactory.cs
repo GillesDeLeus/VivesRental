@@ -10,7 +10,7 @@ namespace VivesRental.Tests.Data.Factories
             {
                 ProductId = product.Id,
                 Product = product,
-                Status = ArticleStatus.InRepair
+                Status = ArticleStatus.Normal
             };
         }
 

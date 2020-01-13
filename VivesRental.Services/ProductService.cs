@@ -149,7 +149,7 @@ namespace VivesRental.Services
         public IList<ProductResult> GetAvailableProductResults()
         {
             return _unitOfWork.Products
-                .FindResult(p => p.Articles.All(a => a.Status == ArticleStatus.Normal &&
+                .FindResult(p => p.Articles.Any(a => a.Status == ArticleStatus.Normal &&
                                                    a.OrderLines.All(ol => ol.ReturnedAt.HasValue)))
                 .ToList();
         }

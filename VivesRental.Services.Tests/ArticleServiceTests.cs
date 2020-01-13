@@ -50,7 +50,6 @@ namespace VivesRental.Services.Tests
             article.OrderLines.Add(orderLine);
             productToAdd.Articles.Add(article);
 
-
             //Setup ArticleRepository
             var articleRepositoryMock = new Mock<IArticleRepository>();
             articleRepositoryMock.Setup(ir => ir.Get(It.IsAny<Guid>(), It.IsAny<ArticleIncludes>())).Returns(article);

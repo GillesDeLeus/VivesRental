@@ -1,10 +1,13 @@
-﻿using VivesRental.Repository.Contracts;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using VivesRental.Repository.Contracts;
 
 namespace VivesRental.Repository.Core
 {
     public class UnitOfWork : IUnitOfWork
     {
         private readonly IVivesRentalDbContext _context;
+        private IDbContextTransaction _transaction;
 
         public UnitOfWork(IVivesRentalDbContext context,
             IProductRepository productRepository,
@@ -29,13 +32,34 @@ namespace VivesRental.Repository.Core
         public IOrderRepository Orders { get; }
         public IOrderLineRepository OrderLines { get; }
         public ICustomerRepository Customers { get; }
+
         public int Complete()
         {
-            return _context.SaveChanges();
+            try
+            {
+                var result = _context.SaveChanges();
+                _transaction?.Commit();
+                return result;
+            }
+            catch
+            {
+                _transaction?.Rollback();
+                throw;
+            }
+        }
+
+        public void BeginTransaction()
+        {
+            if (_context.Database.IsInMemory())
+            {
+                return;
+            }
+            _transaction = _context.Database.BeginTransaction();
         }
 
         public void Dispose()
         {
+            _transaction?.Dispose();
             _context.Dispose();
         }
 

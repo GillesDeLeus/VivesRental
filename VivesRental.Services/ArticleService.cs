@@ -131,24 +131,14 @@ namespace VivesRental.Services
         //TODO: Needs transaction
         public bool Remove(Guid id)
         {
-            var article = _unitOfWork.Articles.Get(id, new ArticleIncludes { OrderLines = true, ArticleReservations = true });
+            var article = _unitOfWork.Articles.Get(id);
             if (article == null)
                 return false;
 
-            //TODO: Move to SqlRaw
-            foreach (var orderLine in article.OrderLines)
-            {
-                orderLine.Article = null;
-                orderLine.ArticleId = null;
-            }
-
-            //TODO: Move to SqlRaw
-            //Remove ArticleReservations
-            foreach (var articleReservation in article.ArticleReservations.ToList())
-            {
-                _unitOfWork.ArticleReservations.Remove(articleReservation.Id);
-            }
-
+            //TODO: SQL Transaction
+            _unitOfWork.BeginTransaction();
+            _unitOfWork.OrderLines.ClearArticleByArticleId(id);
+            _unitOfWork.ArticleReservations.RemoveByArticleId(id);
             _unitOfWork.Articles.Remove(article.Id);
 
             var numberOfObjectsUpdated = _unitOfWork.Complete();

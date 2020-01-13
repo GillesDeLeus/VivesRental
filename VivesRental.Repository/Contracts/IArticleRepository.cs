@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using VivesRental.Model;
 using VivesRental.Repository.Includes;
 
@@ -9,14 +10,15 @@ namespace VivesRental.Repository.Contracts
     {
          IEnumerable<Article> GetAll(ArticleIncludes includes = null);
 
-        IEnumerable<Article> Find(Func<Article, bool> predicate, ArticleIncludes includes = null);
+        IEnumerable<Article> Find(Expression<Func<Article, bool>> predicate, ArticleIncludes includes = null);
 
-        bool All(Guid articleId, Func<Article, bool> predicate);
-        bool All(IList<Guid> articleIds, Func<Article, bool> predicate);
+        bool All(Guid articleId, Expression<Func<Article, bool>> predicate);
+        bool All(IList<Guid> articleIds, Expression<Func<Article, bool>> predicate);
 
         Article Get(Guid id, ArticleIncludes includes = null);
 
         void Remove(Guid id);
+        void RemoveByProductId(Guid productId);
         void Add(Article article);
     }
 }

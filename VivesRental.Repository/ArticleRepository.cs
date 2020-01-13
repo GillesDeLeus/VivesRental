@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using VivesRental.Model;
 using VivesRental.Repository.Contracts;
 using VivesRental.Repository.Core;
@@ -39,19 +40,24 @@ namespace VivesRental.Repository
             }
         }
 
+        public void RemoveByProductId(Guid productId)
+        {
+            _context.Articles.RemoveRange(_context.Articles.Where(a => a.ProductId == productId));
+        }
+
         public void Add(Article article)
         {
             _context.Articles.Add(article);
         }
 
-        public IEnumerable<Article> Find(Func<Article, bool> predicate, ArticleIncludes includes = null)
+        public IEnumerable<Article> Find(Expression<Func<Article, bool>> predicate, ArticleIncludes includes = null)
         {
             return _context.Articles
                 .AddIncludes(includes)
-                .AsEnumerable()
-                .Where(predicate); //Add the where clause and return IEnumerable<Article>
+                .Where(predicate)
+                .AsEnumerable();
         }
-        
+
         public IEnumerable<Article> GetAll(ArticleIncludes includes = null)
         {
             return _context.Articles
@@ -59,14 +65,14 @@ namespace VivesRental.Repository
                 .AsEnumerable();
         }
 
-        public bool All(Guid id, Func<Article, bool> predicate)
+        public bool All(Guid id, Expression<Func<Article, bool>> predicate)
         {
             return _context.Articles
                 .Where(a => a.Id == id)
                 .All(predicate);
         }
 
-        public bool All(IList<Guid> ids, Func<Article, bool> predicate)
+        public bool All(IList<Guid> ids, Expression<Func<Article, bool>> predicate)
         {
             return _context.Articles
                 .Where(a => ids.Contains(a.Id))

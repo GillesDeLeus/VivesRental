@@ -2,22 +2,20 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using VivesRental.Model;
-using VivesRental.Repository.Includes;
 using VivesRental.Repository.Results;
 
 namespace VivesRental.Repository.Contracts
 {
     public interface IProductRepository
     {
-	    IEnumerable<Product> GetAll(ProductIncludes includes = null);
-        IEnumerable<ProductResult> GetAllResult(DateTime availableFromDateTime, DateTime availableUntilDateTime, ProductIncludes includes = null);
+	    IEnumerable<Product> GetAll();
+        IEnumerable<ProductResult> GetAllResult(DateTime availableFromDateTime, DateTime availableUntilDateTime);
+        
+        IEnumerable<Product> Find(Expression<Func<Product, bool>> predicate);
 
+        IEnumerable<ProductResult> FindResult(DateTime availableFromDateTime, DateTime? availableUntilDateTime);
 
-        IEnumerable<Product> Find(Expression<Func<Product, bool>> predicate, ProductIncludes includes = null);
-
-        IEnumerable<ProductResult> FindResult(Expression<Func<Product, bool>> predicate, DateTime availableFromDateTime, DateTime availableUntilDateTime,
-            ProductIncludes includes = null);
-        Product Get(Guid id, ProductIncludes includes = null);
+        Product Get(Guid id);
 
         void Add(Product product);
 

@@ -16,8 +16,7 @@ namespace VivesRental.Tests.Data.Factories
                 ProductName = "TestProductName",
                 ProductDescription = "TestProductDescription",
                 RentedAt = DateTime.Now,
-                ExpiresAt = DateTime.Now,
-                ReturnedAt = DateTime.Now
+                ExpiresAt = DateTime.Now
             };
 
             order.OrderLines.Add(orderLine);

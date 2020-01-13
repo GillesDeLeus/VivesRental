@@ -21,48 +21,43 @@ namespace VivesRental.Repository
             _context = context;
         }
 
-        public Product Get(Guid id, ProductIncludes includes = null)
+        public Product Get(Guid id)
         {
             return _context.Products
-                .AddIncludes(includes)
                 .FirstOrDefault(i => i.Id == id);
         }
 
-        public IEnumerable<Product> GetAll(ProductIncludes includes = null)
+        public IEnumerable<Product> GetAll()
         {
             return _context.Products
-                .AddIncludes(includes)
                 .AsEnumerable();
         }
 
-        public IEnumerable<ProductResult> GetAllResult(ProductIncludes includes = null)
+        public IEnumerable<ProductResult> GetAllResult()
         {
             var fromDateTime = DateTime.Now;
             var untilDateTIme = DateTime.MaxValue;
-            return GetAllResult(fromDateTime, untilDateTIme, includes);
+            return GetAllResult(fromDateTime, untilDateTIme);
         }
 
-        public IEnumerable<ProductResult> GetAllResult(DateTime fromDateTime, DateTime untilDateTime, ProductIncludes includes = null)
+        public IEnumerable<ProductResult> GetAllResult(DateTime fromDateTime, DateTime untilDateTime)
         {
             return _context.Products
-                .AddIncludes(includes)
                 .MapToResults(fromDateTime, untilDateTime)
                 .AsEnumerable();
         }
 
-        public IEnumerable<Product> Find(Expression<Func<Product, bool>> predicate, ProductIncludes includes = null)
+        public IEnumerable<Product> Find(Expression<Func<Product, bool>> predicate)
         {
             return _context.Products
-                .AddIncludes(includes)
                 .Where(predicate)
                 .AsEnumerable();
         }
 
-        public IEnumerable<ProductResult> FindResult(Expression<Func<Product, bool>> predicate, DateTime availableFromDateTime, DateTime availableUntilDateTime, ProductIncludes includes = null)
+        public IEnumerable<ProductResult> FindResult(DateTime availableFromDateTime, DateTime? availableUntilDateTime)
         {
             return _context.Products
-                .AddIncludes(includes)
-                .Where(predicate)
+                .Where(ProductExtensions.IsAvailable(availableFromDateTime, availableUntilDateTime))
                 .MapToResults(availableFromDateTime, availableUntilDateTime)
                 .AsEnumerable();
         }

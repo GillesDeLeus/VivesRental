@@ -11,5 +11,7 @@ namespace VivesRental.Repository.Contracts
         OrderLine Get(Guid id, OrderLineIncludes includes = null);
         IEnumerable<OrderLine> Find(Expression<Func<OrderLine, bool>> predicate, OrderLineIncludes includes = null);
         void Add(OrderLine orderLine);
+        void ClearArticleByArticleId(Guid articleId);
+        void ClearArticleByProductId(Guid productId);
     }
 }

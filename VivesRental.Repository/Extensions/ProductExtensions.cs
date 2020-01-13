@@ -9,7 +9,8 @@ namespace VivesRental.Repository.Extensions
     {
         public static Expression<Func<Product, bool>> IsAvailable(DateTime fromDateTime, DateTime? untilDateTime = null)
         {
-            return p => p.Articles.All(ArticleExtensions.IsAvailable(fromDateTime, untilDateTime));
+            return p => p.Articles.AsQueryable().Any(ArticleExtensions.IsAvailable(fromDateTime, untilDateTime));
         }
+
     }
 }

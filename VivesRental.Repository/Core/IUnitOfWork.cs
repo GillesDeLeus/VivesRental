@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using VivesRental.Repository.Contracts;
 
 namespace VivesRental.Repository.Core
@@ -12,5 +13,6 @@ namespace VivesRental.Repository.Core
         IOrderLineRepository OrderLines { get; }
         ICustomerRepository Customers { get; }
         int Complete();
+        void BeginTransaction();
     }
 }

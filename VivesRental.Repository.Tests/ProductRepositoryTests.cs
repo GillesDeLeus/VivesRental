@@ -60,7 +60,7 @@ namespace VivesRental.Repository.Tests
             var productRepository = new ProductRepository(context);
 
             //Act
-            var product = productRepository.Get(Guid.NewGuid(), new ProductIncludes{ArticleOrderLines = true});
+            var product = productRepository.Get(Guid.NewGuid());
 
             //Assert
             Assert.IsNull(product);
@@ -108,7 +108,7 @@ namespace VivesRental.Repository.Tests
             {
                 //Act
                 var productRepository = new ProductRepository(context);
-                var product = productRepository.Get(addedProductId, new ProductIncludes { ArticleOrderLines = true });
+                var product = productRepository.Get(addedProductId);
                 //Assert
                 Assert.IsNotNull(product);
             }

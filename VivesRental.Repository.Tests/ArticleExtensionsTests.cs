@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VivesRental.Model;
 using VivesRental.Repository.Extensions;
@@ -22,7 +20,7 @@ namespace VivesRental.Repository.Tests
             var articleList = new List<Article> { article };
 
             //Act
-            var result = articleList.Where(ArticleExtensions.IsAvailable(new DateTime(2019, 1, 1))).ToList();
+            var result = articleList.Where(ArticleExtensions.IsAvailable(new DateTime(2019, 1, 1)).Compile()).ToList();
 
             //Assert
             Assert.AreEqual(1, result.Count);
@@ -38,7 +36,7 @@ namespace VivesRental.Repository.Tests
             var articleList = new List<Article> { article };
 
             //Act
-            var result = articleList.Where(ArticleExtensions.IsAvailable(new DateTime(2019, 1, 1))).ToList();
+            var result = articleList.Where(ArticleExtensions.IsAvailable(new DateTime(2019, 1, 1)).Compile()).ToList();
 
             //Assert
             Assert.AreEqual(0, result.Count);
@@ -57,7 +55,7 @@ namespace VivesRental.Repository.Tests
             var articleList = new List<Article> { article };
 
             //Act
-            var result = articleList.Where(ArticleExtensions.IsAvailable(new DateTime(2019, 1, 3))).ToList();
+            var result = articleList.Where(ArticleExtensions.IsAvailable(new DateTime(2019, 1, 3)).Compile()).ToList();
 
             //Assert
             Assert.AreEqual(0, result.Count);
@@ -78,7 +76,7 @@ namespace VivesRental.Repository.Tests
             var articleList = new List<Article> { article };
 
             //Act
-            var result = articleList.Where(ArticleExtensions.IsAvailable(new DateTime(2019, 1, 1))).ToList();
+            var result = articleList.Where(ArticleExtensions.IsAvailable(new DateTime(2019, 1, 1)).Compile()).ToList();
 
             //Assert
             Assert.AreEqual(0, result.Count);
@@ -98,7 +96,7 @@ namespace VivesRental.Repository.Tests
             var articleReservationList = new List<ArticleReservation> { articleReservation };
 
             //Act
-            var result = articleReservationList.Where(ArticleExtensions.IsReserved(new DateTime(2019,1,10))).ToList();
+            var result = articleReservationList.Where(ArticleExtensions.IsReserved(new DateTime(2019,1,10)).Compile()).ToList();
 
             //Assert
             Assert.AreEqual(0, result.Count);
@@ -117,7 +115,7 @@ namespace VivesRental.Repository.Tests
             var articleReservationList = new List<ArticleReservation> { articleReservation };
 
             //Act
-            var result = articleReservationList.Where(ArticleExtensions.IsReserved(reservationFromDate)).ToList();
+            var result = articleReservationList.Where(ArticleExtensions.IsReserved(reservationFromDate).Compile()).ToList();
 
             //Assert
             Assert.AreEqual(1, result.Count);
@@ -136,7 +134,7 @@ namespace VivesRental.Repository.Tests
             var articleReservationList = new List<ArticleReservation> { articleReservation };
 
             //Act
-            var result = articleReservationList.Where(ArticleExtensions.IsReserved(reservationFromDate.AddDays(-5))).ToList();
+            var result = articleReservationList.Where(ArticleExtensions.IsReserved(reservationFromDate.AddDays(-5)).Compile()).ToList();
 
             //Assert
             Assert.AreEqual(1, result.Count);
@@ -155,7 +153,7 @@ namespace VivesRental.Repository.Tests
             var articleReservationList = new List<ArticleReservation> { articleReservation };
 
             //Act
-            var result = articleReservationList.Where(ArticleExtensions.IsReserved(reservationFromDate.AddDays(-5), reservationFromDate.AddDays(2))).ToList();
+            var result = articleReservationList.Where(ArticleExtensions.IsReserved(reservationFromDate.AddDays(-5), reservationFromDate.AddDays(2)).Compile()).ToList();
 
             //Assert
             Assert.AreEqual(1, result.Count);

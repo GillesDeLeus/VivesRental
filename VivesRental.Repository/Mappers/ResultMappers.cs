@@ -26,7 +26,7 @@ namespace VivesRental.Repository.Mappers
             });
         }
 
-        public static IQueryable<ProductResult> MapToResults(this IQueryable<Product> query, DateTime fromDateTime, DateTime untilDateTime)
+        public static IQueryable<ProductResult> MapToResults(this IQueryable<Product> query, DateTime fromDateTime, DateTime? untilDateTime)
         {
             return query.Select(p => new ProductResult
             {
@@ -37,7 +37,7 @@ namespace VivesRental.Repository.Mappers
                 Publisher = p.Publisher,
                 RentalExpiresAfterDays = p.RentalExpiresAfterDays,
                 NumberOfArticles = p.Articles.Count,
-                NumberOfAvailableArticles = p.Articles.Count(ArticleExtensions.IsAvailable(fromDateTime, untilDateTime))
+                NumberOfAvailableArticles = p.Articles.AsQueryable().Count(ArticleExtensions.IsAvailable(fromDateTime, untilDateTime))
             });
         }
     }

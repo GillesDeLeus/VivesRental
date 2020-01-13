@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
 using VivesRental.Repository.Contracts;
 using VivesRental.Repository.Core;
@@ -41,6 +40,16 @@ namespace VivesRental.Repository
             }
         }
 
+        public void RemoveByArticleId(Guid articleId)
+        {
+            _context.ArticleReservations.RemoveRange(_context.ArticleReservations.Where(ar => ar.ArticleId == articleId));
+        }
+
+        public void RemoveByProductId(Guid productId)
+        {
+            _context.ArticleReservations.RemoveRange(_context.ArticleReservations.Where(ar => ar.Article.ProductId == productId));
+        }
+
         public void Add(ArticleReservation article)
         {
             _context.ArticleReservations.Add(article);
@@ -51,7 +60,7 @@ namespace VivesRental.Repository
             return _context.ArticleReservations
                 .AddIncludes(includes)
                 .Where(predicate)
-                .AsEnumerable(); //Add the where clause and return IEnumerable<Article>
+                .AsEnumerable(); 
         }
 
         public IEnumerable<ArticleReservation> GetAll(ArticleReservationIncludes includes = null)
@@ -61,6 +70,6 @@ namespace VivesRental.Repository
                 .AsEnumerable();
         }
 
-        
+       
     }
 }

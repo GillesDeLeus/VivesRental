@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace VivesRental.Repository.Includes
+﻿namespace VivesRental.Repository.Includes
 {
     public class OrderLineIncludes
     {

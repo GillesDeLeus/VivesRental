@@ -9,12 +9,13 @@ namespace VivesRental.Tests.Data.Factories
         {
             var productRepository = new ProductRepository(context);
             var articleRepository = new ArticleRepository(context);
+            var articleReservationRepository = new ArticleReservationRepository(context);
             var customerRepository = new CustomerRepository(context);
             var orderRepository = new OrderRepository(context);
             var orderLineRepository = new OrderLineRepository(context);
 
             //Setup UnitOfWork
-            return new UnitOfWork(context, productRepository, articleRepository, orderRepository, orderLineRepository, customerRepository);
+            return new UnitOfWork(context, productRepository, articleRepository, articleReservationRepository, orderRepository, orderLineRepository, customerRepository);
         }
     }
 }

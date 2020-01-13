@@ -1,6 +1,5 @@
-﻿using System;
+﻿using System; 
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -50,14 +49,23 @@ namespace VivesRental.Repository
             _context.Orders.Add(order);
         }
 
-        public bool ClearCustomer(Guid customerId)
+        public void ClearCustomer(Guid customerId)
         {
+            if (_context.Database.IsInMemory())
+            {
+                var orders = _context.Orders.Where(ol => ol.CustomerId == customerId).ToList();
+                foreach (var order in orders)
+                {
+                    order.Customer = null;
+                    order.CustomerId = null;
+                }
+                return;
+            }
+
             var commandText = "UPDATE Order SET CustomerId = null WHERE CustomerId = @CustomerId";
             var customerIdParameter = new SqlParameter("@CustomerId", customerId);
 
-            var result = _context.Database.ExecuteSqlRaw(commandText, customerIdParameter);
-
-            return result > 0;
+            _context.Database.ExecuteSqlRaw(commandText, customerIdParameter);
         }
 
     }

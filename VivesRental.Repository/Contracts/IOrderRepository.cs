@@ -13,6 +13,6 @@ namespace VivesRental.Repository.Contracts
         IEnumerable<OrderResult> GetAllResult(OrderIncludes includes = null);
         void Add(Order order);
 
-        bool ClearCustomer(Guid customerId);
+        void ClearCustomer(Guid customerId);
     }
 }

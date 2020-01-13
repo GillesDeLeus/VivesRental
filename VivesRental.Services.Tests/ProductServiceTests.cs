@@ -4,7 +4,7 @@ using Moq;
 using VivesRental.Model;
 using VivesRental.Repository.Contracts;
 using VivesRental.Repository.Core;
-using VivesRental.Repository.Includes;
+using VivesRental.Tests.Data.Extensions;
 using VivesRental.Tests.Data.Factories;
 
 namespace VivesRental.Services.Tests
@@ -16,22 +16,17 @@ namespace VivesRental.Services.Tests
         public void Remove_Deletes_Product()
         {
             //Arrange
-            var productToAdd = ProductFactory.CreateValidEntity();
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            var productRepositoryMock = new Mock<IProductRepository>();
-            
-            //Setup ProductRepository
-            productRepositoryMock.Setup(ir => ir.Get(It.IsAny<Guid>(), It.IsAny<ProductIncludes>())).Returns(productToAdd);
-            productRepositoryMock.Setup(ir => ir.Remove(It.IsAny<Guid>()));
+            using var context = DbContextFactory.CreateInstance("Remove_Deletes_Product");
+            using var unitOfWork = UnitOfWorkFactory.CreateInstance(context);
 
-            //Setup UnitOfWork
-            unitOfWorkMock.Setup(uow => uow.Products).Returns(productRepositoryMock.Object);
-            unitOfWorkMock.Setup(uow => uow.Complete()).Returns(1);
-            
-            var productService = new ProductService(unitOfWorkMock.Object);
+            var product = ProductFactory.CreateValidEntity();
+            unitOfWork.Add(product);
+            unitOfWork.Complete();
+
+            var productService = new ProductService(unitOfWork);
 
             //Act
-            var result = productService.Remove(productToAdd.Id);
+            var result = productService.Remove(product.Id);
 
             //Assert
             Assert.IsTrue(result);
@@ -41,18 +36,10 @@ namespace VivesRental.Services.Tests
         public void Remove_Returns_False_When_Product_Is_Null()
         {
             //Arrange
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            var productRepositoryMock = new Mock<IProductRepository>();
+            using var context = DbContextFactory.CreateInstance("Remove_Returns_False_When_Product_Is_Null");
+            using var unitOfWork = UnitOfWorkFactory.CreateInstance(context);
 
-            //Setup ProductRepository
-            productRepositoryMock.Setup(ir => ir.Get(It.IsAny<Guid>(), It.IsAny<ProductIncludes>())).Returns((Product)null);
-            productRepositoryMock.Setup(ir => ir.Remove(It.IsAny<Guid>()));
-
-            //Setup UnitOfWork
-            unitOfWorkMock.Setup(uow => uow.Products).Returns(productRepositoryMock.Object);
-            unitOfWorkMock.Setup(uow => uow.Complete()).Returns(1);
-
-            var productService = new ProductService(unitOfWorkMock.Object);
+            var productService = new ProductService(unitOfWork);
 
             //Act
             var result = productService.Remove(Guid.NewGuid());
@@ -65,27 +52,16 @@ namespace VivesRental.Services.Tests
         public void Remove_Deletes_Product_With_Articles()
         {
             //Arrange
+            using var context = DbContextFactory.CreateInstance("Remove_Deletes_Product_With_Articles");
+            using var unitOfWork = UnitOfWorkFactory.CreateInstance(context);
+            
             var productToAdd = ProductFactory.CreateValidEntity();
+            unitOfWork.Add(productToAdd);
             var article = ArticleFactory.CreateValidEntity(productToAdd);
-            productToAdd.Articles.Add(article);
+            unitOfWork.Add(article);
+            unitOfWork.Complete();
 
-
-            //Setup ProductRepository
-            var productRepositoryMock = new Mock<IProductRepository>();
-            productRepositoryMock.Setup(ir => ir.Get(It.IsAny<Guid>(), It.IsAny<ProductIncludes>())).Returns(productToAdd);
-            productRepositoryMock.Setup(ir => ir.Remove(It.IsAny<Guid>()));
-
-            //Setup ArticleRepository
-            var articleRepositoryMock = new Mock<IArticleRepository>();
-            articleRepositoryMock.Setup(rir => rir.Remove(It.IsAny<Guid>()));
-
-            //Setup UnitOfWork
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            unitOfWorkMock.Setup(uow => uow.Products).Returns(productRepositoryMock.Object);
-            unitOfWorkMock.Setup(uow => uow.Articles).Returns(articleRepositoryMock.Object);
-            unitOfWorkMock.Setup(uow => uow.Complete()).Returns(1);
-
-            var productService = new ProductService(unitOfWorkMock.Object);
+            var productService = new ProductService(unitOfWork);
 
             //Act
             var result = productService.Remove(productToAdd.Id);
@@ -98,39 +74,25 @@ namespace VivesRental.Services.Tests
         public void Remove_Deletes_Product_With_Articles_And_OrderLines()
         {
             //Arrange
+            using var context = DbContextFactory.CreateInstance("Remove_Deletes_Product_With_Articles_And_OrderLines");
+            using var unitOfWork = UnitOfWorkFactory.CreateInstance(context);
+
             var customer = CustomerFactory.CreateValidEntity();
-            var productToAdd = ProductFactory.CreateValidEntity();
-            var article = ArticleFactory.CreateValidEntity(productToAdd);
+            unitOfWork.Add(customer);
+            var product = ProductFactory.CreateValidEntity();
+            unitOfWork.Add(product);
+            var article = ArticleFactory.CreateValidEntity(product);
+            unitOfWork.Add(article);
             var order = OrderFactory.CreateValidEntity(customer);
+            unitOfWork.Add(order);
             var orderLine = OrderLineFactory.CreateValidEntity(order, article);
+            unitOfWork.Add(orderLine);
+            unitOfWork.Complete();
 
-            article.OrderLines.Add(orderLine);
-            productToAdd.Articles.Add(article);
-
-
-            //Setup ProductRepository
-            var productRepositoryMock = new Mock<IProductRepository>();
-            productRepositoryMock.Setup(ir => ir.Get(It.IsAny<Guid>(), It.IsAny<ProductIncludes>())).Returns(productToAdd);
-            productRepositoryMock.Setup(ir => ir.Remove(It.IsAny<Guid>()));
-
-            //Setup ArticleRepository
-            var articleRepositoryMock = new Mock<IArticleRepository>();
-            articleRepositoryMock.Setup(rir => rir.Remove(It.IsAny<Guid>()));
-
-            //Setup OrderLineRepository
-            var orderLineRepositoryMock = new Mock<IOrderLineRepository>();
-
-            //Setup UnitOfWork
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            unitOfWorkMock.Setup(uow => uow.Products).Returns(productRepositoryMock.Object);
-            unitOfWorkMock.Setup(uow => uow.Articles).Returns(articleRepositoryMock.Object);
-            unitOfWorkMock.Setup(uow => uow.OrderLines).Returns(orderLineRepositoryMock.Object);
-            unitOfWorkMock.Setup(uow => uow.Complete()).Returns(1);
-
-            var productService = new ProductService(unitOfWorkMock.Object);
+            var productService = new ProductService(unitOfWork);
 
             //Act
-            var result = productService.Remove(productToAdd.Id);
+            var result = productService.Remove(product.Id);
 
             //Assert
             Assert.IsTrue(result);
@@ -144,17 +106,13 @@ namespace VivesRental.Services.Tests
 
             //Arrange
             var customer = CustomerFactory.CreateValidEntity();
-            customer.Id = Guid.NewGuid();
-            unitOfWork.Customers.Add(customer);
+            unitOfWork.Add(customer);
             var product = ProductFactory.CreateValidEntity();
-            product.Id = Guid.NewGuid();
-            unitOfWork.Products.Add(product);
+            unitOfWork.Add(product);
             var article = ArticleFactory.CreateValidEntity(product);
-            article.Id = Guid.NewGuid();
-            unitOfWork.Articles.Add(article);
+            unitOfWork.Add(article);
             var article2 = ArticleFactory.CreateValidEntity(product);
-            article2.Id = Guid.NewGuid();
-            unitOfWork.Articles.Add(article2);
+            unitOfWork.Add(article2);
             unitOfWork.Complete();
 
             var productService = new ProductService(unitOfWork);
@@ -173,24 +131,17 @@ namespace VivesRental.Services.Tests
 
             //Arrange
             var customer = CustomerFactory.CreateValidEntity();
-            customer.Id = Guid.NewGuid();
-            unitOfWork.Customers.Add(customer);
+            unitOfWork.Add(customer);
             var product = ProductFactory.CreateValidEntity();
-            product.Id = Guid.NewGuid();
-            unitOfWork.Products.Add(product);
+            unitOfWork.Add(product);
             var article = ArticleFactory.CreateValidEntity(product);
-            article.Id = Guid.NewGuid();
-            unitOfWork.Articles.Add(article);
+            unitOfWork.Add(article);
             var article2 = ArticleFactory.CreateValidEntity(product);
-            article2.Id = Guid.NewGuid();
-            unitOfWork.Articles.Add(article2);
+            unitOfWork.Add(article2);
             var order = OrderFactory.CreateValidEntity(customer);
-            order.Id = Guid.NewGuid();
-            unitOfWork.Orders.Add(order);
+            unitOfWork.Add(order);
             var orderLine = OrderLineFactory.CreateValidEntity(order, article);
-            orderLine.Id = Guid.NewGuid();
-            orderLine.ReturnedAt = null;
-            unitOfWork.OrderLines.Add(orderLine);
+            unitOfWork.Add(orderLine);
             unitOfWork.Complete();
 
             var productService = new ProductService(unitOfWork);
@@ -209,28 +160,19 @@ namespace VivesRental.Services.Tests
 
             //Arrange
             var customer = CustomerFactory.CreateValidEntity();
-            customer.Id = Guid.NewGuid();
-            unitOfWork.Customers.Add(customer);
+            unitOfWork.Add(customer);
             var product = ProductFactory.CreateValidEntity();
-            product.Id = Guid.NewGuid();
-            unitOfWork.Products.Add(product);
+            unitOfWork.Add(product);
             var article = ArticleFactory.CreateValidEntity(product);
-            article.Id = Guid.NewGuid();
-            unitOfWork.Articles.Add(article);
+            unitOfWork.Add(article);
             var article2 = ArticleFactory.CreateValidEntity(product);
-            article2.Id = Guid.NewGuid();
-            unitOfWork.Articles.Add(article2);
+            unitOfWork.Add(article2);
             var order = OrderFactory.CreateValidEntity(customer);
-            order.Id = Guid.NewGuid();
-            unitOfWork.Orders.Add(order);
+            unitOfWork.Add(order);
             var orderLine = OrderLineFactory.CreateValidEntity(order, article);
-            orderLine.Id = Guid.NewGuid();
-            orderLine.ReturnedAt = null;
-            unitOfWork.OrderLines.Add(orderLine);
+            unitOfWork.Add(orderLine);
             var orderLine2 = OrderLineFactory.CreateValidEntity(order, article2);
-            orderLine2.Id = Guid.NewGuid();
-            orderLine2.ReturnedAt = null;
-            unitOfWork.OrderLines.Add(orderLine2);
+            unitOfWork.Add(orderLine2);
             unitOfWork.Complete();
 
             var productService = new ProductService(unitOfWork);

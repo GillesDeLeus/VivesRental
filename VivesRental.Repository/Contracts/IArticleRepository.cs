@@ -8,14 +8,11 @@ namespace VivesRental.Repository.Contracts
 {
     public interface IArticleRepository
     {
-        IEnumerable<Article> GetAll();
-        IEnumerable<Article> GetAll(ArticleIncludes includes);
+        IEnumerable<Article> GetAll(ArticleIncludes includes = null);
 
-        IEnumerable<Article> Find(Expression<Func<Article, bool>> predicate);
-        IEnumerable<Article> Find(Expression<Func<Article, bool>> predicate, ArticleIncludes includes);
+        IEnumerable<Article> Find(Expression<Func<Article, bool>> predicate, ArticleIncludes includes = null);
 
-        Article Get(Guid id);
-        Article Get(Guid id, ArticleIncludes includes);
+        Article Get(Guid id, ArticleIncludes includes = null);
 
         void Remove(Guid id);
         void Add(Article article);

@@ -17,11 +17,13 @@ namespace VivesRental.Services.Tests
             var customer = CustomerFactory.CreateValidEntity();
             var unitOfWorkMock = new Mock<IUnitOfWork>();
             var customerRepositoryMock = new Mock<ICustomerRepository>();
+            var orderRepositoryMock = new Mock<IOrderRepository>();
             var customerService = new CustomerService(unitOfWorkMock.Object);
 
             customerRepositoryMock.Setup(ir => ir.Get(It.IsAny<Guid>())).Returns(customer);
             customerRepositoryMock.Setup(rir => rir.Remove(It.IsAny<Guid>()));
             unitOfWorkMock.Setup(uow => uow.Customers).Returns(customerRepositoryMock.Object);
+            unitOfWorkMock.Setup(uow => uow.Orders).Returns(orderRepositoryMock.Object);
             unitOfWorkMock.Setup(uow => uow.Complete()).Returns(1);
 
             //Act

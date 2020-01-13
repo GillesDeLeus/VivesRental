@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
 using VivesRental.Repository.Contracts;
 using VivesRental.Repository.Core;
+using VivesRental.Repository.Extensions;
+using VivesRental.Repository.Includes;
 
 namespace VivesRental.Repository
 {
@@ -18,18 +19,19 @@ namespace VivesRental.Repository
             _context = context;
         }
 
-        public OrderLine Get(Guid id)
-        {
-            var query = _context.OrderLines
-                .AsQueryable(); //It needs to be a queryable to be able to build the expression
-            query = query.Where(i => i.Id == id); //Add the where clause
-            return query.FirstOrDefault();
-        }
-
-        public IEnumerable<OrderLine> Find(Expression<Func<OrderLine, bool>> predicate)
+        public OrderLine Get(Guid id, OrderLineIncludes includes = null)
         {
             return _context.OrderLines
-                .Where(predicate).AsQueryable();
+                .AddIncludes(includes)//Add the where clause
+                .FirstOrDefault(i => i.Id == id);
+        }
+
+        public IEnumerable<OrderLine> Find(Expression<Func<OrderLine, bool>> predicate, OrderLineIncludes includes = null)
+        {
+            return _context.OrderLines
+                .AddIncludes(includes)
+                .Where(predicate)
+                .AsEnumerable();
         }
 
         public void Add(OrderLine orderLine)

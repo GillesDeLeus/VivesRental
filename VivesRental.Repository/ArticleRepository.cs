@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
 using VivesRental.Repository.Contracts;
 using VivesRental.Repository.Core;
+using VivesRental.Repository.Extensions;
 using VivesRental.Repository.Includes;
 
 namespace VivesRental.Repository
@@ -17,19 +17,12 @@ namespace VivesRental.Repository
         {
             _context = context;
         }
-
-        public Article Get(Guid id)
+        
+        public Article Get(Guid id, ArticleIncludes includes = null)
         {
-            return Get(id, null);
-        }
-
-        public Article Get(Guid id, ArticleIncludes includes)
-        {
-            var query = _context.Articles
-                .AsQueryable(); //It needs to be a queryable to be able to build the expression
-            query = AddIncludes(query, includes);
-            query = query.Where(i => i.Id == id); //Add the where clause
-            return query.FirstOrDefault();
+            return _context.Articles
+                .AddIncludes(includes)
+                .FirstOrDefault(i => i.Id == id);
         }
 
         public void Remove(Guid id)
@@ -51,45 +44,20 @@ namespace VivesRental.Repository
         {
             _context.Articles.Add(article);
         }
-        
-        public IEnumerable<Article> Find(Expression<Func<Article, bool>> predicate)
+
+        public IEnumerable<Article> Find(Expression<Func<Article, bool>> predicate, ArticleIncludes includes = null)
         {
-            return Find(predicate, null);
+            return _context.Articles
+                .AddIncludes(includes)
+                .Where(predicate)
+                .AsEnumerable(); //Add the where clause and return IEnumerable<Article>
         }
 
-        public IEnumerable<Article> Find(Expression<Func<Article, bool>> predicate, ArticleIncludes includes)
+        public IEnumerable<Article> GetAll(ArticleIncludes includes = null)
         {
-            var query = _context.Articles
-                .AsQueryable(); //It needs to be a queryable to be able to build the expression
-            query = AddIncludes(query, includes);
-            return query.Where(predicate).AsEnumerable(); //Add the where clause and return IEnumerable<Article>
-        }
-
-        public IEnumerable<Article> GetAll()
-        {
-            return GetAll(null);
-        }
-
-        public IEnumerable<Article> GetAll(ArticleIncludes includes)
-        {
-            var query = _context.Articles
-                .AsQueryable(); //It needs to be a queryable to be able to build the expression
-            query = AddIncludes(query, includes);
-            return query.AsEnumerable();
-        }
-
-        private IQueryable<Article> AddIncludes(IQueryable<Article> query, ArticleIncludes includes)
-        {
-            if (includes == null)
-                return query;
-
-            if (includes.Product)
-                query = query.Include(i => i.Product);
-
-            if (includes.OrderLines)
-                query = query.Include(i => i.OrderLines);
-
-            return query;
+            return _context.Articles
+                .AddIncludes(includes)
+                .AsEnumerable();
         }
     }
 }

@@ -135,5 +135,110 @@ namespace VivesRental.Services.Tests
             //Assert
             Assert.IsTrue(result);
         }
+
+        [TestMethod]
+        public void GetAvailableProductResults_Returns_Available_Product()
+        {
+            var context = DbContextFactory.CreateInstance("GetAvailableProductResults_Returns_Available_Product");
+            var unitOfWork = UnitOfWorkFactory.CreateInstance(context);
+
+            //Arrange
+            var customer = CustomerFactory.CreateValidEntity();
+            customer.Id = Guid.NewGuid();
+            unitOfWork.Customers.Add(customer);
+            var product = ProductFactory.CreateValidEntity();
+            product.Id = Guid.NewGuid();
+            unitOfWork.Products.Add(product);
+            var article = ArticleFactory.CreateValidEntity(product);
+            article.Id = Guid.NewGuid();
+            unitOfWork.Articles.Add(article);
+            var article2 = ArticleFactory.CreateValidEntity(product);
+            article2.Id = Guid.NewGuid();
+            unitOfWork.Articles.Add(article2);
+            unitOfWork.Complete();
+
+            var productService = new ProductService(unitOfWork);
+
+            //Act
+            var result = productService.All();
+
+            Assert.AreEqual(1, result.Count);
+        }
+
+        [TestMethod]
+        public void GetAvailableProductResults_Returns_Available_Product_WithOrderLine()
+        {
+            var context = DbContextFactory.CreateInstance("GetAvailableProductResults_Returns_Available_Product_WithOrderLine");
+            var unitOfWork = UnitOfWorkFactory.CreateInstance(context);
+
+            //Arrange
+            var customer = CustomerFactory.CreateValidEntity();
+            customer.Id = Guid.NewGuid();
+            unitOfWork.Customers.Add(customer);
+            var product = ProductFactory.CreateValidEntity();
+            product.Id = Guid.NewGuid();
+            unitOfWork.Products.Add(product);
+            var article = ArticleFactory.CreateValidEntity(product);
+            article.Id = Guid.NewGuid();
+            unitOfWork.Articles.Add(article);
+            var article2 = ArticleFactory.CreateValidEntity(product);
+            article2.Id = Guid.NewGuid();
+            unitOfWork.Articles.Add(article2);
+            var order = OrderFactory.CreateValidEntity(customer);
+            order.Id = Guid.NewGuid();
+            unitOfWork.Orders.Add(order);
+            var orderLine = OrderLineFactory.CreateValidEntity(order, article);
+            orderLine.Id = Guid.NewGuid();
+            orderLine.ReturnedAt = null;
+            unitOfWork.OrderLines.Add(orderLine);
+            unitOfWork.Complete();
+
+            var productService = new ProductService(unitOfWork);
+
+            //Act
+            var result = productService.GetAvailableProductResults();
+
+            Assert.AreEqual(1, result.Count);
+        }
+
+        [TestMethod]
+        public void GetAvailableProductResults_Returns_No_Available_Product_When_All_Rented()
+        {
+            var context = DbContextFactory.CreateInstance("GetAvailableProductResults_Returns_No_Available_Product_When_All_Rented");
+            var unitOfWork = UnitOfWorkFactory.CreateInstance(context);
+
+            //Arrange
+            var customer = CustomerFactory.CreateValidEntity();
+            customer.Id = Guid.NewGuid();
+            unitOfWork.Customers.Add(customer);
+            var product = ProductFactory.CreateValidEntity();
+            product.Id = Guid.NewGuid();
+            unitOfWork.Products.Add(product);
+            var article = ArticleFactory.CreateValidEntity(product);
+            article.Id = Guid.NewGuid();
+            unitOfWork.Articles.Add(article);
+            var article2 = ArticleFactory.CreateValidEntity(product);
+            article2.Id = Guid.NewGuid();
+            unitOfWork.Articles.Add(article2);
+            var order = OrderFactory.CreateValidEntity(customer);
+            order.Id = Guid.NewGuid();
+            unitOfWork.Orders.Add(order);
+            var orderLine = OrderLineFactory.CreateValidEntity(order, article);
+            orderLine.Id = Guid.NewGuid();
+            orderLine.ReturnedAt = null;
+            unitOfWork.OrderLines.Add(orderLine);
+            var orderLine2 = OrderLineFactory.CreateValidEntity(order, article2);
+            orderLine2.Id = Guid.NewGuid();
+            orderLine2.ReturnedAt = null;
+            unitOfWork.OrderLines.Add(orderLine2);
+            unitOfWork.Complete();
+
+            var productService = new ProductService(unitOfWork);
+
+            //Act
+            var result = productService.GetAvailableProductResults();
+
+            Assert.AreEqual(0, result.Count);
+        }
     }
 }

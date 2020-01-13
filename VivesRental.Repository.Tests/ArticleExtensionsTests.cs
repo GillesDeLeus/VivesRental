@@ -73,7 +73,8 @@ namespace VivesRental.Repository.Tests
             var article = ArticleFactory.CreateValidEntity(product);
             var order = OrderFactory.CreateValidEntity(customer);
             var orderLine = OrderLineFactory.CreateValidEntity(order, article);
-            orderLine.ExpiresAt = new DateTime(2019, 1, 2);
+            orderLine.ExpiresAt = rentalExpiryDate;
+            orderLine.ReturnedAt = null; //Not returned yet
             var articleList = new List<Article> { article };
 
             //Act

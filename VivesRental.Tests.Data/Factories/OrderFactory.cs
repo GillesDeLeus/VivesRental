@@ -7,7 +7,7 @@ namespace VivesRental.Tests.Data.Factories
     {
         public static Order CreateValidEntity(Customer customer)
         {
-            return new Order
+            var order = new Order
             {
                 CustomerId = customer.Id,
                 Customer = customer,
@@ -16,6 +16,8 @@ namespace VivesRental.Tests.Data.Factories
                 CustomerEmail = "TestEmail",
                 CreatedAt = DateTime.Now
             };
+            customer.Orders.Add(order);
+            return order;
         }
 
         public static Order CreateInvalidEntity()

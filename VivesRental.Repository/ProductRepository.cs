@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using VivesRental.Model;
 using VivesRental.Repository.Contracts;
 using VivesRental.Repository.Core;
+using VivesRental.Repository.Extensions;
 using VivesRental.Repository.Includes;
 using VivesRental.Repository.Mappers;
 using VivesRental.Repository.Results;
@@ -22,21 +23,18 @@ namespace VivesRental.Repository
         }
 
         public Product Get(Guid id, ProductIncludes includes = null)
-	    {
-		    var query = _context.Products
-                .AsQueryable(); //It needs to be a queryable to be able to build the expression
-            query = AddIncludes(query, includes);
-		    query = query.Where(i => i.Id == id); //Add the where clause
-		    return query.FirstOrDefault(); 
-	    }
+        {
+            return _context.Products
+                .AddIncludes(includes)
+                .FirstOrDefault(i => i.Id == id);
+        }
 
         public IEnumerable<Product> GetAll(ProductIncludes includes = null)
-		{
-			var query = _context.Products
-                .AsQueryable(); //It needs to be a queryable to be able to build the expression
-			query = AddIncludes(query, includes);
-			return query.AsEnumerable(); 
-		}
+        {
+            return _context.Products
+                .AddIncludes(includes)
+                .AsEnumerable();
+        }
 
         public IEnumerable<ProductResult> GetAllResult(ProductIncludes includes = null)
         {
@@ -47,32 +45,27 @@ namespace VivesRental.Repository
 
         public IEnumerable<ProductResult> GetAllResult(DateTime fromDateTime, DateTime untilDateTime, ProductIncludes includes = null)
         {
-            var query = _context.Products
-                .AsQueryable(); //It needs to be a queryable to be able to build the expression
-            query = AddIncludes(query, includes);
-            return query
+            return _context.Products
+                .AddIncludes(includes)
                 .MapToResults(fromDateTime, untilDateTime)
                 .AsEnumerable();
         }
 
-        public IEnumerable<Product> Find(Func<Product, bool> predicate, ProductIncludes includes = null)
-		{
-			var query = _context.Products
-                .Where(predicate)
-                .AsQueryable(); //It needs to be a queryable to be able to build the expression
-			query = AddIncludes(query, includes);
-			return query.AsEnumerable(); //Add the where clause and return IEnumerable<Product>
-		}
-
-        public IEnumerable<ProductResult> FindResult(Func<Product, bool> predicate, DateTime availableFromDateTime, DateTime availableUntilDateTime, ProductIncludes includes = null)
+        public IEnumerable<Product> Find(Expression<Func<Product, bool>> predicate, ProductIncludes includes = null)
         {
-            var query = _context.Products
+            return _context.Products
+                .AddIncludes(includes)
                 .Where(predicate)
-                .AsQueryable(); //It needs to be a queryable to be able to build the expression
-            query = AddIncludes(query, includes);
-            return query
+                .AsEnumerable();
+        }
+
+        public IEnumerable<ProductResult> FindResult(Expression<Func<Product, bool>> predicate, DateTime availableFromDateTime, DateTime availableUntilDateTime, ProductIncludes includes = null)
+        {
+            return _context.Products
+                .AddIncludes(includes)
+                .Where(predicate)
                 .MapToResults(availableFromDateTime, availableUntilDateTime)
-                .AsEnumerable(); //Add the where clause and return IEnumerable<Product>
+                .AsEnumerable();
         }
 
         public void Add(Product product)
@@ -95,35 +88,6 @@ namespace VivesRental.Repository
             }
         }
 
-        /// <summary>
-        /// Adds the DbContext includes based on the booleans set in the Includes object
-        /// </summary>
-        /// <param name="query"></param>
-        /// <param name="includes"></param>
-        /// <returns></returns>
-        private IQueryable<Product> AddIncludes(IQueryable<Product> query, ProductIncludes includes)
-	    {
-		    if (includes == null)
-			    return query;
-
-		    if (includes.Articles)
-			    query = query.Include(i => i.Articles);
-
-            if (includes.ArticleOrderLines)
-            {
-	            query = query
-                    .Include(p => p.Articles)
-                    .ThenInclude(a => a.OrderLines);
-            }
-
-            if (includes.ArticleReservations)
-            {
-                query = query
-                    .Include(p => p.Articles)
-                    .ThenInclude(a => a.ArticleReservations);
-            }
-
-            return query;
-	    }
+        
     }
 }

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using VivesRental.Model;
 
 namespace VivesRental.Repository.Extensions
 {
     public static class ArticleExtensions
     {
+        
         public static Func<Article, bool> IsAvailable(DateTime fromDateTime, DateTime? untilDateTime = null)
         {
             return article => article.Status == ArticleStatus.Normal && //Only articles that are "Normal"

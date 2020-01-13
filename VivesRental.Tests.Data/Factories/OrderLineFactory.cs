@@ -7,7 +7,7 @@ namespace VivesRental.Tests.Data.Factories
     {
         public static OrderLine CreateValidEntity(Order order, Article article)
         {
-            return new OrderLine
+            var orderLine = new OrderLine
             {
                 OrderId =  order.Id,
                 Order = order,
@@ -19,6 +19,11 @@ namespace VivesRental.Tests.Data.Factories
                 ExpiresAt = DateTime.Now,
                 ReturnedAt = DateTime.Now
             };
+
+            order.OrderLines.Add(orderLine);
+            article.OrderLines.Add(orderLine);
+
+            return orderLine;
         }
 
         public static OrderLine CreateInvalidEntity()

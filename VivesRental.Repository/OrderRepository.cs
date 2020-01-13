@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
 using VivesRental.Repository.Contracts;
 using VivesRental.Repository.Core;
@@ -41,6 +43,16 @@ namespace VivesRental.Repository
         public void Add(Order order)
         {
             _context.Orders.Add(order);
+        }
+
+        public bool ClearCustomer(Guid customerId)
+        {
+            var commandText = "UPDATE Order SET CustomerId = null WHERE CustomerId = @CustomerId";
+            var customerIdParameter = new SqlParameter("@CustomerId", customerId);
+
+            var result = _context.Database.ExecuteSqlRaw(commandText, customerIdParameter);
+
+            return result > 0;
         }
 
     }

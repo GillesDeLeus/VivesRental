@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
 using VivesRental.Repository.Contracts;
 using VivesRental.Repository.Core;
+using VivesRental.Repository.Extensions;
 using VivesRental.Repository.Includes;
 
 namespace VivesRental.Repository
@@ -20,11 +21,9 @@ namespace VivesRental.Repository
 
         public ArticleReservation Get(Guid id, ArticleReservationIncludes includes = null)
         {
-            var query = _context.ArticleReservations
-                .AsQueryable(); //It needs to be a queryable to be able to build the expression
-            query = AddIncludes(query, includes);
-            query = query.Where(i => i.Id == id); //Add the where clause
-            return query.FirstOrDefault();
+            return _context.ArticleReservations
+                .AddIncludes(includes)
+                .FirstOrDefault(i => i.Id == id);
         }
 
         public void Remove(Guid id)
@@ -49,32 +48,19 @@ namespace VivesRental.Repository
 
         public IEnumerable<ArticleReservation> Find(Expression<Func<ArticleReservation, bool>> predicate, ArticleReservationIncludes includes = null)
         {
-            var query = _context.ArticleReservations
-                .AsQueryable(); //It needs to be a queryable to be able to build the expression
-            query = AddIncludes(query, includes);
-            return query.Where(predicate).AsEnumerable(); //Add the where clause and return IEnumerable<Article>
+            return _context.ArticleReservations
+                .AddIncludes(includes)
+                .Where(predicate)
+                .AsEnumerable(); //Add the where clause and return IEnumerable<Article>
         }
 
         public IEnumerable<ArticleReservation> GetAll(ArticleReservationIncludes includes = null)
         {
-            var query = _context.ArticleReservations
-                .AsQueryable(); //It needs to be a queryable to be able to build the expression
-            query = AddIncludes(query, includes);
-            return query.AsEnumerable();
+            return _context.ArticleReservations
+                .AddIncludes(includes)
+                .AsEnumerable();
         }
 
-        private IQueryable<ArticleReservation> AddIncludes(IQueryable<ArticleReservation> query, ArticleReservationIncludes includes)
-        {
-            if (includes == null)
-                return query;
-
-            if (includes.Article)
-                query = query.Include(i => i.Article);
-
-            if (includes.Customer)
-                query = query.Include(i => i.Customer);
-
-            return query;
-        }
+        
     }
 }

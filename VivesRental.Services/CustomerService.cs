@@ -78,12 +78,16 @@ namespace VivesRental.Services
             return null;
         }
 
+        //TODO: Needs transaction
         public bool Remove(Guid id)
         {
             var customer = _unitOfWork.Customers.Get(id);
             if (customer == null)
                 return false;
 
+            //Remove the Customer from the Orders
+            _unitOfWork.Orders.ClearCustomer(id);
+            //Remove the Order
             _unitOfWork.Customers.Remove(id);
 
             var numberOfObjectsUpdated = _unitOfWork.Complete();

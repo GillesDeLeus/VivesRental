@@ -128,14 +128,12 @@ namespace VivesRental.Services
             return numberOfObjectsUpdated > 0;
         }
 
-        //TODO: Needs transaction
         public bool Remove(Guid id)
         {
             var article = _unitOfWork.Articles.Get(id);
             if (article == null)
                 return false;
 
-            //TODO: SQL Transaction
             _unitOfWork.BeginTransaction();
             _unitOfWork.OrderLines.ClearArticleByArticleId(id);
             _unitOfWork.ArticleReservations.RemoveByArticleId(id);

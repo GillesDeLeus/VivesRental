@@ -39,14 +39,28 @@ namespace VivesRental.Services
 
         public IList<Article> GetAvailableArticles()
         {
-            return _unitOfWork.Articles.Find(ri => ri.Status == ArticleStatus.Normal &&
-                                                         ri.OrderLines.All(rol => rol.ReturnedAt.HasValue)).ToList();
+            return _unitOfWork.Articles.Find(a => a.Status == ArticleStatus.Normal &&
+                                                         a.OrderLines.All(ol => ol.ReturnedAt.HasValue)).ToList();
         }
 
         public IList<Article> GetAvailableArticles(ArticleIncludes includes)
         {
-            return _unitOfWork.Articles.Find(ri => ri.Status == ArticleStatus.Normal &&
-                                                         ri.OrderLines.All(rol => rol.ReturnedAt.HasValue), includes).ToList();
+            return _unitOfWork.Articles.Find(a => a.Status == ArticleStatus.Normal &&
+                                                         a.OrderLines.All(ol => ol.ReturnedAt.HasValue), includes).ToList();
+        }
+
+        public IList<Article> GetAvailableArticles(Guid productId)
+        {
+            return _unitOfWork.Articles.Find(a => a.ProductId == productId &&
+                                                  a.Status == ArticleStatus.Normal &&
+                                                  a.OrderLines.All(ol => ol.ReturnedAt.HasValue)).ToList();
+        }
+
+        public IList<Article> GetAvailableArticles(Guid productId, ArticleIncludes includes)
+        {
+            return _unitOfWork.Articles.Find(a => a.ProductId == productId && 
+                                                  a.Status == ArticleStatus.Normal &&
+                                                  a.OrderLines.All(ol => ol.ReturnedAt.HasValue), includes).ToList();
         }
 
         public IList<Article> GetRentedArticles()
@@ -115,7 +129,7 @@ namespace VivesRental.Services
             //Only update the properties we want to update
             article.ProductId = entity.ProductId;
             article.Status = entity.Status;
-            
+
             var numberOfObjectsUpdated = _unitOfWork.Complete();
             if (numberOfObjectsUpdated > 0)
             {
@@ -157,6 +171,6 @@ namespace VivesRental.Services
             var numberOfObjectsUpdated = _unitOfWork.Complete();
             return numberOfObjectsUpdated > 0;
         }
-        
+
     }
 }

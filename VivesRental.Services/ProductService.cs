@@ -153,5 +153,6 @@ namespace VivesRental.Services
                                                    a.OrderLines.All(ol => ol.ReturnedAt.HasValue)))
                 .ToList();
         }
+
     }
 }

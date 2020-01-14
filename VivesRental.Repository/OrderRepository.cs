@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
 using System.Linq;
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
 using VivesRental.Repository.Contracts;
@@ -42,6 +43,14 @@ namespace VivesRental.Repository
                 .AddIncludes(includes)
                 .MapToResults()
                 .AsEnumerable();
+        }
+
+        public IEnumerable<Order> Find(Expression<Func<Order, bool>> predicate, OrderIncludes includes = null)
+        {
+            return _context.Orders
+                .AddIncludes(includes)
+                .Where(predicate)
+                .AsEnumerable(); //Add the where clause and return IEnumerable<Article>
         }
 
         public void Add(Order order)

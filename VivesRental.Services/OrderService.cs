@@ -73,7 +73,7 @@ namespace VivesRental.Services
 
         public bool Return(Guid orderId, DateTime returnedAt)
         {
-            var orderLines = _unitOfWork.OrderLines.Find(rol => rol.OrderId == orderId);
+            var orderLines = _unitOfWork.OrderLines.Find(ol => ol.OrderId == orderId && !ol.ReturnedAt.HasValue);
             foreach (var orderLine in orderLines)
             {
                 orderLine.ReturnedAt = returnedAt;

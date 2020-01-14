@@ -45,11 +45,12 @@ namespace VivesRental.Repository
                 .AsEnumerable();
         }
 
-        public IEnumerable<Order> Find(Expression<Func<Order, bool>> predicate, OrderIncludes includes = null)
+        public IEnumerable<OrderResult> FindResult(Expression<Func<Order, bool>> predicate, OrderIncludes includes = null)
         {
             return _context.Orders
                 .AddIncludes(includes)
                 .Where(predicate)
+                .MapToResults()
                 .AsEnumerable(); //Add the where clause and return IEnumerable<Article>
         }
 

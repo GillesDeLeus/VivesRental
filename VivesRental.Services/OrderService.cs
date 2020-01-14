@@ -24,9 +24,9 @@ namespace VivesRental.Services
             return _unitOfWork.Orders.Get(id, includes);
         }
 
-        public IList<Order> FindByCustomerId(Guid customerId, OrderIncludes includes = null)
+        public IList<OrderResult> FindByCustomerIdResult(Guid customerId, OrderIncludes includes = null)
         {
-            return _unitOfWork.Orders.Find(o => o.CustomerId == customerId, includes).ToList();
+            return _unitOfWork.Orders.FindResult(o => o.CustomerId == customerId, includes).ToList();
         }
 
         public IList<Order> All()

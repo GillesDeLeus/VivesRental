@@ -10,7 +10,7 @@ namespace VivesRental.Services.Contracts
     {
         Order Get(Guid id, OrderIncludes includes = null);
 
-        IList<Order> FindByCustomerId(Guid customerId, OrderIncludes includes = null);
+        IList<OrderResult> FindByCustomerIdResult(Guid customerId, OrderIncludes includes = null);
         IList<Order> All();
         IList<OrderResult> AllResult();
 

@@ -7,14 +7,10 @@ namespace VivesRental.Services.Contracts
 {
     public interface IArticleService
     {
-        Article Get(Guid id);
-        Article Get(Guid id, ArticleIncludes includes);
-        IList<Article> All();
-        IList<Article> All(ArticleIncludes includes);
+        Article Get(Guid id, ArticleIncludes includes = null);
+        IList<Article> All(ArticleIncludes includes = null);
         IList<Article> GetAvailableArticles(ArticleIncludes includes = null);
-
-        IList<Article> GetAvailableArticles(DateTime fromDateTime, DateTime untilDateTime,
-            ArticleIncludes includes = null);
+        IList<Article> GetAvailableArticles(Guid productId, ArticleIncludes includes = null);
         IList<Article> GetRentedArticles(ArticleIncludes includes = null);
 
         IList<Article> GetRentedArticles(Guid customerId, ArticleIncludes includes = null);

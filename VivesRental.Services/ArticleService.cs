@@ -51,6 +51,20 @@ namespace VivesRental.Services
             return _unitOfWork.Articles.Find(ArticleExtensions.IsAvailable(fromDateTime, untilDateTime), includes).ToList();
         }
 
+        public IList<Article> GetAvailableArticles(Guid productId)
+        {
+            return _unitOfWork.Articles.Find(a => a.ProductId == productId &&
+                                                  a.Status == ArticleStatus.Normal &&
+                                                  a.OrderLines.All(ol => ol.ReturnedAt.HasValue)).ToList();
+        }
+
+        public IList<Article> GetAvailableArticles(Guid productId, ArticleIncludes includes)
+        {
+            return _unitOfWork.Articles.Find(a => a.ProductId == productId &&
+                                                  a.Status == ArticleStatus.Normal &&
+                                                  a.OrderLines.All(ol => ol.ReturnedAt.HasValue), includes).ToList();
+        }
+
         public IList<Article> GetRentedArticles(ArticleIncludes includes = null)
         {
             return _unitOfWork.Articles.Find(a => a.IsRented(), includes).ToList();

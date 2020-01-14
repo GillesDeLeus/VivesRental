@@ -149,7 +149,7 @@ namespace VivesRental.Tests.ConsoleApp
             var articleService = new ArticleService(unitOfWork);
             var customerService = new CustomerService(unitOfWork);
             var orderService = new OrderService(unitOfWork);
-            var orderLineService = new OrderLineService(unitOfWork);
+            var orderLineService = new OrderLineService(unitOfWork, articleService);
 
             var customer = customerService.Create(new Customer
                 {FirstName = "Test", LastName = "Test", Email = "test@test.com"});
@@ -189,11 +189,11 @@ namespace VivesRental.Tests.ConsoleApp
             
             var productRepository = new ProductRepository(context);
             var articleRepository = new ArticleRepository(context);
-            var articleReservationRepository = new ArticleReservationRepository(dbContext);
+            var articleReservationRepository = new ArticleReservationRepository(context);
             var orderRepository = new OrderRepository(context);
             var orderLineRepository = new OrderLineRepository(context);
             var customerRepository = new CustomerRepository(context);
-            return new UnitOfWork(context, productRepository, articleRepository, orderRepository, orderLineRepository, customerRepository);
+            return new UnitOfWork(context, productRepository, articleRepository, articleReservationRepository, orderRepository, orderLineRepository, customerRepository);
         }
     }
 }

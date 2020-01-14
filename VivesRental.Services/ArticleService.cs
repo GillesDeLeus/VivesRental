@@ -18,22 +18,13 @@ namespace VivesRental.Services
         {
             _unitOfWork = unitOfWork;
         }
-        public Article Get(Guid id)
-        {
-            return _unitOfWork.Articles.Get(id);
-        }
 
-        public Article Get(Guid id, ArticleIncludes includes)
+        public Article Get(Guid id, ArticleIncludes includes = null)
         {
             return _unitOfWork.Articles.Get(id, includes);
         }
-
-        public IList<Article> All()
-        {
-            return _unitOfWork.Articles.GetAll().ToList();
-        }
-
-        public IList<Article> All(ArticleIncludes includes)
+        
+        public IList<Article> All(ArticleIncludes includes = null)
         {
             return _unitOfWork.Articles.GetAll(includes).ToList();
         }
@@ -50,15 +41,8 @@ namespace VivesRental.Services
         {
             return _unitOfWork.Articles.Find(ArticleExtensions.IsAvailable(fromDateTime, untilDateTime), includes).ToList();
         }
-
-        public IList<Article> GetAvailableArticles(Guid productId)
-        {
-            return _unitOfWork.Articles.Find(a => a.ProductId == productId &&
-                                                  a.Status == ArticleStatus.Normal &&
-                                                  a.OrderLines.All(ol => ol.ReturnedAt.HasValue)).ToList();
-        }
-
-        public IList<Article> GetAvailableArticles(Guid productId, ArticleIncludes includes)
+        
+        public IList<Article> GetAvailableArticles(Guid productId, ArticleIncludes includes = null)
         {
             return _unitOfWork.Articles.Find(a => a.ProductId == productId &&
                                                   a.Status == ArticleStatus.Normal &&

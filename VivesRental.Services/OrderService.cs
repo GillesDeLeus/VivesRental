@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using VivesRental.Model;
 using VivesRental.Repository.Core;
+using VivesRental.Repository.Extensions;
 using VivesRental.Repository.Includes;
 using VivesRental.Services.Contracts;
 using VivesRental.Services.Mappers;
@@ -13,40 +14,42 @@ namespace VivesRental.Services
 
     public class OrderService : IOrderService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IVivesRentalDbContext _context;
 
-        public OrderService(IUnitOfWork unitOfWork)
+        public OrderService(IVivesRentalDbContext context)
         {
-            _unitOfWork = unitOfWork;
+            _context = context;
         }
 
         public OrderResult Get(Guid id, OrderIncludes includes = null)
         {
-            return _unitOfWork.Orders
-                .Where(o => o.Id == id, includes)
+            return _context.Orders
+                .AddIncludes(includes)
+                .Where(o => o.Id == id)
                 .MapToResults()
                 .FirstOrDefault();
         }
 
         public IList<OrderResult> FindByCustomerId(Guid customerId, OrderIncludes includes = null)
         {
-            return _unitOfWork.Orders
-                .Where(o => o.CustomerId == customerId, includes)
+            return _context.Orders
+                .AddIncludes(includes)
+                .Where(o => o.CustomerId == customerId)
                 .MapToResults()
                 .ToList();
         }
 
         public IList<OrderResult> All()
         {
-            return _unitOfWork.Orders
-                .Where()
+            return _context.Orders
                 .MapToResults()
                 .ToList();
         }
         
         public OrderResult Create(Guid customerId)
         {
-            var customer = _unitOfWork.Customers.Where(c => c.Id == customerId)
+            var customer = _context.Customers
+                .Where(c => c.Id == customerId)
                 .MapToResults()
                 .FirstOrDefault();
 
@@ -65,8 +68,8 @@ namespace VivesRental.Services
                 CreatedAt = DateTime.Now
             };
 
-            _unitOfWork.Orders.Add(order);
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
+            _context.Orders.Add(order);
+            var numberOfObjectsUpdated = _context.SaveChanges();
             if (numberOfObjectsUpdated > 0)
             {
                 return order.MapToResult();
@@ -76,13 +79,15 @@ namespace VivesRental.Services
 
         public bool Return(Guid orderId, DateTime returnedAt)
         {
-            var orderLines = _unitOfWork.OrderLines.Where(ol => ol.OrderId == orderId && !ol.ReturnedAt.HasValue);
+            var orderLines = _context.OrderLines
+                .Where(ol => ol.OrderId == orderId && !ol.ReturnedAt.HasValue)
+                .ToList();
             foreach (var orderLine in orderLines)
             {
                 orderLine.ReturnedAt = returnedAt;
             }
 
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
+            var numberOfObjectsUpdated = _context.SaveChanges();
             return numberOfObjectsUpdated > 0;
         }
     }

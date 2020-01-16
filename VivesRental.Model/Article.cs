@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using VivesRental.Model.Contracts;
 
 namespace VivesRental.Model
 {
     [Table(nameof(Article))]
-    public class Article
+    public class Article: IIdentifiable
     {
         public Article()
         {

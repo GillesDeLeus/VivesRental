@@ -1,10 +1,5 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using VivesRental.Model;
-using VivesRental.Repository.Contracts;
-using VivesRental.Repository.Core;
-using VivesRental.Tests.Data.Extensions;
 using VivesRental.Tests.Data.Factories;
 
 namespace VivesRental.Services.Tests
@@ -17,13 +12,12 @@ namespace VivesRental.Services.Tests
         {
             //Arrange
             using var context = DbContextFactory.CreateInstance("Remove_Deletes_Product");
-            using var unitOfWork = UnitOfWorkFactory.CreateInstance(context);
-
+            
             var product = ProductFactory.CreateValidEntity();
-            unitOfWork.Add(product);
-            unitOfWork.Complete();
+            context.Products.Add(product);
+            context.SaveChanges();
 
-            var productService = new ProductService(unitOfWork);
+            var productService = new ProductService(context);
 
             //Act
             var result = productService.Remove(product.Id);
@@ -37,9 +31,8 @@ namespace VivesRental.Services.Tests
         {
             //Arrange
             using var context = DbContextFactory.CreateInstance("Remove_Returns_False_When_Product_Is_Null");
-            using var unitOfWork = UnitOfWorkFactory.CreateInstance(context);
-
-            var productService = new ProductService(unitOfWork);
+            
+            var productService = new ProductService(context);
 
             //Act
             var result = productService.Remove(Guid.NewGuid());
@@ -53,15 +46,14 @@ namespace VivesRental.Services.Tests
         {
             //Arrange
             using var context = DbContextFactory.CreateInstance("Remove_Deletes_Product_With_Articles");
-            using var unitOfWork = UnitOfWorkFactory.CreateInstance(context);
             
             var productToAdd = ProductFactory.CreateValidEntity();
-            unitOfWork.Add(productToAdd);
+            context.Products.Add(productToAdd);
             var article = ArticleFactory.CreateValidEntity(productToAdd);
-            unitOfWork.Add(article);
-            unitOfWork.Complete();
+            context.Articles.Add(article);
+            context.SaveChanges();
 
-            var productService = new ProductService(unitOfWork);
+            var productService = new ProductService(context);
 
             //Act
             var result = productService.Remove(productToAdd.Id);
@@ -75,21 +67,20 @@ namespace VivesRental.Services.Tests
         {
             //Arrange
             using var context = DbContextFactory.CreateInstance("Remove_Deletes_Product_With_Articles_And_OrderLines");
-            using var unitOfWork = UnitOfWorkFactory.CreateInstance(context);
-
+            
             var customer = CustomerFactory.CreateValidEntity();
-            unitOfWork.Add(customer);
+            context.Customers.Add(customer);
             var product = ProductFactory.CreateValidEntity();
-            unitOfWork.Add(product);
+            context.Products.Add(product);
             var article = ArticleFactory.CreateValidEntity(product);
-            unitOfWork.Add(article);
+            context.Articles.Add(article);
             var order = OrderFactory.CreateValidEntity(customer);
-            unitOfWork.Add(order);
+            context.Orders.Add(order);
             var orderLine = OrderLineFactory.CreateValidEntity(order, article);
-            unitOfWork.Add(orderLine);
-            unitOfWork.Complete();
+            context.OrderLines.Add(orderLine);
+            context.SaveChanges();
 
-            var productService = new ProductService(unitOfWork);
+            var productService = new ProductService(context);
 
             //Act
             var result = productService.Remove(product.Id);
@@ -102,20 +93,19 @@ namespace VivesRental.Services.Tests
         public void GetAvailableProductResults_Returns_Available_Product()
         {
             var context = DbContextFactory.CreateInstance("GetAvailableProductResults_Returns_Available_Product");
-            var unitOfWork = UnitOfWorkFactory.CreateInstance(context);
-
+            
             //Arrange
             var customer = CustomerFactory.CreateValidEntity();
-            unitOfWork.Add(customer);
+            context.Customers.Add(customer);
             var product = ProductFactory.CreateValidEntity();
-            unitOfWork.Add(product);
+            context.Products.Add(product);
             var article = ArticleFactory.CreateValidEntity(product);
-            unitOfWork.Add(article);
+            context.Articles.Add(article);
             var article2 = ArticleFactory.CreateValidEntity(product);
-            unitOfWork.Add(article2);
-            unitOfWork.Complete();
+            context.Articles.Add(article2);
+            context.SaveChanges();
 
-            var productService = new ProductService(unitOfWork);
+            var productService = new ProductService(context);
 
             //Act
             var result = productService.All();
@@ -127,24 +117,23 @@ namespace VivesRental.Services.Tests
         public void GetAvailableProductResults_Returns_Available_Product_WithOrderLine()
         {
             var context = DbContextFactory.CreateInstance("GetAvailableProductResults_Returns_Available_Product_WithOrderLine");
-            var unitOfWork = UnitOfWorkFactory.CreateInstance(context);
-
+            
             //Arrange
             var customer = CustomerFactory.CreateValidEntity();
-            unitOfWork.Add(customer);
+            context.Customers.Add(customer);
             var product = ProductFactory.CreateValidEntity();
-            unitOfWork.Add(product);
+            context.Products.Add(product);
             var article = ArticleFactory.CreateValidEntity(product);
-            unitOfWork.Add(article);
+            context.Articles.Add(article);
             var article2 = ArticleFactory.CreateValidEntity(product);
-            unitOfWork.Add(article2);
+            context.Articles.Add(article2);
             var order = OrderFactory.CreateValidEntity(customer);
-            unitOfWork.Add(order);
+            context.Orders.Add(order);
             var orderLine = OrderLineFactory.CreateValidEntity(order, article);
-            unitOfWork.Add(orderLine);
-            unitOfWork.Complete();
+            context.OrderLines.Add(orderLine);
+            context.SaveChanges();
 
-            var productService = new ProductService(unitOfWork);
+            var productService = new ProductService(context);
 
             //Act
             var result = productService.GetAvailableProductResults();
@@ -156,26 +145,25 @@ namespace VivesRental.Services.Tests
         public void GetAvailableProductResults_Returns_No_Available_Product_When_All_Rented()
         {
             var context = DbContextFactory.CreateInstance("GetAvailableProductResults_Returns_No_Available_Product_When_All_Rented");
-            var unitOfWork = UnitOfWorkFactory.CreateInstance(context);
-
+            
             //Arrange
             var customer = CustomerFactory.CreateValidEntity();
-            unitOfWork.Add(customer);
+            context.Customers.Add(customer);
             var product = ProductFactory.CreateValidEntity();
-            unitOfWork.Add(product);
+            context.Products.Add(product);
             var article = ArticleFactory.CreateValidEntity(product);
-            unitOfWork.Add(article);
+            context.Articles.Add(article);
             var article2 = ArticleFactory.CreateValidEntity(product);
-            unitOfWork.Add(article2);
+            context.Articles.Add(article2);
             var order = OrderFactory.CreateValidEntity(customer);
-            unitOfWork.Add(order);
+            context.Orders.Add(order);
             var orderLine = OrderLineFactory.CreateValidEntity(order, article);
-            unitOfWork.Add(orderLine);
+            context.OrderLines.Add(orderLine);
             var orderLine2 = OrderLineFactory.CreateValidEntity(order, article2);
-            unitOfWork.Add(orderLine2);
-            unitOfWork.Complete();
+            context.OrderLines.Add(orderLine2);
+            context.SaveChanges();
 
-            var productService = new ProductService(unitOfWork);
+            var productService = new ProductService(context);
 
             //Act
             var result = productService.GetAvailableProductResults();

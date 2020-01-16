@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore.Internal;
 using VivesRental.Model;
 using VivesRental.Repository.Core;
+using VivesRental.Repository.Extensions;
 using VivesRental.Repository.Includes;
 using VivesRental.Services.Contracts;
 using VivesRental.Services.Extensions;
@@ -15,15 +16,15 @@ namespace VivesRental.Services
 
     public class ArticleReservationService : IArticleReservationService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IVivesRentalDbContext _context;
 
-        public ArticleReservationService(IUnitOfWork unitOfWork)
+        public ArticleReservationService(IVivesRentalDbContext context)
         {
-            _unitOfWork = unitOfWork;
+            _context = context;
         }
         public ArticleReservationResult Get(Guid id)
         {
-            return _unitOfWork.ArticleReservations
+            return _context.ArticleReservations
                 .Where(ar => ar.Id == id)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefault();
@@ -31,24 +32,24 @@ namespace VivesRental.Services
 
         public ArticleReservationResult Get(Guid id, ArticleReservationIncludes includes)
         {
-            return _unitOfWork.ArticleReservations
-                .Where(ar => ar.Id == id, includes)
+            return _context.ArticleReservations
+                .AddIncludes(includes)
+                .Where(ar => ar.Id == id)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefault();
         }
 
         public IList<ArticleReservationResult> All()
         {
-            return _unitOfWork.ArticleReservations
-                .Where()
+            return _context.ArticleReservations
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToList();
         }
 
         public IList<ArticleReservationResult> All(ArticleReservationIncludes includes)
         {
-            return _unitOfWork.ArticleReservations
-                .Where(includes)
+            return _context.ArticleReservations
+                .AddIncludes(includes)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToList();
         }
@@ -81,8 +82,8 @@ namespace VivesRental.Services
                 UntilDateTime = entity.UntilDateTime
             };
 
-            _unitOfWork.ArticleReservations.Add(articleReservation);
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
+            _context.ArticleReservations.Add(articleReservation);
+            var numberOfObjectsUpdated = _context.SaveChanges();
             if (numberOfObjectsUpdated > 0)
             {
                 //Detach and return
@@ -98,16 +99,9 @@ namespace VivesRental.Services
         /// <returns>True if the article reservation was deleted</returns>
         public bool Remove(Guid id)
         {
-            var article = _unitOfWork.ArticleReservations
-                .Where(a => a.Id == id)
-                .FirstOrDefault();
+            _context.ArticleReservations.Remove(id);
 
-            if (article == null)
-                return false;
-
-            _unitOfWork.ArticleReservations.Remove(article.Id);
-
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
+            var numberOfObjectsUpdated = _context.SaveChangesWithConcurrencyIgnore();
             return numberOfObjectsUpdated > 0;
         }
     }

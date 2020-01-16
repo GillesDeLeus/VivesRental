@@ -1,10 +1,11 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using VivesRental.Model.Contracts;
 
 namespace VivesRental.Model
 {
     [Table(nameof(OrderLine))]
-    public class OrderLine
+    public class OrderLine: IIdentifiable
     {
         public Guid Id { get; set; }
         public Guid OrderId { get; set; }

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using VivesRental.Model.Contracts;
 
 namespace VivesRental.Model
 {
     [Table("ArticleReservation")]
-    public class ArticleReservation
+    public class ArticleReservation : IIdentifiable
     {
         public Guid Id { get; set; }
         public Guid ArticleId { get; set; }

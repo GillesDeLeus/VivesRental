@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
 using VivesRental.Model;
-using VivesRental.Repository;
-using VivesRental.Repository.Core;
 using VivesRental.Services;
 using VivesRental.Tests.ConsoleApp.Factories;
 
@@ -13,22 +11,23 @@ namespace VivesRental.Tests.ConsoleApp
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            TestNumberOfAvailableItems();
+            //TestNumberOfAvailableItems();
             //TestIsAvailable();
+            //TestRemove();
+            TestEdit2();
             Console.ReadLine();
         }
 
         static void TestNumberOfAvailableItems()
         {
-            using var dbContext = new DbContextFactory().CreateDbContext();
-            var unitOfWork = CreateUnitOfWork(dbContext);
-
-            var customerService = new CustomerService(unitOfWork);
-            var productService = new ProductService(unitOfWork);
-            var articleService = new ArticleService(unitOfWork);
-            var articleReservationService = new ArticleReservationService(unitOfWork);
-            var orderService = new OrderService(unitOfWork);
-            var orderLineService = new OrderLineService(unitOfWork, articleService);
+            using var context = new DbContextFactory().CreateDbContext();
+            
+            var customerService = new CustomerService(context);
+            var productService = new ProductService(context);
+            var articleService = new ArticleService(context);
+            var articleReservationService = new ArticleReservationService(context);
+            var orderService = new OrderService(context);
+            var orderLineService = new OrderLineService(context);
 
             //Create Customer
             var customer = customerService.Create(new Customer { FirstName = "Bavo", LastName = "Ketels", Email = "bavo.ketels@vives.be", PhoneNumber = "test" });
@@ -66,15 +65,14 @@ namespace VivesRental.Tests.ConsoleApp
 
         static void TestIsAvailable()
         {
-            using var dbContext = new DbContextFactory().CreateDbContext();
-            var unitOfWork = CreateUnitOfWork(dbContext);
-
-            var customerService = new CustomerService(unitOfWork);
-            var productService = new ProductService(unitOfWork);
-            var articleService = new ArticleService(unitOfWork);
-            var articleReservationService = new ArticleReservationService(unitOfWork);
-            var orderService = new OrderService(unitOfWork);
-            var orderLineService = new OrderLineService(unitOfWork, articleService);
+            using var context = new DbContextFactory().CreateDbContext();
+            
+            var customerService = new CustomerService(context);
+            var productService = new ProductService(context);
+            var articleService = new ArticleService(context);
+            var articleReservationService = new ArticleReservationService(context);
+            var orderService = new OrderService(context);
+            var orderLineService = new OrderLineService(context);
 
             //Create Customer
             var customer = customerService.Create(new Customer { FirstName = "Bavo", LastName = "Ketels", Email = "bavo.ketels@vives.be", PhoneNumber = "test" });
@@ -112,12 +110,11 @@ namespace VivesRental.Tests.ConsoleApp
 
         static void TestEdit()
         {
-            using var dbContext = new DbContextFactory().CreateDbContext();
-            var unitOfWork = CreateUnitOfWork(dbContext);
+            using var context = new DbContextFactory().CreateDbContext();
+            
+            var productService = new ProductService(context);
 
-            var productService = new ProductService(unitOfWork);
-
-            var articleService = new ArticleService(unitOfWork);
+            var articleService = new ArticleService(context);
 
             var product = new Product
             {
@@ -140,16 +137,46 @@ namespace VivesRental.Tests.ConsoleApp
             productService.Remove(createdProduct.Id);
         }
 
+        static void TestEdit2()
+        {
+            using var context = new DbContextFactory().CreateDbContext();
+
+            var productService = new ProductService(context);
+
+            var articleService = new ArticleService(context);
+
+            var product = new Product
+            {
+                Name = "Test",
+                Description = "Test",
+                Manufacturer = "Test",
+                Publisher = "Test",
+                RentalExpiresAfterDays = 10
+            };
+            var createdProduct = productService.Create(product);
+            var article = new Article
+            {
+                ProductId = createdProduct.Id,
+                Status = ArticleStatus.Normal
+            };
+            var createdArticle = articleService.Create(article);
+
+            var fakeUpdateStatusResult = articleService.UpdateStatus(Guid.NewGuid(), ArticleStatus.Broken);
+            product.Id = Guid.NewGuid();
+            var fakeUpdateResult = productService.Edit(product);
+
+            productService.Remove(createdProduct.Id);
+        }
+
         static void TestRemove()
         {
             using var context = new DbContextFactory().CreateDbContext();
-            var unitOfWork = CreateUnitOfWork(context);
-
-            var productService = new ProductService(unitOfWork);
-            var articleService = new ArticleService(unitOfWork);
-            var customerService = new CustomerService(unitOfWork);
-            var orderService = new OrderService(unitOfWork);
-            var orderLineService = new OrderLineService(unitOfWork, articleService);
+            
+            var productService = new ProductService(context);
+            var articleService = new ArticleService(context);
+            var customerService = new CustomerService(context);
+            var orderService = new OrderService(context);
+            var orderLineService = new OrderLineService(context);
 
             var customer = customerService.Create(new Customer
                 {FirstName = "Test", LastName = "Test", Email = "test@test.com"});
@@ -172,28 +199,18 @@ namespace VivesRental.Tests.ConsoleApp
 
 
             var deleteResult = customerService.Remove(product.Id);
+
+            var failingDeleteResult = customerService.Remove(Guid.NewGuid());
+            var failingDeleteResult2 = productService.Remove(Guid.NewGuid());
         }
 
         static void TestRemove2()
         {
             using var context = new DbContextFactory().CreateDbContext();
-            var unitOfWork = CreateUnitOfWork(context);
-
-            var customerService = new CustomerService(unitOfWork);
+           
+            var customerService = new CustomerService(context);
 
             var deleteResult = customerService.Remove(Guid.Parse("94EF2D02-FD9D-42AE-6461-08D799014437"));
-        }
-
-        static IUnitOfWork CreateUnitOfWork(IVivesRentalDbContext context)
-        {
-            
-            var productRepository = new ProductRepository(context);
-            var articleRepository = new ArticleRepository(context);
-            var articleReservationRepository = new ArticleReservationRepository(context);
-            var orderRepository = new OrderRepository(context);
-            var orderLineRepository = new OrderLineRepository(context);
-            var customerRepository = new CustomerRepository(context);
-            return new UnitOfWork(context, productRepository, articleRepository, articleReservationRepository, orderRepository, orderLineRepository, customerRepository);
         }
     }
 }

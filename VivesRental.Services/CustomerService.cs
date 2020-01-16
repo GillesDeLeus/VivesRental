@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
 using VivesRental.Repository.Core;
 using VivesRental.Services.Contracts;
@@ -12,17 +14,17 @@ namespace VivesRental.Services
 {
     public class CustomerService : ICustomerService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IVivesRentalDbContext _context;
 
-        public CustomerService(IUnitOfWork unitOfWork)
+        public CustomerService(IVivesRentalDbContext context)
         {
-            _unitOfWork = unitOfWork;
+            _context = context;
         }
 
 
         public CustomerResult Get(Guid id)
         {
-            return _unitOfWork.Customers
+            return _context.Customers
                 .Where(c => c.Id == id)
                 .MapToResults()
                 .FirstOrDefault();
@@ -30,8 +32,7 @@ namespace VivesRental.Services
 
         public IList<CustomerResult> All()
         {
-            return _unitOfWork.Customers
-                .Where()
+            return _context.Customers
                 .MapToResults()
                 .ToList();
         }
@@ -51,8 +52,8 @@ namespace VivesRental.Services
                 PhoneNumber = entity.PhoneNumber
             };
 
-            _unitOfWork.Customers.Add(customer);
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
+            _context.Customers.Add(customer);
+            var numberOfObjectsUpdated = _context.SaveChanges();
 
             if (numberOfObjectsUpdated > 0)
                 return customer.MapToResult();
@@ -68,9 +69,8 @@ namespace VivesRental.Services
             }
 
             //Get Product from unitOfWork
-            var customer = _unitOfWork.Customers
-                .Where(c => c.Id==entity.Id)
-                .FirstOrDefault();
+            var customer = _context.Customers
+                .FirstOrDefault(c => c.Id==entity.Id);
 
             if (customer == null)
             {
@@ -83,7 +83,7 @@ namespace VivesRental.Services
             customer.Email = entity.Email;
             customer.PhoneNumber = entity.PhoneNumber;
 
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
+            var numberOfObjectsUpdated = _context.SaveChanges();
             if (numberOfObjectsUpdated > 0)
                 return entity.MapToResult();
             return null;
@@ -96,21 +96,37 @@ namespace VivesRental.Services
         /// <returns>True if the customer was deleted</returns>
         public bool Remove(Guid id)
         {
-            var customer = _unitOfWork.Customers
-                .Where(c => c.Id == id)
-                .FirstOrDefault();
+            var result = _context.RunInTransaction(() =>
+            {
+                //Remove the Customer from the Orders
+                ClearCustomer(id);
+                //Remove the Order
+                _context.Customers.Remove(id);
 
-            if (customer == null)
-                return false;
+                var numberOfObjectsUpdated = _context.SaveChangesWithConcurrencyIgnore();
 
-            _unitOfWork.BeginTransaction();
-            //Remove the Customer from the Orders
-            _unitOfWork.Orders.ClearCustomer(id);
-            //Remove the Order
-            _unitOfWork.Customers.Remove(id);
+                return numberOfObjectsUpdated > 0;
+            });
+            return result;
+        }
 
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
-            return numberOfObjectsUpdated > 0;
+        private void ClearCustomer(Guid customerId)
+        {
+            if (_context.Database.IsInMemory())
+            {
+                var orders = _context.Orders.Where(ol => ol.CustomerId == customerId).ToList();
+                foreach (var order in orders)
+                {
+                    order.Customer = null;
+                    order.CustomerId = null;
+                }
+                return;
+            }
+
+            var commandText = "UPDATE [Order] SET CustomerId = null WHERE CustomerId = @CustomerId";
+            var customerIdParameter = new SqlParameter("@CustomerId", customerId);
+
+            _context.Database.ExecuteSqlRaw(commandText, customerIdParameter);
         }
     }
 }

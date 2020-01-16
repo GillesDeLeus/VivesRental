@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
 using VivesRental.Repository.Core;
 using VivesRental.Repository.Extensions;
@@ -14,26 +16,27 @@ namespace VivesRental.Services
 {
     public class ArticleService : IArticleService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IVivesRentalDbContext _context;
 
-        public ArticleService(IUnitOfWork unitOfWork)
+        public ArticleService(IVivesRentalDbContext context)
         {
-            _unitOfWork = unitOfWork;
+            _context = context;
         }
 
         public ArticleResult Get(Guid id, ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles
-                .Where(a => a.Id == id, includes)
+            return _context.Articles
+                .AddIncludes(includes)
+                .Where(a => a.Id == id)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefault();
         }
-        
+
         public IList<ArticleResult> All(ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles
-                .Where(includes)
-                .MapToResults(DateTime.Now,DateTime.MaxValue)
+            return _context.Articles
+                .AddIncludes(includes)
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToList();
         }
 
@@ -47,34 +50,38 @@ namespace VivesRental.Services
 
         public IList<ArticleResult> GetAvailableArticles(DateTime fromDateTime, DateTime untilDateTime, ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles
-                .Where(ArticleExtensions.IsAvailable(fromDateTime, untilDateTime), includes)
+            return _context.Articles
+                .AddIncludes(includes)
+                .Where(ArticleExtensions.IsAvailable(fromDateTime, untilDateTime))
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToList();
         }
-        
+
         public IList<ArticleResult> GetAvailableArticles(Guid productId, ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles
+            return _context.Articles
+                .AddIncludes(includes)
                 .Where(a => a.ProductId == productId &&
                                                   a.Status == ArticleStatus.Normal &&
-                                                  a.OrderLines.All(ol => ol.ReturnedAt.HasValue), includes)
+                                                  a.OrderLines.All(ol => ol.ReturnedAt.HasValue))
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToList();
         }
 
         public IList<ArticleResult> GetRentedArticles(ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles
-                .Where(a => a.IsRented(), includes)
+            return _context.Articles
+                .AddIncludes(includes)
+                .Where(a => a.IsRented())
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToList();
         }
 
         public IList<ArticleResult> GetRentedArticles(Guid customerId, ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles
-                .Where(a => a.IsRented(customerId), includes)
+            return _context.Articles
+                .AddIncludes(includes)
+                .Where(a => a.IsRented(customerId))
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToList();
         }
@@ -93,9 +100,9 @@ namespace VivesRental.Services
                 Status = entity.Status
             };
 
-            _unitOfWork.Articles.Add(article);
+            _context.Articles.Add(article);
 
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
+            var numberOfObjectsUpdated = _context.SaveChanges();
             if (numberOfObjectsUpdated > 0)
             {
                 //Detach and return
@@ -107,8 +114,8 @@ namespace VivesRental.Services
         public bool UpdateStatus(Guid articleId, ArticleStatus status)
         {
             //Get Product from unitOfWork
-            var article = _unitOfWork.Articles
-                .Where(a => a.Id== articleId)
+            var article = _context.Articles
+                .Where(a => a.Id == articleId)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefault();
 
@@ -120,7 +127,7 @@ namespace VivesRental.Services
             //Only update the properties we want to update
             article.Status = status;
 
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
+            var numberOfObjectsUpdated = _context.SaveChanges();
             return numberOfObjectsUpdated > 0;
         }
 
@@ -131,33 +138,51 @@ namespace VivesRental.Services
         /// <returns>True if the article was deleted</returns>
         public bool Remove(Guid id)
         {
-            var article = _unitOfWork.Articles
-                .Where(a => a.Id == id)
-                .FirstOrDefault();
+            var result = _context.RunInTransaction(() =>
+            {
+                ClearArticleByArticleId(id);
+                _context.ArticleReservations.RemoveRange(_context.ArticleReservations.Where(ar => ar.ArticleId == id));
+                _context.Articles.Remove(id);
 
-            if (article == null)
-                return false;
+                var numberOfObjectsUpdated = _context.SaveChangesWithConcurrencyIgnore();
+                return numberOfObjectsUpdated > 0;
+            });
 
-            _unitOfWork.BeginTransaction();
-            _unitOfWork.OrderLines.ClearArticleByArticleId(id);
-            _unitOfWork.ArticleReservations.RemoveByArticleId(id);
-            _unitOfWork.Articles.Remove(article.Id);
-
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
-            return numberOfObjectsUpdated > 0;
+            return result;
         }
 
         public bool IsAvailable(Guid articleId, DateTime fromDateTime, DateTime? untilDateTime = null)
         {
-            return _unitOfWork.Articles
-                .All(articleId, ArticleExtensions.IsAvailable(articleId, fromDateTime, untilDateTime));
-        }
-        
-        public bool IsAvailable(IList<Guid> articleIds, DateTime fromDateTime, DateTime? untilDateTime = null)
-        {
-            return _unitOfWork.Articles
-                .All(articleIds, ArticleExtensions.IsAvailable(articleIds, fromDateTime, untilDateTime));
+            return _context.Articles
+                .Where(a => a.Id == articleId)
+                .All(ArticleExtensions.IsAvailable(articleId, fromDateTime, untilDateTime));
         }
 
-}
+        public bool IsAvailable(IList<Guid> articleIds, DateTime fromDateTime, DateTime? untilDateTime = null)
+        {
+            return _context.Articles
+                .Where(a => articleIds.Contains(a.Id))
+                .All(ArticleExtensions.IsAvailable(articleIds, fromDateTime, untilDateTime));
+        }
+
+        private void ClearArticleByArticleId(Guid articleId)
+        {
+            if (_context.Database.IsInMemory())
+            {
+                var orderLines = _context.OrderLines.Where(ol => ol.ArticleId == articleId).ToList();
+                foreach (var orderLine in orderLines)
+                {
+                    orderLine.Article = null;
+                    orderLine.ArticleId = null;
+                }
+                return;
+            }
+
+            var commandText = "UPDATE OrderLine SET ArticleId = null WHERE ArticleId = @ArticleId";
+            var articleIdParameter = new SqlParameter("@ArticleId", articleId);
+
+            _context.Database.ExecuteSqlRaw(commandText, articleIdParameter);
+        }
+
+    }
 }

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
 using VivesRental.Repository.Core;
 using VivesRental.Repository.Extensions;
@@ -14,16 +15,16 @@ namespace VivesRental.Services
 {
     public class ProductService : IProductService
     {
-        private readonly IUnitOfWork _unitOfWork;
-        public ProductService(IUnitOfWork unitOfWork)
+        private readonly IVivesRentalDbContext _context;
+        public ProductService(IVivesRentalDbContext context)
         {
-            _unitOfWork = unitOfWork;
+            _context = context;
         }
 
 
         public ProductResult Get(Guid id)
         {
-            return _unitOfWork.Products
+            return _context.Products
                 .Where(p => p.Id == id)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefault();
@@ -40,8 +41,7 @@ namespace VivesRental.Services
 
         public IList<ProductResult> All(DateTime fromDateTime, DateTime untilDateTime)
         {
-            return _unitOfWork.Products
-                .Where()
+            return _context.Products
                 .MapToResults(fromDateTime, untilDateTime)
                 .ToList();
         }
@@ -63,8 +63,8 @@ namespace VivesRental.Services
                 RentalExpiresAfterDays = entity.RentalExpiresAfterDays
             };
 
-            _unitOfWork.Products.Add(product);
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
+            _context.Products.Add(product);
+            var numberOfObjectsUpdated = _context.SaveChanges();
             if (numberOfObjectsUpdated > 0)
             {
                 return product.MapToResult(DateTime.Now, DateTime.MaxValue);
@@ -80,9 +80,8 @@ namespace VivesRental.Services
             }
 
             //Get Product from unitOfWork
-            var product = _unitOfWork.Products
-                .Where(p => p.Id == entity.Id)
-                .FirstOrDefault();
+            var product = _context.Products
+                .FirstOrDefault(p => p.Id == entity.Id);
 
             if (product == null)
             {
@@ -96,7 +95,7 @@ namespace VivesRental.Services
             product.Publisher = entity.Publisher;
             product.RentalExpiresAfterDays = entity.RentalExpiresAfterDays;
 
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
+            var numberOfObjectsUpdated = _context.SaveChanges();
             if (numberOfObjectsUpdated > 0)
             {
                 return entity.MapToResult(DateTime.Now, DateTime.MaxValue);
@@ -111,23 +110,21 @@ namespace VivesRental.Services
         /// <returns>True if the product was deleted</returns>
         public bool Remove(Guid id)
         {
-            var product = _unitOfWork.Products
-                .Where(p => p.Id == id)
-                .FirstOrDefault();
+            var result = _context.RunInTransaction(() =>
+            {
+                ClearArticleByProductId(id);
+                _context.ArticleReservations.RemoveRange(
+                    _context.ArticleReservations.Where(a => a.Article.ProductId == id));
+                _context.Articles.RemoveRange(_context.Articles.Where(a => a.ProductId == id));
 
-            if (product == null)
-                return false;
+                //Remove product
+                _context.Products.Remove(id);
 
-            _unitOfWork.BeginTransaction();
-            _unitOfWork.OrderLines.ClearArticleByProductId(id);
-            _unitOfWork.ArticleReservations.RemoveByProductId(id);
-            _unitOfWork.Articles.RemoveByProductId(id);
+                var numberOfObjectsUpdated = _context.SaveChangesWithConcurrencyIgnore();
 
-            //Remove product
-            _unitOfWork.Products.Remove(product.Id);
-
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
-            return numberOfObjectsUpdated > 0;
+                return numberOfObjectsUpdated > 0;
+            });
+            return result;
         }
 
         /// <summary>
@@ -140,19 +137,21 @@ namespace VivesRental.Services
             if (amount <= 0 && amount > 10.000) //Set a limit
                 return false;
 
-            _unitOfWork.BeginTransaction();
-
-            for (int i = 0; i < amount; i++)
+            var result = _context.RunInTransaction(() =>
             {
-                var article = new Article
+                for (int i = 0; i < amount; i++)
                 {
-                    ProductId = productId
-                };
-                _unitOfWork.Articles.Add(article);
-            }
+                    var article = new Article
+                    {
+                        ProductId = productId
+                    };
+                    _context.Articles.Add(article);
+                }
 
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
-            return numberOfObjectsUpdated > 0;
+                var numberOfObjectsUpdated = _context.SaveChanges();
+                return numberOfObjectsUpdated > 0;
+            });
+            return result;
         }
 
         /// <summary>
@@ -172,10 +171,29 @@ namespace VivesRental.Services
         /// <returns>A list of ProductResults</returns>
         public IList<ProductResult> GetAvailableProductResults(DateTime fromDateTime, DateTime untilDateTime)
         {
-            return _unitOfWork.Products
+            return _context.Products
                 .Where(ProductExtensions.IsAvailable(fromDateTime, untilDateTime)) //Only articles that are not reserved in this period
                 .MapToResults(fromDateTime, untilDateTime)
                 .ToList();
+        }
+
+        private void ClearArticleByProductId(Guid productId)
+        {
+            if (_context.Database.IsInMemory())
+            {
+                var orderLines = _context.OrderLines.Where(ol => ol.Article.ProductId == productId).ToList();
+                foreach (var orderLine in orderLines)
+                {
+                    orderLine.Article = null;
+                    orderLine.ArticleId = null;
+                }
+                return;
+            }
+
+            var commandText = "UPDATE OrderLine SET ArticleId = null from OrderLine inner join Article on Article.ProductId = @ProductId";
+            var articleIdParameter = new SqlParameter("@ProductId", productId);
+
+            _context.Database.ExecuteSqlRaw(commandText, articleIdParameter);
         }
 
     }

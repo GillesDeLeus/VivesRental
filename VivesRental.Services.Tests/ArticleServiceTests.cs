@@ -12,15 +12,14 @@ namespace VivesRental.Services.Tests
         {
             //Arrange
             using var context = DbContextFactory.CreateInstance("Remove_Deletes_Product_With_Articles");
-            using var unitOfWork = UnitOfWorkFactory.CreateInstance(context);
-
+            
             var product = ProductFactory.CreateValidEntity();
-            unitOfWork.Add(product);
+            context.Products.Add(product);
             var article = ArticleFactory.CreateValidEntity(product);
-            unitOfWork.Add(article);
-            unitOfWork.Complete();
+            context.Articles.Add(article);
+            context.SaveChanges();
 
-            var articleService = new ArticleService(unitOfWork);
+            var articleService = new ArticleService(context);
 
             //Act
             var result = articleService.Remove(article.Id);
@@ -34,21 +33,20 @@ namespace VivesRental.Services.Tests
 		{
             //Arrange
             using var context = DbContextFactory.CreateInstance("Remove_Deletes_Product_With_Articles");
-            using var unitOfWork = UnitOfWorkFactory.CreateInstance(context);
-
+            
             var customer = CustomerFactory.CreateValidEntity();
-            unitOfWork.Add(customer);
+            context.Customers.Add(customer);
             var product = ProductFactory.CreateValidEntity();
-            unitOfWork.Add(product);
+            context.Products.Add(product);
             var article = ArticleFactory.CreateValidEntity(product);
-            unitOfWork.Add(article);
+            context.Articles.Add(article);
             var order = OrderFactory.CreateValidEntity(customer);
-            unitOfWork.Add(order);
+            context.Orders.Add(order);
             var orderLine = OrderLineFactory.CreateValidEntity(order, article);
-            unitOfWork.Add(orderLine);
-            unitOfWork.Complete();
+            context.OrderLines.Add(orderLine);
+            context.SaveChanges();
 
-            var articleService = new ArticleService(unitOfWork);
+            var articleService = new ArticleService(context);
 
             //Act
             var result = articleService.Remove(article.Id);

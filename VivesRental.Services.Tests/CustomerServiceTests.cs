@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using VivesRental.Repository.Contracts;
 using VivesRental.Repository.Core;
 using VivesRental.Tests.Data.Factories;
 

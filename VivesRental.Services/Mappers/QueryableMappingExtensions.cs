@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using VivesRental.Model;
 using VivesRental.Services.Results;
@@ -8,32 +7,32 @@ namespace VivesRental.Services.Mappers
 {
     public static class QueryableMappingExtensions
     {
-        public static IEnumerable<CustomerResult> MapToResults(this IEnumerable<Customer> query)
+        public static IQueryable<CustomerResult> MapToResults(this IQueryable<Customer> query)
         {
             return query.Select(o => o.MapToResult());
         }
 
-        public static IEnumerable<ArticleResult> MapToResults(this IEnumerable<Article> query, DateTime fromDateTime, DateTime? untilDateTime)
+        public static IQueryable<ArticleResult> MapToResults(this IQueryable<Article> query, DateTime fromDateTime, DateTime? untilDateTime)
         {
             return query.Select(o => o.MapToResult(fromDateTime, untilDateTime));
         }
 
-        public static IEnumerable<ArticleReservationResult> MapToResults(this IEnumerable<ArticleReservation> query, DateTime fromDateTime, DateTime? untilDateTime)
+        public static IQueryable<ArticleReservationResult> MapToResults(this IQueryable<ArticleReservation> query, DateTime fromDateTime, DateTime? untilDateTime)
         {
             return query.Select(o => o.MapToResult(fromDateTime, untilDateTime));
         }
 
-        public static IEnumerable<OrderResult> MapToResults(this IEnumerable<Order> query)
+        public static IQueryable<OrderResult> MapToResults(this IQueryable<Order> query)
         {
             return query.Select(o => o.MapToResult());
         }
 
-        public static IEnumerable<OrderLineResult> MapToResults(this IEnumerable<OrderLine> query, DateTime fromDateTime, DateTime? untilDateTime)
+        public static IQueryable<OrderLineResult> MapToResults(this IQueryable<OrderLine> query, DateTime fromDateTime, DateTime? untilDateTime)
         {
             return query.Select(o => o.MapToResult(fromDateTime, untilDateTime));
         }
 
-        public static IEnumerable<ProductResult> MapToResults(this IEnumerable<Product> query, DateTime fromDateTime, DateTime? untilDateTime)
+        public static IQueryable<ProductResult> MapToResults(this IQueryable<Product> query, DateTime fromDateTime, DateTime? untilDateTime)
         {
             return query.Select(p => p.MapToResult(fromDateTime, untilDateTime));
         }

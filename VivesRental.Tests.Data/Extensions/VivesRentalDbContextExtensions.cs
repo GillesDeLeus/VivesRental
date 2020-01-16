@@ -4,60 +4,60 @@ using VivesRental.Repository.Core;
 
 namespace VivesRental.Tests.Data.Extensions
 {
-    public static class UnitOfWorkExtensions
+    public static class VivesRentalDbContextExtensions
     {
-        public static void Add(this IUnitOfWork unitOfWork, Customer customer)
+        public static void Add(this IVivesRentalDbContext context, Customer customer)
         {
             if (customer.Id == Guid.Empty)
             {
                 customer.Id = Guid.NewGuid();
             }
-            unitOfWork.Customers.Add(customer);
+            context.Customers.Add(customer);
         }
 
-        public static void Add(this IUnitOfWork unitOfWork, Product product)
+        public static void Add(this IVivesRentalDbContext context, Product product)
         {
             if (product.Id == Guid.Empty)
             {
                 product.Id = Guid.NewGuid();
             }
-            unitOfWork.Products.Add(product);
+            context.Products.Add(product);
         }
 
-        public static void Add(this IUnitOfWork unitOfWork, Article article)
+        public static void Add(this IVivesRentalDbContext context, Article article)
         {
             if (article.Id == Guid.Empty)
             {
                 article.Id = Guid.NewGuid();
             }
-            unitOfWork.Articles.Add(article);
+            context.Articles.Add(article);
         }
 
-        public static void Add(this IUnitOfWork unitOfWork, ArticleReservation articleReservation)
+        public static void Add(this IVivesRentalDbContext context, ArticleReservation articleReservation)
         {
             if (articleReservation.Id == Guid.Empty)
             {
                 articleReservation.Id = Guid.NewGuid();
             }
-            unitOfWork.ArticleReservations.Add(articleReservation);
+            context.ArticleReservations.Add(articleReservation);
         }
 
-        public static void Add(this IUnitOfWork unitOfWork, Order order)
+        public static void Add(this IVivesRentalDbContext context, Order order)
         {
             if (order.Id == Guid.Empty)
             {
                 order.Id = Guid.NewGuid();
             }
-            unitOfWork.Orders.Add(order);
+            context.Orders.Add(order);
         }
 
-        public static void Add(this IUnitOfWork unitOfWork, OrderLine orderLine)
+        public static void Add(this IVivesRentalDbContext context, OrderLine orderLine)
         {
             if (orderLine.Id == Guid.Empty)
             {
                 orderLine.Id = Guid.NewGuid();
             }
-            unitOfWork.OrderLines.Add(orderLine);
+            context.OrderLines.Add(orderLine);
         }
     }
 }

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using VivesRental.Model;
 using VivesRental.Repository.Core;
 using VivesRental.Repository.Extensions;
-using VivesRental.Repository.Includes;
 using VivesRental.Services.Contracts;
 using VivesRental.Services.Extensions;
 using VivesRental.Services.Mappers;
@@ -14,18 +12,16 @@ namespace VivesRental.Services
 {
     public class OrderLineService : IOrderLineService
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IArticleService _articleService;
+        private readonly IVivesRentalDbContext _context;
 
-        public OrderLineService(IUnitOfWork unitOfWork, IArticleService articleService)
+        public OrderLineService(IVivesRentalDbContext context)
         {
-            _unitOfWork = unitOfWork;
-            _articleService = articleService;
+            _context = context;
         }
 
         public OrderLineResult Get(Guid id)
         {
-            return _unitOfWork.OrderLines
+            return _context.OrderLines
                 .Where(ol => ol.Id == id)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefault();
@@ -33,7 +29,7 @@ namespace VivesRental.Services
 
         public IList<OrderLineResult> FindByOrderId(Guid orderId)
         {
-            return _unitOfWork.OrderLines
+            return _context.OrderLines
                 .Where(rol => rol.OrderId == orderId)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToList();
@@ -43,8 +39,8 @@ namespace VivesRental.Services
         {
             var fromDateTime = DateTime.Now;
 
-            var article = _unitOfWork.Articles
-                .Where(ArticleExtensions.IsAvailable(articleId, fromDateTime), new ArticleIncludes { Product = true })
+            var article = _context.Articles
+                .Where(ArticleExtensions.IsAvailable(articleId, fromDateTime))
                 .SingleOrDefault();
 
             if (article == null)
@@ -56,16 +52,16 @@ namespace VivesRental.Services
 
             var orderLine = article.CreateOrderLine(orderId);
 
-            _unitOfWork.OrderLines.Add(orderLine);
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
+            _context.OrderLines.Add(orderLine);
+            var numberOfObjectsUpdated = _context.SaveChanges();
             return numberOfObjectsUpdated > 0;
         }
 
         public bool Rent(Guid orderId, IList<Guid> articleIds)
         {
             var fromDateTime = DateTime.Now;
-            var articles = _unitOfWork.Articles
-                .Where(ArticleExtensions.IsAvailable(articleIds, fromDateTime), new ArticleIncludes { Product = true })
+            var articles = _context.Articles
+                .Where(ArticleExtensions.IsAvailable(articleIds, fromDateTime))
                 .ToList();
 
             //If the amount of articles is not the same as the requested ids, some articles are not available anymore
@@ -77,10 +73,10 @@ namespace VivesRental.Services
             foreach (var article in articles)
             {
                 var orderLine = article.CreateOrderLine(orderId);
-                _unitOfWork.OrderLines.Add(orderLine);
+                _context.OrderLines.Add(orderLine);
             }
 
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
+            var numberOfObjectsUpdated = _context.SaveChanges();
             return numberOfObjectsUpdated > 0;
         }
 
@@ -92,7 +88,7 @@ namespace VivesRental.Services
         /// <returns></returns>
         public bool Return(Guid orderLineId, DateTime returnedAt)
         {
-            var orderLine = _unitOfWork.OrderLines
+            var orderLine = _context.OrderLines
                 .Where(ol => ol.Id == orderLineId)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefault();
@@ -114,7 +110,7 @@ namespace VivesRental.Services
 
             orderLine.ReturnedAt = returnedAt;
 
-            _unitOfWork.Complete();
+            _context.SaveChanges();
             return true;
         }
 

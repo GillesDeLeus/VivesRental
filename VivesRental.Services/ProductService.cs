@@ -96,6 +96,11 @@ namespace VivesRental.Services
             return null;
         }
 
+        /// <summary>
+        /// Removes one Product, removes ArticleReservations, removes all linked articles and disconnects OrderLines from articles
+        /// </summary>
+        /// <param name="id">The id of the Product</param>
+        /// <returns>True if the product was deleted</returns>
         public bool Remove(Guid id)
         {
             var product = _unitOfWork.Products.Get(id);
@@ -114,9 +119,14 @@ namespace VivesRental.Services
             return numberOfObjectsUpdated > 0;
         }
 
+        /// <summary>
+        /// Adds a number of articles with Normal status to the Product.
+        /// This is limited to maximum 10.000
+        /// </summary>
+        /// <returns>True if articles are added</returns>
         public bool GenerateArticles(Guid productId, int amount)
         {
-            if (amount <= 0)
+            if (amount <= 0 && amount > 10.000) //Set a limit
                 return false;
 
             _unitOfWork.BeginTransaction();
@@ -134,6 +144,10 @@ namespace VivesRental.Services
             return numberOfObjectsUpdated > 0;
         }
 
+        /// <summary>
+        /// Retrieves a list of products that are available from now
+        /// </summary>
+        /// <returns>A list of ProductResults</returns>
         public IList<ProductResult> GetAvailableProductResults()
         {
             var fromDateTime = DateTime.Now;
@@ -141,6 +155,10 @@ namespace VivesRental.Services
             return GetAvailableProductResults(fromDateTime, untilDateTime);
         }
 
+        /// <summary>
+        /// Retrieves a list of products that are available between a from and until date
+        /// </summary>
+        /// <returns>A list of ProductResults</returns>
         public IList<ProductResult> GetAvailableProductResults(DateTime fromDateTime, DateTime untilDateTime)
         {
             return _unitOfWork.Products

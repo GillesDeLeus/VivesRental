@@ -75,7 +75,12 @@ namespace VivesRental.Services
             }
             return null;
         }
-        
+
+        /// <summary>
+        /// Removes one ArticleReservation
+        /// </summary>
+        /// <param name="id">The id of the ArticleReservation</param>
+        /// <returns>True if the article reservation was deleted</returns>
         public bool Remove(Guid id)
         {
             var article = _unitOfWork.ArticleReservations.Get(id);

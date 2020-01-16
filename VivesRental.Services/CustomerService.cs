@@ -78,13 +78,18 @@ namespace VivesRental.Services
             return null;
         }
 
-        //TODO: Needs transaction
+        /// <summary>
+        /// Removes one Customer and disconnects Orders from the customer
+        /// </summary>
+        /// <param name="id">The id of the Customer</param>
+        /// <returns>True if the customer was deleted</returns>
         public bool Remove(Guid id)
         {
             var customer = _unitOfWork.Customers.Get(id);
             if (customer == null)
                 return false;
 
+            _unitOfWork.BeginTransaction();
             //Remove the Customer from the Orders
             _unitOfWork.Orders.ClearCustomer(id);
             //Remove the Order

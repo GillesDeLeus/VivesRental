@@ -126,6 +126,11 @@ namespace VivesRental.Services
             return numberOfObjectsUpdated > 0;
         }
 
+        /// <summary>
+        /// Removes one Article, Removes the ArticleReservations and disconnects OrderLines from the Article
+        /// </summary>
+        /// <param name="id">The id of the Article</param>
+        /// <returns>True if the article was deleted</returns>
         public bool Remove(Guid id)
         {
             var article = _unitOfWork.Articles.Get(id);

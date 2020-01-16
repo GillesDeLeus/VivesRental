@@ -4,8 +4,9 @@ using System.Linq;
 using VivesRental.Model;
 using VivesRental.Repository.Core;
 using VivesRental.Repository.Includes;
-using VivesRental.Repository.Results;
 using VivesRental.Services.Contracts;
+using VivesRental.Services.Mappers;
+using VivesRental.Services.Results;
 
 namespace VivesRental.Services
 {
@@ -19,33 +20,35 @@ namespace VivesRental.Services
             _unitOfWork = unitOfWork;
         }
 
-        public Order Get(Guid id, OrderIncludes includes = null)
-        {
-            return _unitOfWork.Orders.Get(id, includes);
-        }
-
-        public IList<OrderResult> FindByCustomerIdResult(Guid customerId, OrderIncludes includes = null)
-        {
-            return _unitOfWork.Orders.FindResult(o => o.CustomerId == customerId, includes).ToList();
-        }
-
-        public IList<Order> All()
+        public OrderResult Get(Guid id, OrderIncludes includes = null)
         {
             return _unitOfWork.Orders
-                .GetAll()
+                .Find(o => o.Id == id, includes)
+                .MapToResults()
+                .FirstOrDefault();
+        }
+
+        public IList<OrderResult> FindByCustomerId(Guid customerId, OrderIncludes includes = null)
+        {
+            return _unitOfWork.Orders
+                .Find(o => o.CustomerId == customerId, includes)
+                .MapToResults()
                 .ToList();
         }
 
-        public IList<OrderResult> AllResult()
+        public IList<OrderResult> All()
         {
             return _unitOfWork.Orders
-                .GetAllResult()
+                .Find()
+                .MapToResults()
                 .ToList();
         }
-
-        public Order Create(Guid customerId)
+        
+        public OrderResult Create(Guid customerId)
         {
-            var customer = _unitOfWork.Customers.Get(customerId);
+            var customer = _unitOfWork.Customers.Find(c => c.Id == customerId)
+                .MapToResults()
+                .FirstOrDefault();
 
             if (customer == null)
             {
@@ -66,7 +69,7 @@ namespace VivesRental.Services
             var numberOfObjectsUpdated = _unitOfWork.Complete();
             if (numberOfObjectsUpdated > 0)
             {
-                return order;
+                return order.MapToResult();
             }
             return null;
         }

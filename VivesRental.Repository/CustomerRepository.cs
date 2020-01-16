@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using VivesRental.Model;
 using VivesRental.Repository.Contracts;
 using VivesRental.Repository.Core;
@@ -21,16 +22,16 @@ namespace VivesRental.Repository
             _context.Customers.Add(customer);
         }
 
-        public Customer Get(Guid id)
-        {
-            var query = _context.Customers
-                .AsQueryable();
-            return query.SingleOrDefault(c => c.Id== id);
-        }
-
-        public IEnumerable<Customer> GetAll()
+        public IEnumerable<Customer> Find()
         {
             return _context.Customers
+                .AsEnumerable();
+        }
+
+        public IEnumerable<Customer> Find(Expression<Func<Customer, bool>> predicate)
+        {
+            return _context.Customers
+                .Where(predicate)
                 .AsEnumerable();
         }
 

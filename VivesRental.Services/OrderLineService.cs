@@ -7,6 +7,8 @@ using VivesRental.Repository.Extensions;
 using VivesRental.Repository.Includes;
 using VivesRental.Services.Contracts;
 using VivesRental.Services.Extensions;
+using VivesRental.Services.Mappers;
+using VivesRental.Services.Results;
 
 namespace VivesRental.Services
 {
@@ -21,14 +23,20 @@ namespace VivesRental.Services
             _articleService = articleService;
         }
 
-        public OrderLine Get(Guid id)
+        public OrderLineResult Get(Guid id)
         {
-            return _unitOfWork.OrderLines.Get(id);
+            return _unitOfWork.OrderLines
+                .Find(ol => ol.Id == id)
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .FirstOrDefault();
         }
 
-        public IList<OrderLine> FindByOrderId(Guid orderId)
+        public IList<OrderLineResult> FindByOrderId(Guid orderId)
         {
-            return _unitOfWork.OrderLines.Find(rol => rol.OrderId == orderId).ToList();
+            return _unitOfWork.OrderLines
+                .Find(rol => rol.OrderId == orderId)
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .ToList();
         }
 
         public bool Rent(Guid orderId, Guid articleId)
@@ -84,7 +92,10 @@ namespace VivesRental.Services
         /// <returns></returns>
         public bool Return(Guid orderLineId, DateTime returnedAt)
         {
-            var orderLine = _unitOfWork.OrderLines.Get(orderLineId);
+            var orderLine = _unitOfWork.OrderLines
+                .Find(ol => ol.Id == orderLineId)
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .FirstOrDefault();
 
             if (orderLine == null)
             {

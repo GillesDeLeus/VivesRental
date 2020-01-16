@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore.Internal;
 using VivesRental.Model;
 using VivesRental.Repository.Core;
-using VivesRental.Repository.Results;
+using VivesRental.Repository.Extensions;
 using VivesRental.Services.Contracts;
 using VivesRental.Services.Extensions;
+using VivesRental.Services.Mappers;
+using VivesRental.Services.Results;
 
 namespace VivesRental.Services
 {
@@ -18,30 +21,32 @@ namespace VivesRental.Services
         }
 
 
-        public Product Get(Guid id)
+        public ProductResult Get(Guid id)
         {
-            return _unitOfWork.Products.Get(id);
+            return _unitOfWork.Products
+                .Find(p => p.Id == id)
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .FirstOrDefault();
         }
 
 
-        public IList<Product> All()
-        {
-            return _unitOfWork.Products.GetAll().ToList();
-        }
 
-        public IList<ProductResult> AllResult()
+        public IList<ProductResult> All()
         {
             var fromDateTime = DateTime.Now;
             var untilDateTime = DateTime.MaxValue;
-            return AllResult(fromDateTime, untilDateTime);
+            return All(fromDateTime, untilDateTime);
         }
 
-        public IList<ProductResult> AllResult(DateTime fromDateTime, DateTime untilDateTime)
+        public IList<ProductResult> All(DateTime fromDateTime, DateTime untilDateTime)
         {
-            return _unitOfWork.Products.GetAllResult(fromDateTime, untilDateTime).ToList();
+            return _unitOfWork.Products
+                .Find()
+                .MapToResults(fromDateTime, untilDateTime)
+                .ToList();
         }
 
-        public Product Create(Product entity)
+        public ProductResult Create(Product entity)
         {
             if (!entity.IsValid())
             {
@@ -62,12 +67,12 @@ namespace VivesRental.Services
             var numberOfObjectsUpdated = _unitOfWork.Complete();
             if (numberOfObjectsUpdated > 0)
             {
-                return product;
+                return product.MapToResult(DateTime.Now, DateTime.MaxValue);
             }
             return null;
         }
 
-        public Product Edit(Product entity)
+        public ProductResult Edit(Product entity)
         {
             if (!entity.IsValid())
             {
@@ -75,7 +80,10 @@ namespace VivesRental.Services
             }
 
             //Get Product from unitOfWork
-            var product = _unitOfWork.Products.Get(entity.Id);
+            var product = _unitOfWork.Products
+                .Find(p => p.Id == entity.Id)
+                .FirstOrDefault();
+
             if (product == null)
             {
                 return null;
@@ -91,7 +99,7 @@ namespace VivesRental.Services
             var numberOfObjectsUpdated = _unitOfWork.Complete();
             if (numberOfObjectsUpdated > 0)
             {
-                return entity;
+                return entity.MapToResult(DateTime.Now, DateTime.MaxValue);
             }
             return null;
         }
@@ -103,7 +111,10 @@ namespace VivesRental.Services
         /// <returns>True if the product was deleted</returns>
         public bool Remove(Guid id)
         {
-            var product = _unitOfWork.Products.Get(id);
+            var product = _unitOfWork.Products
+                .Find(p => p.Id == id)
+                .FirstOrDefault();
+
             if (product == null)
                 return false;
 
@@ -162,7 +173,8 @@ namespace VivesRental.Services
         public IList<ProductResult> GetAvailableProductResults(DateTime fromDateTime, DateTime untilDateTime)
         {
             return _unitOfWork.Products
-                .FindResult(fromDateTime, untilDateTime) //Only articles that are not reserved in this period
+                .Find(ProductExtensions.IsAvailable(fromDateTime, untilDateTime)) //Only articles that are not reserved in this period
+                .MapToResults(fromDateTime, untilDateTime)
                 .ToList();
         }
 

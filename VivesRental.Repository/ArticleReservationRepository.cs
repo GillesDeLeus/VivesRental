@@ -18,13 +18,6 @@ namespace VivesRental.Repository
             _context = context;
         }
 
-        public ArticleReservation Get(Guid id, ArticleReservationIncludes includes = null)
-        {
-            return _context.ArticleReservations
-                .AddIncludes(includes)
-                .FirstOrDefault(i => i.Id == id);
-        }
-
         public void Remove(Guid id)
         {
             var localEntity = _context.ArticleReservations.Local.SingleOrDefault(e => e.Id == id);
@@ -55,7 +48,14 @@ namespace VivesRental.Repository
             _context.ArticleReservations.Add(article);
         }
 
-        public IEnumerable<ArticleReservation> Find(Expression<Func<ArticleReservation, bool>> predicate, ArticleReservationIncludes includes = null)
+        public IEnumerable<ArticleReservation> Find(ArticleReservationIncludes includes = null)
+        {
+            return _context.ArticleReservations
+                .AddIncludes(includes)
+                .AsEnumerable();
+        }
+
+        public IEnumerable<ArticleReservation> Find(Expression<Func<ArticleReservation, bool>> predicate = null, ArticleReservationIncludes includes = null)
         {
             return _context.ArticleReservations
                 .AddIncludes(includes)
@@ -63,13 +63,5 @@ namespace VivesRental.Repository
                 .AsEnumerable(); 
         }
 
-        public IEnumerable<ArticleReservation> GetAll(ArticleReservationIncludes includes = null)
-        {
-            return _context.ArticleReservations
-                .AddIncludes(includes)
-                .AsEnumerable();
-        }
-
-       
     }
 }

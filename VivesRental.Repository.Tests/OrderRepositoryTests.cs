@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VivesRental.Repository.Core;
 using VivesRental.Tests.Data.Factories;
@@ -9,7 +10,7 @@ namespace VivesRental.Repository.Tests
     [TestClass]
     public class OrderRepositoryTests
     {
-       
+
 
         [TestMethod]
         public void Add_Returns_1_When_Adding_Valid_Order()
@@ -44,7 +45,9 @@ namespace VivesRental.Repository.Tests
                 var orderRepository = new OrderRepository(context);
 
                 //Act
-                var order = orderRepository.Get(Guid.NewGuid());
+                var order = orderRepository
+                    .Find(o => o.Id == Guid.NewGuid())
+                    .FirstOrDefault();
 
                 //Assert
                 Assert.IsNull(order);
@@ -69,7 +72,7 @@ namespace VivesRental.Repository.Tests
                 context.SaveChanges();
 
                 //Act
-                var order = orderRepository.Get(orderToAdd.Id);
+                var order = orderRepository.Find(o => o.Id == orderToAdd.Id);
 
                 //Assert
                 Assert.IsNotNull(order);
@@ -95,12 +98,12 @@ namespace VivesRental.Repository.Tests
                 context.SaveChanges();
 
                 //Act
-                var orders = orderRepository.GetAll();
+                var orders = orderRepository.Find().ToList();
 
                 //Assert
                 Assert.AreEqual(10, orders.Count());
             }
         }
-        
+
     }
 }

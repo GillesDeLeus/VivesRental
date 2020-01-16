@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using VivesRental.Model;
-using VivesRental.Repository.Results;
+using VivesRental.Services.Results;
 
 namespace VivesRental.Services.Contracts
 {
     public interface IProductService
     {
-        Product Get(Guid id);
-        IList<Product> All();
-        IList<ProductResult> AllResult();
-        IList<ProductResult> AllResult(DateTime fromDateTime, DateTime untilDateTime);
-        Product Create(Product entity);
-        Product Edit(Product entity);
+        ProductResult Get(Guid id);
+        IList<ProductResult> All();
+        IList<ProductResult> All(DateTime fromDateTime, DateTime untilDateTime);
+        ProductResult Create(Product entity);
+        ProductResult Edit(Product entity);
         bool Remove(Guid id);
         bool GenerateArticles(Guid productId, int amount);
         IList<ProductResult> GetAvailableProductResults();

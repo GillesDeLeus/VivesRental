@@ -18,13 +18,6 @@ namespace VivesRental.Repository
             _context = context;
         }
 
-        public Article Get(Guid id, ArticleIncludes includes = null)
-        {
-            return _context.Articles
-                .AddIncludes(includes)
-                .FirstOrDefault(i => i.Id == id);
-        }
-
         public void Remove(Guid id)
         {
             var localEntity = _context.Articles.Local.SingleOrDefault(e => e.Id == id);
@@ -50,18 +43,18 @@ namespace VivesRental.Repository
             _context.Articles.Add(article);
         }
 
+        public IEnumerable<Article> Find(ArticleIncludes includes = null)
+        {
+            return _context.Articles
+                .AddIncludes(includes)
+                .AsEnumerable();
+        }
+
         public IEnumerable<Article> Find(Expression<Func<Article, bool>> predicate, ArticleIncludes includes = null)
         {
             return _context.Articles
                 .AddIncludes(includes)
                 .Where(predicate)
-                .AsEnumerable();
-        }
-
-        public IEnumerable<Article> GetAll(ArticleIncludes includes = null)
-        {
-            return _context.Articles
-                .AddIncludes(includes)
                 .AsEnumerable();
         }
 

@@ -9,8 +9,6 @@ using VivesRental.Repository.Contracts;
 using VivesRental.Repository.Core;
 using VivesRental.Repository.Extensions;
 using VivesRental.Repository.Includes;
-using VivesRental.Repository.Mappers;
-using VivesRental.Repository.Results;
 
 namespace VivesRental.Repository
 {
@@ -23,34 +21,18 @@ namespace VivesRental.Repository
             _context = context;
         }
 
-        public Order Get(Guid id, OrderIncludes includes = null)
-        {
-            return _context.Orders
-                .AddIncludes(includes)
-                .SingleOrDefault(o => o.Id == id);
-        }
-
-        public IEnumerable<Order> GetAll(OrderIncludes includes = null)
+        public IEnumerable<Order> Find(OrderIncludes includes = null)
         {
             return _context.Orders
                 .AddIncludes(includes)
                 .AsEnumerable();
         }
 
-        public IEnumerable<OrderResult> GetAllResult(OrderIncludes includes = null)
-        {
-            return _context.Orders
-                .AddIncludes(includes)
-                .MapToResults()
-                .AsEnumerable();
-        }
-
-        public IEnumerable<OrderResult> FindResult(Expression<Func<Order, bool>> predicate, OrderIncludes includes = null)
+        public IEnumerable<Order> Find(Expression<Func<Order, bool>> predicate, OrderIncludes includes = null)
         {
             return _context.Orders
                 .AddIncludes(includes)
                 .Where(predicate)
-                .MapToResults()
                 .AsEnumerable(); //Add the where clause and return IEnumerable<Article>
         }
 

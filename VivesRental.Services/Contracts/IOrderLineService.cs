@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using VivesRental.Model;
+using VivesRental.Services.Results;
 
 namespace VivesRental.Services.Contracts
 {
     public interface IOrderLineService
     {
-        OrderLine Get(Guid id);
+        OrderLineResult Get(Guid id);
         bool Rent(Guid orderId, Guid articleId);
         bool Rent(Guid orderId, IList<Guid> articleIds);
         bool Return(Guid orderLineId, DateTime returnedAt);
-	    IList<OrderLine> FindByOrderId(Guid orderId);
+	    IList<OrderLineResult> FindByOrderId(Guid orderId);
 
     }
 }

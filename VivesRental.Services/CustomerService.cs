@@ -5,6 +5,8 @@ using VivesRental.Model;
 using VivesRental.Repository.Core;
 using VivesRental.Services.Contracts;
 using VivesRental.Services.Extensions;
+using VivesRental.Services.Mappers;
+using VivesRental.Services.Results;
 
 namespace VivesRental.Services
 {
@@ -18,17 +20,23 @@ namespace VivesRental.Services
         }
 
 
-        public Customer Get(Guid id)
+        public CustomerResult Get(Guid id)
         {
-            return _unitOfWork.Customers.Get(id);
+            return _unitOfWork.Customers
+                .Find(c => c.Id == id)
+                .MapToResults()
+                .FirstOrDefault();
         }
 
-        public IList<Customer> All()
+        public IList<CustomerResult> All()
         {
-            return _unitOfWork.Customers.GetAll().ToList();
+            return _unitOfWork.Customers
+                .Find()
+                .MapToResults()
+                .ToList();
         }
 
-        public Customer Create(Customer entity)
+        public CustomerResult Create(Customer entity)
         {
             if (!entity.IsValid())
             {
@@ -47,12 +55,12 @@ namespace VivesRental.Services
             var numberOfObjectsUpdated = _unitOfWork.Complete();
 
             if (numberOfObjectsUpdated > 0)
-                return customer;
+                return customer.MapToResult();
 
             return null;
         }
 
-        public Customer Edit(Customer entity)
+        public CustomerResult Edit(Customer entity)
         {
             if (!entity.IsValid())
             {
@@ -60,7 +68,10 @@ namespace VivesRental.Services
             }
 
             //Get Product from unitOfWork
-            var customer = _unitOfWork.Customers.Get(entity.Id);
+            var customer = _unitOfWork.Customers
+                .Find(c => c.Id==entity.Id)
+                .FirstOrDefault();
+
             if (customer == null)
             {
                 return null;
@@ -74,7 +85,7 @@ namespace VivesRental.Services
 
             var numberOfObjectsUpdated = _unitOfWork.Complete();
             if (numberOfObjectsUpdated > 0)
-                return entity;
+                return entity.MapToResult();
             return null;
         }
 
@@ -85,7 +96,10 @@ namespace VivesRental.Services
         /// <returns>True if the customer was deleted</returns>
         public bool Remove(Guid id)
         {
-            var customer = _unitOfWork.Customers.Get(id);
+            var customer = _unitOfWork.Customers
+                .Find(c => c.Id == id)
+                .FirstOrDefault();
+
             if (customer == null)
                 return false;
 

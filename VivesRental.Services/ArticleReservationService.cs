@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore.Internal;
 using VivesRental.Model;
 using VivesRental.Repository.Core;
 using VivesRental.Repository.Includes;
 using VivesRental.Services.Contracts;
 using VivesRental.Services.Extensions;
+using VivesRental.Services.Mappers;
+using VivesRental.Services.Results;
 
 namespace VivesRental.Services
 {
-    
+
     public class ArticleReservationService : IArticleReservationService
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -18,27 +21,39 @@ namespace VivesRental.Services
         {
             _unitOfWork = unitOfWork;
         }
-        public ArticleReservation Get(Guid id)
+        public ArticleReservationResult Get(Guid id)
         {
-            return _unitOfWork.ArticleReservations.Get(id);
+            return _unitOfWork.ArticleReservations
+                .Find(ar => ar.Id == id)
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .FirstOrDefault();
         }
 
-        public ArticleReservation Get(Guid id, ArticleReservationIncludes includes)
+        public ArticleReservationResult Get(Guid id, ArticleReservationIncludes includes)
         {
-            return _unitOfWork.ArticleReservations.Get(id, includes);
+            return _unitOfWork.ArticleReservations
+                .Find(ar => ar.Id == id, includes)
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .FirstOrDefault();
         }
 
-        public IList<ArticleReservation> All()
+        public IList<ArticleReservationResult> All()
         {
-            return _unitOfWork.ArticleReservations.GetAll().ToList();
+            return _unitOfWork.ArticleReservations
+                .Find()
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .ToList();
         }
 
-        public IList<ArticleReservation> All(ArticleReservationIncludes includes)
+        public IList<ArticleReservationResult> All(ArticleReservationIncludes includes)
         {
-            return _unitOfWork.ArticleReservations.GetAll(includes).ToList();
+            return _unitOfWork.ArticleReservations
+                .Find(includes)
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .ToList();
         }
 
-        public ArticleReservation Create(Guid customerId, Guid articleId)
+        public ArticleReservationResult Create(Guid customerId, Guid articleId)
         {
             var articleReservation = new ArticleReservation
             {
@@ -50,7 +65,7 @@ namespace VivesRental.Services
             return Create(articleReservation);
         }
 
-        public ArticleReservation Create(ArticleReservation entity)
+        public ArticleReservationResult Create(ArticleReservation entity)
         {
 
             if (!entity.IsValid())
@@ -71,7 +86,7 @@ namespace VivesRental.Services
             if (numberOfObjectsUpdated > 0)
             {
                 //Detach and return
-                return articleReservation;
+                return articleReservation.MapToResult(DateTime.Now, DateTime.MaxValue);
             }
             return null;
         }
@@ -83,7 +98,10 @@ namespace VivesRental.Services
         /// <returns>True if the article reservation was deleted</returns>
         public bool Remove(Guid id)
         {
-            var article = _unitOfWork.ArticleReservations.Get(id);
+            var article = _unitOfWork.ArticleReservations
+                .Find(a => a.Id == id)
+                .FirstOrDefault();
+
             if (article == null)
                 return false;
 

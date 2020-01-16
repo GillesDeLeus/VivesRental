@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using VivesRental.Repository.Contracts;
 
 namespace VivesRental.Repository.Core

@@ -2,17 +2,18 @@
 using System.Collections.Generic;
 using VivesRental.Model;
 using VivesRental.Repository.Includes;
+using VivesRental.Services.Results;
 
 namespace VivesRental.Services.Contracts
 {
     public interface IArticleReservationService
     {
-        ArticleReservation Get(Guid id);
-        ArticleReservation Get(Guid id, ArticleReservationIncludes includes);
-        IList<ArticleReservation> All();
-        IList<ArticleReservation> All(ArticleReservationIncludes includes);
-        ArticleReservation Create(Guid customerId, Guid articleId);
-        ArticleReservation Create(ArticleReservation entity);
+        ArticleReservationResult Get(Guid id);
+        ArticleReservationResult Get(Guid id, ArticleReservationIncludes includes);
+        IList<ArticleReservationResult> All();
+        IList<ArticleReservationResult> All(ArticleReservationIncludes includes);
+        ArticleReservationResult Create(Guid customerId, Guid articleId);
+        ArticleReservationResult Create(ArticleReservation entity);
         bool Remove(Guid id);
     }
 }

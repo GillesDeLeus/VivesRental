@@ -2,6 +2,7 @@
 using System.Data;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VivesRental.Repository.Core;
 using VivesRental.Tests.Data.Factories;
@@ -45,7 +46,7 @@ namespace VivesRental.Repository.Tests
                 var articleRepository = new ArticleRepository(context);
 
                 //Act
-                var article = articleRepository.Get(Guid.NewGuid());
+                var article = articleRepository.Find(a => a.Id == Guid.NewGuid()).FirstOrDefault();
 
                 //Assert
                 Assert.IsNull(article);
@@ -69,7 +70,7 @@ namespace VivesRental.Repository.Tests
                 context.SaveChanges();
 
                 //Act
-                var article = articleRepository.Get(articleToAdd.Id);
+                var article = articleRepository.Find(a => a.Id == articleToAdd.Id).FirstOrDefault();
 
                 //Assert
                 Assert.IsNotNull(article);
@@ -95,7 +96,7 @@ namespace VivesRental.Repository.Tests
                 context.SaveChanges();
 
                 //Act
-                var articles = articleRepository.GetAll();
+                var articles = articleRepository.Find().ToList();
 
                 //Assert
                 Assert.AreEqual(10, articles.Count());
@@ -155,7 +156,7 @@ namespace VivesRental.Repository.Tests
             using (var context = DbContextFactory.CreateInstance(databaseName))
             {
                 var articleRepository = new ArticleRepository(context);
-                var article = articleRepository.Get(articleId);
+                var article = articleRepository.Find(a => a.Id == articleId).FirstOrDefault();
                 Assert.IsNull(article);
             }
         }

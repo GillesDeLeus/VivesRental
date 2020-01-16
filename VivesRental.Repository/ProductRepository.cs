@@ -5,10 +5,6 @@ using System.Linq.Expressions;
 using VivesRental.Model;
 using VivesRental.Repository.Contracts;
 using VivesRental.Repository.Core;
-using VivesRental.Repository.Extensions;
-using VivesRental.Repository.Includes;
-using VivesRental.Repository.Mappers;
-using VivesRental.Repository.Results;
 
 namespace VivesRental.Repository
 {
@@ -21,29 +17,9 @@ namespace VivesRental.Repository
             _context = context;
         }
 
-        public Product Get(Guid id)
+        public IEnumerable<Product> Find()
         {
             return _context.Products
-                .FirstOrDefault(i => i.Id == id);
-        }
-
-        public IEnumerable<Product> GetAll()
-        {
-            return _context.Products
-                .AsEnumerable();
-        }
-
-        public IEnumerable<ProductResult> GetAllResult()
-        {
-            var fromDateTime = DateTime.Now;
-            var untilDateTIme = DateTime.MaxValue;
-            return GetAllResult(fromDateTime, untilDateTIme);
-        }
-
-        public IEnumerable<ProductResult> GetAllResult(DateTime fromDateTime, DateTime untilDateTime)
-        {
-            return _context.Products
-                .MapToResults(fromDateTime, untilDateTime)
                 .AsEnumerable();
         }
 
@@ -51,14 +27,6 @@ namespace VivesRental.Repository
         {
             return _context.Products
                 .Where(predicate)
-                .AsEnumerable();
-        }
-
-        public IEnumerable<ProductResult> FindResult(DateTime availableFromDateTime, DateTime? availableUntilDateTime)
-        {
-            return _context.Products
-                .Where(ProductExtensions.IsAvailable(availableFromDateTime, availableUntilDateTime))
-                .MapToResults(availableFromDateTime, availableUntilDateTime)
                 .AsEnumerable();
         }
 

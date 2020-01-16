@@ -1,5 +1,6 @@
 ﻿using System;
 using VivesRental.Model;
+using VivesRental.Services.Results;
 
 namespace VivesRental.Services.Extensions
 {

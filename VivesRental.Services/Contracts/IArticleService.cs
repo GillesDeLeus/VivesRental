@@ -2,22 +2,22 @@
 using System.Collections.Generic;
 using VivesRental.Model;
 using VivesRental.Repository.Includes;
+using VivesRental.Services.Results;
 
 namespace VivesRental.Services.Contracts
 {
     public interface IArticleService
     {
-        Article Get(Guid id, ArticleIncludes includes = null);
-        IList<Article> All(ArticleIncludes includes = null);
-        IList<Article> GetAvailableArticles(ArticleIncludes includes = null);
-        IList<Article> GetAvailableArticles(Guid productId, ArticleIncludes includes = null);
-        IList<Article> GetRentedArticles(ArticleIncludes includes = null);
+        ArticleResult Get(Guid id, ArticleIncludes includes = null);
+        IList<ArticleResult> All(ArticleIncludes includes = null);
+        IList<ArticleResult> GetAvailableArticles(ArticleIncludes includes = null);
+        IList<ArticleResult> GetAvailableArticles(Guid productId, ArticleIncludes includes = null);
+        IList<ArticleResult> GetRentedArticles(ArticleIncludes includes = null);
 
-        IList<Article> GetRentedArticles(Guid customerId, ArticleIncludes includes = null);
+        IList<ArticleResult> GetRentedArticles(Guid customerId, ArticleIncludes includes = null);
 
-        Article Create(Article entity);
-        [Obsolete("Edit has been replaced by the UpdateStatus method. Use the UpdateStatus method in stead.")]
-        Article Edit(Article entity);
+        ArticleResult Create(Article entity);
+       
         bool UpdateStatus(Guid articleId, ArticleStatus status);
         bool Remove(Guid id);
 

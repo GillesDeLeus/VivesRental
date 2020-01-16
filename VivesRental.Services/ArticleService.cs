@@ -7,6 +7,8 @@ using VivesRental.Repository.Extensions;
 using VivesRental.Repository.Includes;
 using VivesRental.Services.Contracts;
 using VivesRental.Services.Extensions;
+using VivesRental.Services.Mappers;
+using VivesRental.Services.Results;
 
 namespace VivesRental.Services
 {
@@ -19,17 +21,23 @@ namespace VivesRental.Services
             _unitOfWork = unitOfWork;
         }
 
-        public Article Get(Guid id, ArticleIncludes includes = null)
+        public ArticleResult Get(Guid id, ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles.Get(id, includes);
+            return _unitOfWork.Articles
+                .Find(a => a.Id == id, includes)
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .FirstOrDefault();
         }
         
-        public IList<Article> All(ArticleIncludes includes = null)
+        public IList<ArticleResult> All(ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles.GetAll(includes).ToList();
+            return _unitOfWork.Articles
+                .Find(includes)
+                .MapToResults(DateTime.Now,DateTime.MaxValue)
+                .ToList();
         }
 
-        public IList<Article> GetAvailableArticles(ArticleIncludes includes = null)
+        public IList<ArticleResult> GetAvailableArticles(ArticleIncludes includes = null)
         {
             var fromDateTime = DateTime.Now;
             var untilDateTime = DateTime.MaxValue;
@@ -37,29 +45,41 @@ namespace VivesRental.Services
             return GetAvailableArticles(fromDateTime, untilDateTime, includes);
         }
 
-        public IList<Article> GetAvailableArticles(DateTime fromDateTime, DateTime untilDateTime, ArticleIncludes includes = null)
+        public IList<ArticleResult> GetAvailableArticles(DateTime fromDateTime, DateTime untilDateTime, ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles.Find(ArticleExtensions.IsAvailable(fromDateTime, untilDateTime), includes).ToList();
+            return _unitOfWork.Articles
+                .Find(ArticleExtensions.IsAvailable(fromDateTime, untilDateTime), includes)
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .ToList();
         }
         
-        public IList<Article> GetAvailableArticles(Guid productId, ArticleIncludes includes = null)
+        public IList<ArticleResult> GetAvailableArticles(Guid productId, ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles.Find(a => a.ProductId == productId &&
+            return _unitOfWork.Articles
+                .Find(a => a.ProductId == productId &&
                                                   a.Status == ArticleStatus.Normal &&
-                                                  a.OrderLines.All(ol => ol.ReturnedAt.HasValue), includes).ToList();
+                                                  a.OrderLines.All(ol => ol.ReturnedAt.HasValue), includes)
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .ToList();
         }
 
-        public IList<Article> GetRentedArticles(ArticleIncludes includes = null)
+        public IList<ArticleResult> GetRentedArticles(ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles.Find(a => a.IsRented(), includes).ToList();
+            return _unitOfWork.Articles
+                .Find(a => a.IsRented(), includes)
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .ToList();
         }
 
-        public IList<Article> GetRentedArticles(Guid customerId, ArticleIncludes includes = null)
+        public IList<ArticleResult> GetRentedArticles(Guid customerId, ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles.Find(a => a.IsRented(customerId), includes).ToList();
+            return _unitOfWork.Articles
+                .Find(a => a.IsRented(customerId), includes)
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .ToList();
         }
 
-        public Article Create(Article entity)
+        public ArticleResult Create(Article entity)
         {
 
             if (!entity.IsValid())
@@ -74,38 +94,12 @@ namespace VivesRental.Services
             };
 
             _unitOfWork.Articles.Add(article);
+
             var numberOfObjectsUpdated = _unitOfWork.Complete();
             if (numberOfObjectsUpdated > 0)
             {
                 //Detach and return
-                return article;
-            }
-            return null;
-        }
-
-        [Obsolete("Edit has been replaced by the UpdateStatus method. Use the UpdateStatus method in stead.")]
-        public Article Edit(Article entity)
-        {
-            if (!entity.IsValid())
-            {
-                return null;
-            }
-
-            //Get Product from unitOfWork
-            var article = _unitOfWork.Articles.Get(entity.Id);
-            if (article == null)
-            {
-                return null;
-            }
-
-            //Only update the properties we want to update
-            article.ProductId = entity.ProductId;
-            article.Status = entity.Status;
-
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
-            if (numberOfObjectsUpdated > 0)
-            {
-                return entity;
+                return article.MapToResult(DateTime.Now, DateTime.MaxValue);
             }
             return null;
         }
@@ -113,7 +107,11 @@ namespace VivesRental.Services
         public bool UpdateStatus(Guid articleId, ArticleStatus status)
         {
             //Get Product from unitOfWork
-            var article = _unitOfWork.Articles.Get(articleId);
+            var article = _unitOfWork.Articles
+                .Find(a => a.Id== articleId)
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .FirstOrDefault();
+
             if (article == null)
             {
                 return false;
@@ -133,7 +131,10 @@ namespace VivesRental.Services
         /// <returns>True if the article was deleted</returns>
         public bool Remove(Guid id)
         {
-            var article = _unitOfWork.Articles.Get(id);
+            var article = _unitOfWork.Articles
+                .Find(a => a.Id == id)
+                .FirstOrDefault();
+
             if (article == null)
                 return false;
 
@@ -148,12 +149,14 @@ namespace VivesRental.Services
 
         public bool IsAvailable(Guid articleId, DateTime fromDateTime, DateTime? untilDateTime = null)
         {
-            return _unitOfWork.Articles.All(articleId, ArticleExtensions.IsAvailable(articleId, fromDateTime, untilDateTime));
+            return _unitOfWork.Articles
+                .All(articleId, ArticleExtensions.IsAvailable(articleId, fromDateTime, untilDateTime));
         }
         
         public bool IsAvailable(IList<Guid> articleIds, DateTime fromDateTime, DateTime? untilDateTime = null)
         {
-            return _unitOfWork.Articles.All(articleIds, ArticleExtensions.IsAvailable(articleIds, fromDateTime, untilDateTime));
+            return _unitOfWork.Articles
+                .All(articleIds, ArticleExtensions.IsAvailable(articleIds, fromDateTime, untilDateTime));
         }
 
 }

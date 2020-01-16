@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VivesRental.Tests.Data.Extensions;
 using VivesRental.Tests.Data.Factories;
 
@@ -8,7 +9,7 @@ namespace VivesRental.Services.Tests
 	public class ArticleServiceTests
 	{
 		[TestMethod]
-		public void Remove_Deletes_Article()
+		public async Task Remove_Deletes_Article()
         {
             //Arrange
             using var context = DbContextFactory.CreateInstance("Remove_Deletes_Product_With_Articles");
@@ -22,14 +23,14 @@ namespace VivesRental.Services.Tests
             var articleService = new ArticleService(context);
 
             //Act
-            var result = articleService.Remove(article.Id);
+            var result = await articleService.RemoveAsync(article.Id);
 
             //Assert
             Assert.IsTrue(result);
         }
 
 		[TestMethod]
-		public void Remove_Deletes_Article_With_OrderLines()
+		public async Task Remove_Deletes_Article_With_OrderLines()
 		{
             //Arrange
             using var context = DbContextFactory.CreateInstance("Remove_Deletes_Product_With_Articles");
@@ -44,12 +45,12 @@ namespace VivesRental.Services.Tests
             context.Orders.Add(order);
             var orderLine = OrderLineFactory.CreateValidEntity(order, article);
             context.OrderLines.Add(orderLine);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
             var articleService = new ArticleService(context);
 
             //Act
-            var result = articleService.Remove(article.Id);
+            var result = await articleService.RemoveAsync(article.Id);
 
             //Assert
             Assert.IsTrue(result);

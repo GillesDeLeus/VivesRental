@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VivesRental.Repository.Core;
 using VivesRental.Repository.Extensions;
 using VivesRental.Services.Contracts;
@@ -19,29 +21,29 @@ namespace VivesRental.Services
             _context = context;
         }
 
-        public OrderLineResult Get(Guid id)
+        public async Task<OrderLineResult> GetAsync(Guid id)
         {
-            return _context.OrderLines
+            return await _context.OrderLines
                 .Where(ol => ol.Id == id)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
         }
 
-        public IList<OrderLineResult> FindByOrderId(Guid orderId)
+        public async Task<List<OrderLineResult>> FindByOrderIdAsync(Guid orderId)
         {
-            return _context.OrderLines
+            return await _context.OrderLines
                 .Where(rol => rol.OrderId == orderId)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
-                .ToList();
+                .ToListAsync();
         }
 
-        public bool Rent(Guid orderId, Guid articleId)
+        public async Task<bool> RentAsync(Guid orderId, Guid articleId)
         {
             var fromDateTime = DateTime.Now;
 
-            var article = _context.Articles
+            var article = await _context.Articles
                 .Where(ArticleExtensions.IsAvailable(articleId, fromDateTime))
-                .SingleOrDefault();
+                .SingleOrDefaultAsync();
 
             if (article == null)
             {
@@ -53,16 +55,16 @@ namespace VivesRental.Services
             var orderLine = article.CreateOrderLine(orderId);
 
             _context.OrderLines.Add(orderLine);
-            var numberOfObjectsUpdated = _context.SaveChanges();
+            var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             return numberOfObjectsUpdated > 0;
         }
 
-        public bool Rent(Guid orderId, IList<Guid> articleIds)
+        public async Task<bool> RentAsync(Guid orderId, IList<Guid> articleIds)
         {
             var fromDateTime = DateTime.Now;
-            var articles = _context.Articles
+            var articles = await _context.Articles
                 .Where(ArticleExtensions.IsAvailable(articleIds, fromDateTime))
-                .ToList();
+                .ToListAsync();
 
             //If the amount of articles is not the same as the requested ids, some articles are not available anymore
             if (articleIds.Count != articles.Count)
@@ -76,7 +78,7 @@ namespace VivesRental.Services
                 _context.OrderLines.Add(orderLine);
             }
 
-            var numberOfObjectsUpdated = _context.SaveChanges();
+            var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             return numberOfObjectsUpdated > 0;
         }
 
@@ -86,12 +88,12 @@ namespace VivesRental.Services
         /// <param name="orderLineId"></param>
         /// <param name="returnedAt"></param>
         /// <returns></returns>
-        public bool Return(Guid orderLineId, DateTime returnedAt)
+        public async Task<bool> ReturnAsync(Guid orderLineId, DateTime returnedAt)
         {
-            var orderLine = _context.OrderLines
+            var orderLine = await _context.OrderLines
                 .Where(ol => ol.Id == orderLineId)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
             if (orderLine == null)
             {
@@ -110,7 +112,7 @@ namespace VivesRental.Services
 
             orderLine.ReturnedAt = returnedAt;
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return true;
         }
 

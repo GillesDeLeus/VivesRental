@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
 using VivesRental.Repository.Core;
 using VivesRental.Repository.Extensions;
@@ -21,37 +23,37 @@ namespace VivesRental.Services
             _context = context;
         }
 
-        public OrderResult Get(Guid id, OrderIncludes includes = null)
+        public async Task<OrderResult> GetAsync(Guid id, OrderIncludes includes = null)
         {
-            return _context.Orders
+            return await _context.Orders
                 .AddIncludes(includes)
                 .Where(o => o.Id == id)
                 .MapToResults()
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
         }
 
-        public IList<OrderResult> FindByCustomerId(Guid customerId, OrderIncludes includes = null)
+        public async Task<List<OrderResult>> FindByCustomerIdAsync(Guid customerId, OrderIncludes includes = null)
         {
-            return _context.Orders
+            return await _context.Orders
                 .AddIncludes(includes)
                 .Where(o => o.CustomerId == customerId)
                 .MapToResults()
-                .ToList();
+                .ToListAsync();
         }
 
-        public IList<OrderResult> All()
+        public async Task<List<OrderResult>> AllAsync()
         {
-            return _context.Orders
+            return await _context.Orders
                 .MapToResults()
-                .ToList();
+                .ToListAsync();
         }
         
-        public OrderResult Create(Guid customerId)
+        public async Task<OrderResult> CreateAsync(Guid customerId)
         {
-            var customer = _context.Customers
+            var customer = await _context.Customers
                 .Where(c => c.Id == customerId)
                 .MapToResults()
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
             if (customer == null)
             {
@@ -69,7 +71,7 @@ namespace VivesRental.Services
             };
 
             _context.Orders.Add(order);
-            var numberOfObjectsUpdated = _context.SaveChanges();
+            var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             if (numberOfObjectsUpdated > 0)
             {
                 return order.MapToResult();
@@ -77,17 +79,17 @@ namespace VivesRental.Services
             return null;
         }
 
-        public bool Return(Guid orderId, DateTime returnedAt)
+        public async Task<bool> ReturnAsync(Guid orderId, DateTime returnedAt)
         {
-            var orderLines = _context.OrderLines
+            var orderLines = await _context.OrderLines
                 .Where(ol => ol.OrderId == orderId && !ol.ReturnedAt.HasValue)
-                .ToList();
+                .ToListAsync();
             foreach (var orderLine in orderLines)
             {
                 orderLine.ReturnedAt = returnedAt;
             }
 
-            var numberOfObjectsUpdated = _context.SaveChanges();
+            var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             return numberOfObjectsUpdated > 0;
         }
     }

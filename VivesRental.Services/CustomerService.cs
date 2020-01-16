@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
@@ -22,22 +23,22 @@ namespace VivesRental.Services
         }
 
 
-        public CustomerResult Get(Guid id)
+        public async Task<CustomerResult> GetAsync(Guid id)
         {
-            return _context.Customers
+            return await _context.Customers
                 .Where(c => c.Id == id)
                 .MapToResults()
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
         }
 
-        public IList<CustomerResult> All()
+        public async Task<List<CustomerResult>> AllAsync()
         {
-            return _context.Customers
+            return await _context.Customers
                 .MapToResults()
-                .ToList();
+                .ToListAsync();
         }
 
-        public CustomerResult Create(Customer entity)
+        public async Task<CustomerResult> CreateAsync(Customer entity)
         {
             if (!entity.IsValid())
             {
@@ -53,7 +54,7 @@ namespace VivesRental.Services
             };
 
             _context.Customers.Add(customer);
-            var numberOfObjectsUpdated = _context.SaveChanges();
+            var numberOfObjectsUpdated = await _context.SaveChangesAsync();
 
             if (numberOfObjectsUpdated > 0)
                 return customer.MapToResult();
@@ -61,7 +62,7 @@ namespace VivesRental.Services
             return null;
         }
 
-        public CustomerResult Edit(Customer entity)
+        public async Task<CustomerResult> EditAsync(Customer entity)
         {
             if (!entity.IsValid())
             {
@@ -69,8 +70,8 @@ namespace VivesRental.Services
             }
 
             //Get Product from unitOfWork
-            var customer = _context.Customers
-                .FirstOrDefault(c => c.Id==entity.Id);
+            var customer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.Id==entity.Id);
 
             if (customer == null)
             {
@@ -83,7 +84,7 @@ namespace VivesRental.Services
             customer.Email = entity.Email;
             customer.PhoneNumber = entity.PhoneNumber;
 
-            var numberOfObjectsUpdated = _context.SaveChanges();
+            var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             if (numberOfObjectsUpdated > 0)
                 return entity.MapToResult();
             return null;
@@ -94,27 +95,27 @@ namespace VivesRental.Services
         /// </summary>
         /// <param name="id">The id of the Customer</param>
         /// <returns>True if the customer was deleted</returns>
-        public bool Remove(Guid id)
+        public async Task<bool> RemoveAsync(Guid id)
         {
-            var result = _context.RunInTransaction(() =>
+            var result = await _context.RunInTransactionAsync(async () =>
             {
                 //Remove the Customer from the Orders
-                ClearCustomer(id);
+                await ClearCustomerAsync(id);
                 //Remove the Order
                 _context.Customers.Remove(id);
 
-                var numberOfObjectsUpdated = _context.SaveChangesWithConcurrencyIgnore();
+                var numberOfObjectsUpdated = await _context.SaveChangesWithConcurrencyIgnoreAsync();
 
                 return numberOfObjectsUpdated > 0;
             });
-            return result;
+            return await result;
         }
 
-        private void ClearCustomer(Guid customerId)
+        private async Task ClearCustomerAsync(Guid customerId)
         {
             if (_context.Database.IsInMemory())
             {
-                var orders = _context.Orders.Where(ol => ol.CustomerId == customerId).ToList();
+                var orders = await _context.Orders.Where(ol => ol.CustomerId == customerId).ToListAsync();
                 foreach (var order in orders)
                 {
                     order.Customer = null;
@@ -126,7 +127,7 @@ namespace VivesRental.Services
             var commandText = "UPDATE [Order] SET CustomerId = null WHERE CustomerId = @CustomerId";
             var customerIdParameter = new SqlParameter("@CustomerId", customerId);
 
-            _context.Database.ExecuteSqlRaw(commandText, customerIdParameter);
+            await _context.Database.ExecuteSqlRawAsync(commandText, customerIdParameter);
         }
     }
 }

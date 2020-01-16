@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
@@ -23,70 +24,70 @@ namespace VivesRental.Services
             _context = context;
         }
 
-        public ArticleResult Get(Guid id, ArticleIncludes includes = null)
+        public async Task<ArticleResult> GetAsync(Guid id, ArticleIncludes includes = null)
         {
-            return _context.Articles
+            return await _context.Articles
                 .AddIncludes(includes)
                 .Where(a => a.Id == id)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
         }
 
-        public IList<ArticleResult> All(ArticleIncludes includes = null)
+        public async Task<List<ArticleResult>> AllAsync(ArticleIncludes includes = null)
         {
-            return _context.Articles
+            return await _context.Articles
                 .AddIncludes(includes)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
-                .ToList();
+                .ToListAsync();
         }
 
-        public IList<ArticleResult> GetAvailableArticles(ArticleIncludes includes = null)
+        public async Task<List<ArticleResult>> GetAvailableArticlesAsync(ArticleIncludes includes = null)
         {
             var fromDateTime = DateTime.Now;
             var untilDateTime = DateTime.MaxValue;
 
-            return GetAvailableArticles(fromDateTime, untilDateTime, includes);
+            return await GetAvailableArticlesAsync(fromDateTime, untilDateTime, includes);
         }
 
-        public IList<ArticleResult> GetAvailableArticles(DateTime fromDateTime, DateTime untilDateTime, ArticleIncludes includes = null)
+        public async Task<List<ArticleResult>> GetAvailableArticlesAsync(DateTime fromDateTime, DateTime untilDateTime, ArticleIncludes includes = null)
         {
-            return _context.Articles
+            return await _context.Articles
                 .AddIncludes(includes)
                 .Where(ArticleExtensions.IsAvailable(fromDateTime, untilDateTime))
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
-                .ToList();
+                .ToListAsync();
         }
 
-        public IList<ArticleResult> GetAvailableArticles(Guid productId, ArticleIncludes includes = null)
+        public async Task<List<ArticleResult>> GetAvailableArticlesAsync(Guid productId, ArticleIncludes includes = null)
         {
-            return _context.Articles
+            return await _context.Articles
                 .AddIncludes(includes)
                 .Where(a => a.ProductId == productId &&
                                                   a.Status == ArticleStatus.Normal &&
                                                   a.OrderLines.All(ol => ol.ReturnedAt.HasValue))
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
-                .ToList();
+                .ToListAsync();
         }
 
-        public IList<ArticleResult> GetRentedArticles(ArticleIncludes includes = null)
+        public async Task<List<ArticleResult>> GetRentedArticlesAsync(ArticleIncludes includes = null)
         {
-            return _context.Articles
+            return await _context.Articles
                 .AddIncludes(includes)
                 .Where(a => a.IsRented())
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
-                .ToList();
+                .ToListAsync();
         }
 
-        public IList<ArticleResult> GetRentedArticles(Guid customerId, ArticleIncludes includes = null)
+        public async Task<List<ArticleResult>> GetRentedArticlesAsync(Guid customerId, ArticleIncludes includes = null)
         {
-            return _context.Articles
+            return await _context.Articles
                 .AddIncludes(includes)
                 .Where(a => a.IsRented(customerId))
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
-                .ToList();
+                .ToListAsync();
         }
 
-        public ArticleResult Create(Article entity)
+        public async Task<ArticleResult> CreateAsync(Article entity)
         {
 
             if (!entity.IsValid())
@@ -102,7 +103,7 @@ namespace VivesRental.Services
 
             _context.Articles.Add(article);
 
-            var numberOfObjectsUpdated = _context.SaveChanges();
+            var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             if (numberOfObjectsUpdated > 0)
             {
                 //Detach and return
@@ -111,13 +112,13 @@ namespace VivesRental.Services
             return null;
         }
 
-        public bool UpdateStatus(Guid articleId, ArticleStatus status)
+        public async Task<bool> UpdateStatusAsync(Guid articleId, ArticleStatus status)
         {
             //Get Product from unitOfWork
-            var article = _context.Articles
+            var article = await _context.Articles
                 .Where(a => a.Id == articleId)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
 
             if (article == null)
             {
@@ -127,7 +128,7 @@ namespace VivesRental.Services
             //Only update the properties we want to update
             article.Status = status;
 
-            var numberOfObjectsUpdated = _context.SaveChanges();
+            var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             return numberOfObjectsUpdated > 0;
         }
 
@@ -136,40 +137,40 @@ namespace VivesRental.Services
         /// </summary>
         /// <param name="id">The id of the Article</param>
         /// <returns>True if the article was deleted</returns>
-        public bool Remove(Guid id)
+        public async Task<bool> RemoveAsync(Guid id)
         {
-            var result = _context.RunInTransaction(() =>
+            var result = await _context.RunInTransactionAsync(async () =>
             {
-                ClearArticleByArticleId(id);
+                await ClearArticleByArticleId(id);
                 _context.ArticleReservations.RemoveRange(_context.ArticleReservations.Where(ar => ar.ArticleId == id));
                 _context.Articles.Remove(id);
 
-                var numberOfObjectsUpdated = _context.SaveChangesWithConcurrencyIgnore();
+                var numberOfObjectsUpdated = await _context.SaveChangesWithConcurrencyIgnoreAsync();
                 return numberOfObjectsUpdated > 0;
             });
 
-            return result;
+            return await result;
         }
 
-        public bool IsAvailable(Guid articleId, DateTime fromDateTime, DateTime? untilDateTime = null)
+        public async Task<bool> IsAvailableAsync(Guid articleId, DateTime fromDateTime, DateTime? untilDateTime = null)
         {
-            return _context.Articles
+            return await _context.Articles
                 .Where(a => a.Id == articleId)
-                .All(ArticleExtensions.IsAvailable(articleId, fromDateTime, untilDateTime));
+                .AllAsync(ArticleExtensions.IsAvailable(articleId, fromDateTime, untilDateTime));
         }
 
-        public bool IsAvailable(IList<Guid> articleIds, DateTime fromDateTime, DateTime? untilDateTime = null)
+        public async Task<bool> IsAvailableAsync(IList<Guid> articleIds, DateTime fromDateTime, DateTime? untilDateTime = null)
         {
-            return _context.Articles
+            return await _context.Articles
                 .Where(a => articleIds.Contains(a.Id))
-                .All(ArticleExtensions.IsAvailable(articleIds, fromDateTime, untilDateTime));
+                .AllAsync(ArticleExtensions.IsAvailable(articleIds, fromDateTime, untilDateTime));
         }
 
-        private void ClearArticleByArticleId(Guid articleId)
+        private async Task ClearArticleByArticleId(Guid articleId)
         {
             if (_context.Database.IsInMemory())
             {
-                var orderLines = _context.OrderLines.Where(ol => ol.ArticleId == articleId).ToList();
+                var orderLines = await _context.OrderLines.Where(ol => ol.ArticleId == articleId).ToListAsync();
                 foreach (var orderLine in orderLines)
                 {
                     orderLine.Article = null;
@@ -181,7 +182,7 @@ namespace VivesRental.Services
             var commandText = "UPDATE OrderLine SET ArticleId = null WHERE ArticleId = @ArticleId";
             var articleIdParameter = new SqlParameter("@ArticleId", articleId);
 
-            _context.Database.ExecuteSqlRaw(commandText, articleIdParameter);
+            await _context.Database.ExecuteSqlRawAsync(commandText, articleIdParameter);
         }
 
     }

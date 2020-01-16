@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VivesRental.Tests.Data.Factories;
 
@@ -8,7 +9,7 @@ namespace VivesRental.Services.Tests
     public class ProductServiceTests
     {
         [TestMethod]
-        public void Remove_Deletes_Product()
+        public async Task Remove_Deletes_Product()
         {
             //Arrange
             using var context = DbContextFactory.CreateInstance("Remove_Deletes_Product");
@@ -20,14 +21,14 @@ namespace VivesRental.Services.Tests
             var productService = new ProductService(context);
 
             //Act
-            var result = productService.Remove(product.Id);
+            var result = await productService.RemoveAsync(product.Id);
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void Remove_Returns_False_When_Product_Is_Null()
+        public async Task Remove_Returns_False_When_Product_Is_Null()
         {
             //Arrange
             using var context = DbContextFactory.CreateInstance("Remove_Returns_False_When_Product_Is_Null");
@@ -35,14 +36,14 @@ namespace VivesRental.Services.Tests
             var productService = new ProductService(context);
 
             //Act
-            var result = productService.Remove(Guid.NewGuid());
+            var result = await productService.RemoveAsync(Guid.NewGuid());
 
             //Assert
             Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public void Remove_Deletes_Product_With_Articles()
+        public async Task Remove_Deletes_Product_With_Articles()
         {
             //Arrange
             using var context = DbContextFactory.CreateInstance("Remove_Deletes_Product_With_Articles");
@@ -56,14 +57,14 @@ namespace VivesRental.Services.Tests
             var productService = new ProductService(context);
 
             //Act
-            var result = productService.Remove(productToAdd.Id);
+            var result = await productService.RemoveAsync(productToAdd.Id);
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void Remove_Deletes_Product_With_Articles_And_OrderLines()
+        public async Task Remove_Deletes_Product_With_Articles_And_OrderLines()
         {
             //Arrange
             using var context = DbContextFactory.CreateInstance("Remove_Deletes_Product_With_Articles_And_OrderLines");
@@ -83,14 +84,14 @@ namespace VivesRental.Services.Tests
             var productService = new ProductService(context);
 
             //Act
-            var result = productService.Remove(product.Id);
+            var result = await productService.RemoveAsync(product.Id);
 
             //Assert
             Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public void GetAvailableProductResults_Returns_Available_Product()
+        public async Task GetAvailableProductResults_Returns_Available_Product()
         {
             var context = DbContextFactory.CreateInstance("GetAvailableProductResults_Returns_Available_Product");
             
@@ -108,13 +109,13 @@ namespace VivesRental.Services.Tests
             var productService = new ProductService(context);
 
             //Act
-            var result = productService.All();
+            var result = await productService.AllAsync();
 
             Assert.AreEqual(1, result.Count);
         }
 
         [TestMethod]
-        public void GetAvailableProductResults_Returns_Available_Product_WithOrderLine()
+        public async Task GetAvailableProductResults_Returns_Available_Product_WithOrderLine()
         {
             var context = DbContextFactory.CreateInstance("GetAvailableProductResults_Returns_Available_Product_WithOrderLine");
             
@@ -136,13 +137,13 @@ namespace VivesRental.Services.Tests
             var productService = new ProductService(context);
 
             //Act
-            var result = productService.GetAvailableProductResults();
+            var result = await productService.GetAvailableProductResultsAsync();
 
             Assert.AreEqual(1, result.Count);
         }
 
         [TestMethod]
-        public void GetAvailableProductResults_Returns_No_Available_Product_When_All_Rented()
+        public async Task GetAvailableProductResults_Returns_No_Available_Product_When_All_Rented()
         {
             var context = DbContextFactory.CreateInstance("GetAvailableProductResults_Returns_No_Available_Product_When_All_Rented");
             
@@ -166,7 +167,7 @@ namespace VivesRental.Services.Tests
             var productService = new ProductService(context);
 
             //Act
-            var result = productService.GetAvailableProductResults();
+            var result = await productService.GetAvailableProductResultsAsync();
 
             Assert.AreEqual(0, result.Count);
         }

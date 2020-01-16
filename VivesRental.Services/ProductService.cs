@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
@@ -22,31 +23,31 @@ namespace VivesRental.Services
         }
 
 
-        public ProductResult Get(Guid id)
+        public async Task<ProductResult> GetAsync(Guid id)
         {
-            return _context.Products
+            return await _context.Products
                 .Where(p => p.Id == id)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
         }
 
 
 
-        public IList<ProductResult> All()
+        public async Task<List<ProductResult>> AllAsync()
         {
             var fromDateTime = DateTime.Now;
             var untilDateTime = DateTime.MaxValue;
-            return All(fromDateTime, untilDateTime);
+            return await AllAsync(fromDateTime, untilDateTime);
         }
 
-        public IList<ProductResult> All(DateTime fromDateTime, DateTime untilDateTime)
+        public async Task<List<ProductResult>> AllAsync(DateTime fromDateTime, DateTime untilDateTime)
         {
-            return _context.Products
+            return await _context.Products
                 .MapToResults(fromDateTime, untilDateTime)
-                .ToList();
+                .ToListAsync();
         }
 
-        public ProductResult Create(Product entity)
+        public async Task<ProductResult> CreateAsync(Product entity)
         {
             if (!entity.IsValid())
             {
@@ -64,7 +65,7 @@ namespace VivesRental.Services
             };
 
             _context.Products.Add(product);
-            var numberOfObjectsUpdated = _context.SaveChanges();
+            var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             if (numberOfObjectsUpdated > 0)
             {
                 return product.MapToResult(DateTime.Now, DateTime.MaxValue);
@@ -72,7 +73,7 @@ namespace VivesRental.Services
             return null;
         }
 
-        public ProductResult Edit(Product entity)
+        public async Task<ProductResult> EditAsync(Product entity)
         {
             if (!entity.IsValid())
             {
@@ -80,8 +81,8 @@ namespace VivesRental.Services
             }
 
             //Get Product from unitOfWork
-            var product = _context.Products
-                .FirstOrDefault(p => p.Id == entity.Id);
+            var product = await _context.Products
+                .FirstOrDefaultAsync(p => p.Id == entity.Id);
 
             if (product == null)
             {
@@ -95,7 +96,7 @@ namespace VivesRental.Services
             product.Publisher = entity.Publisher;
             product.RentalExpiresAfterDays = entity.RentalExpiresAfterDays;
 
-            var numberOfObjectsUpdated = _context.SaveChanges();
+            var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             if (numberOfObjectsUpdated > 0)
             {
                 return entity.MapToResult(DateTime.Now, DateTime.MaxValue);
@@ -108,11 +109,11 @@ namespace VivesRental.Services
         /// </summary>
         /// <param name="id">The id of the Product</param>
         /// <returns>True if the product was deleted</returns>
-        public bool Remove(Guid id)
+        public async Task<bool> RemoveAsync(Guid id)
         {
-            var result = _context.RunInTransaction(() =>
+            var result = await _context.RunInTransactionAsync(async () =>
             {
-                ClearArticleByProductId(id);
+                await ClearArticleByProductIdAsync(id);
                 _context.ArticleReservations.RemoveRange(
                     _context.ArticleReservations.Where(a => a.Article.ProductId == id));
                 _context.Articles.RemoveRange(_context.Articles.Where(a => a.ProductId == id));
@@ -120,11 +121,11 @@ namespace VivesRental.Services
                 //Remove product
                 _context.Products.Remove(id);
 
-                var numberOfObjectsUpdated = _context.SaveChangesWithConcurrencyIgnore();
+                var numberOfObjectsUpdated = await _context.SaveChangesWithConcurrencyIgnoreAsync();
 
                 return numberOfObjectsUpdated > 0;
             });
-            return result;
+            return await result;
         }
 
         /// <summary>
@@ -132,12 +133,12 @@ namespace VivesRental.Services
         /// This is limited to maximum 10.000
         /// </summary>
         /// <returns>True if articles are added</returns>
-        public bool GenerateArticles(Guid productId, int amount)
+        public async Task<bool> GenerateArticlesAsync(Guid productId, int amount)
         {
             if (amount <= 0 && amount > 10.000) //Set a limit
                 return false;
 
-            var result = _context.RunInTransaction(() =>
+            var result = await _context.RunInTransactionAsync(async () =>
             {
                 for (int i = 0; i < amount; i++)
                 {
@@ -148,40 +149,42 @@ namespace VivesRental.Services
                     _context.Articles.Add(article);
                 }
 
-                var numberOfObjectsUpdated = _context.SaveChanges();
+                var numberOfObjectsUpdated = await _context.SaveChangesAsync();
                 return numberOfObjectsUpdated > 0;
             });
-            return result;
+            return await result;
         }
 
         /// <summary>
         /// Retrieves a list of products that are available from now
         /// </summary>
         /// <returns>A list of ProductResults</returns>
-        public IList<ProductResult> GetAvailableProductResults()
+        public async Task<List<ProductResult>> GetAvailableProductResultsAsync()
         {
             var fromDateTime = DateTime.Now;
             var untilDateTime = DateTime.MaxValue;
-            return GetAvailableProductResults(fromDateTime, untilDateTime);
+            return await GetAvailableProductResultsAsync(fromDateTime, untilDateTime);
         }
 
         /// <summary>
         /// Retrieves a list of products that are available between a from and until date
         /// </summary>
         /// <returns>A list of ProductResults</returns>
-        public IList<ProductResult> GetAvailableProductResults(DateTime fromDateTime, DateTime untilDateTime)
+        public async Task<List<ProductResult>> GetAvailableProductResultsAsync(DateTime fromDateTime, DateTime untilDateTime)
         {
-            return _context.Products
+            return await _context.Products
                 .Where(ProductExtensions.IsAvailable(fromDateTime, untilDateTime)) //Only articles that are not reserved in this period
                 .MapToResults(fromDateTime, untilDateTime)
-                .ToList();
+                .ToListAsync();
         }
 
-        private void ClearArticleByProductId(Guid productId)
+        private async Task ClearArticleByProductIdAsync(Guid productId)
         {
             if (_context.Database.IsInMemory())
             {
-                var orderLines = _context.OrderLines.Where(ol => ol.Article.ProductId == productId).ToList();
+                var orderLines = await _context.OrderLines
+                    .Where(ol => ol.Article.ProductId == productId)
+                    .ToListAsync();
                 foreach (var orderLine in orderLines)
                 {
                     orderLine.Article = null;
@@ -193,7 +196,7 @@ namespace VivesRental.Services
             var commandText = "UPDATE OrderLine SET ArticleId = null from OrderLine inner join Article on Article.ProductId = @ProductId";
             var articleIdParameter = new SqlParameter("@ProductId", productId);
 
-            _context.Database.ExecuteSqlRaw(commandText, articleIdParameter);
+            await _context.Database.ExecuteSqlRawAsync(commandText, articleIdParameter);
         }
 
     }

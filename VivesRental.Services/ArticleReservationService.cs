@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.EntityFrameworkCore.Internal;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
 using VivesRental.Repository.Core;
 using VivesRental.Repository.Extensions;
@@ -22,39 +23,39 @@ namespace VivesRental.Services
         {
             _context = context;
         }
-        public ArticleReservationResult Get(Guid id)
+        public async Task<ArticleReservationResult> GetAsync(Guid id)
         {
-            return _context.ArticleReservations
+            return await _context.ArticleReservations
                 .Where(ar => ar.Id == id)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
         }
 
-        public ArticleReservationResult Get(Guid id, ArticleReservationIncludes includes)
+        public async Task<ArticleReservationResult> GetAsync(Guid id, ArticleReservationIncludes includes)
         {
-            return _context.ArticleReservations
+            return await _context.ArticleReservations
                 .AddIncludes(includes)
                 .Where(ar => ar.Id == id)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
         }
 
-        public IList<ArticleReservationResult> All()
+        public async Task<List<ArticleReservationResult>> AllAsync()
         {
-            return _context.ArticleReservations
+            return await _context.ArticleReservations
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
-                .ToList();
+                .ToListAsync();
         }
 
-        public IList<ArticleReservationResult> All(ArticleReservationIncludes includes)
+        public async Task<List<ArticleReservationResult>> AllAsync(ArticleReservationIncludes includes)
         {
-            return _context.ArticleReservations
+            return await _context.ArticleReservations
                 .AddIncludes(includes)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
-                .ToList();
+                .ToListAsync();
         }
 
-        public ArticleReservationResult Create(Guid customerId, Guid articleId)
+        public async Task<ArticleReservationResult> CreateAsync(Guid customerId, Guid articleId)
         {
             var articleReservation = new ArticleReservation
             {
@@ -63,10 +64,10 @@ namespace VivesRental.Services
                 FromDateTime = DateTime.Now,
                 UntilDateTime = DateTime.Now.AddMinutes(5)
             };
-            return Create(articleReservation);
+            return await CreateAsync(articleReservation);
         }
 
-        public ArticleReservationResult Create(ArticleReservation entity)
+        public async Task<ArticleReservationResult> CreateAsync(ArticleReservation entity)
         {
 
             if (!entity.IsValid())
@@ -83,7 +84,7 @@ namespace VivesRental.Services
             };
 
             _context.ArticleReservations.Add(articleReservation);
-            var numberOfObjectsUpdated = _context.SaveChanges();
+            var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             if (numberOfObjectsUpdated > 0)
             {
                 //Detach and return
@@ -97,11 +98,11 @@ namespace VivesRental.Services
         /// </summary>
         /// <param name="id">The id of the ArticleReservation</param>
         /// <returns>True if the article reservation was deleted</returns>
-        public bool Remove(Guid id)
+        public async Task<bool> RemoveAsync(Guid id)
         {
             _context.ArticleReservations.Remove(id);
 
-            var numberOfObjectsUpdated = _context.SaveChangesWithConcurrencyIgnore();
+            var numberOfObjectsUpdated = await _context.SaveChangesWithConcurrencyIgnoreAsync();
             return numberOfObjectsUpdated > 0;
         }
     }

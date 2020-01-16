@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using VivesRental.Model;
 using VivesRental.Repository.Includes;
 using VivesRental.Services.Results;
@@ -8,12 +9,12 @@ namespace VivesRental.Services.Contracts
 {
     public interface IArticleReservationService
     {
-        ArticleReservationResult Get(Guid id);
-        ArticleReservationResult Get(Guid id, ArticleReservationIncludes includes);
-        IList<ArticleReservationResult> All();
-        IList<ArticleReservationResult> All(ArticleReservationIncludes includes);
-        ArticleReservationResult Create(Guid customerId, Guid articleId);
-        ArticleReservationResult Create(ArticleReservation entity);
-        bool Remove(Guid id);
+        Task<ArticleReservationResult> GetAsync(Guid id);
+        Task<ArticleReservationResult> GetAsync(Guid id, ArticleReservationIncludes includes);
+        Task<List<ArticleReservationResult>> AllAsync();
+        Task<List<ArticleReservationResult>> AllAsync(ArticleReservationIncludes includes);
+        Task<ArticleReservationResult> CreateAsync(Guid customerId, Guid articleId);
+        Task<ArticleReservationResult> CreateAsync(ArticleReservation entity);
+        Task<bool> RemoveAsync(Guid id);
     }
 }

@@ -41,7 +41,7 @@ namespace VivesRental.Repository.Tests
                 var customerRepository = new CustomerRepository(context);
 
                 //Act
-                var customer = customerRepository.Find(c => c.Id == Guid.NewGuid()).FirstOrDefault();
+                var customer = customerRepository.Where(c => c.Id == Guid.NewGuid()).FirstOrDefault();
 
                 //Assert
                 Assert.IsNull(customer);
@@ -61,7 +61,7 @@ namespace VivesRental.Repository.Tests
                 context.SaveChanges();
 
                 //Act
-                var dbCustomer = customerRepository.Find(c => c.Id == customer.Id).FirstOrDefault();
+                var dbCustomer = customerRepository.Where(c => c.Id == customer.Id).FirstOrDefault();
 
                 //Assert
                 Assert.IsNotNull(dbCustomer);
@@ -84,7 +84,7 @@ namespace VivesRental.Repository.Tests
                 context.SaveChanges();
 
                 //Act
-                var customers = customerRepository.Find().ToList();
+                var customers = customerRepository.Where().ToList();
 
                 //Assert
                 Assert.AreEqual(10, customers.Count());

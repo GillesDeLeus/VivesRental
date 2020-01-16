@@ -24,7 +24,7 @@ namespace VivesRental.Services
         public ArticleResult Get(Guid id, ArticleIncludes includes = null)
         {
             return _unitOfWork.Articles
-                .Find(a => a.Id == id, includes)
+                .Where(a => a.Id == id, includes)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefault();
         }
@@ -32,7 +32,7 @@ namespace VivesRental.Services
         public IList<ArticleResult> All(ArticleIncludes includes = null)
         {
             return _unitOfWork.Articles
-                .Find(includes)
+                .Where(includes)
                 .MapToResults(DateTime.Now,DateTime.MaxValue)
                 .ToList();
         }
@@ -48,7 +48,7 @@ namespace VivesRental.Services
         public IList<ArticleResult> GetAvailableArticles(DateTime fromDateTime, DateTime untilDateTime, ArticleIncludes includes = null)
         {
             return _unitOfWork.Articles
-                .Find(ArticleExtensions.IsAvailable(fromDateTime, untilDateTime), includes)
+                .Where(ArticleExtensions.IsAvailable(fromDateTime, untilDateTime), includes)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToList();
         }
@@ -56,7 +56,7 @@ namespace VivesRental.Services
         public IList<ArticleResult> GetAvailableArticles(Guid productId, ArticleIncludes includes = null)
         {
             return _unitOfWork.Articles
-                .Find(a => a.ProductId == productId &&
+                .Where(a => a.ProductId == productId &&
                                                   a.Status == ArticleStatus.Normal &&
                                                   a.OrderLines.All(ol => ol.ReturnedAt.HasValue), includes)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
@@ -66,7 +66,7 @@ namespace VivesRental.Services
         public IList<ArticleResult> GetRentedArticles(ArticleIncludes includes = null)
         {
             return _unitOfWork.Articles
-                .Find(a => a.IsRented(), includes)
+                .Where(a => a.IsRented(), includes)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToList();
         }
@@ -74,7 +74,7 @@ namespace VivesRental.Services
         public IList<ArticleResult> GetRentedArticles(Guid customerId, ArticleIncludes includes = null)
         {
             return _unitOfWork.Articles
-                .Find(a => a.IsRented(customerId), includes)
+                .Where(a => a.IsRented(customerId), includes)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToList();
         }
@@ -108,7 +108,7 @@ namespace VivesRental.Services
         {
             //Get Product from unitOfWork
             var article = _unitOfWork.Articles
-                .Find(a => a.Id== articleId)
+                .Where(a => a.Id== articleId)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefault();
 
@@ -132,7 +132,7 @@ namespace VivesRental.Services
         public bool Remove(Guid id)
         {
             var article = _unitOfWork.Articles
-                .Find(a => a.Id == id)
+                .Where(a => a.Id == id)
                 .FirstOrDefault();
 
             if (article == null)

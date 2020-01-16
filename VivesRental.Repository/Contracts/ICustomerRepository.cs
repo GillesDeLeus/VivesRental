@@ -7,8 +7,8 @@ namespace VivesRental.Repository.Contracts
 {
     public interface ICustomerRepository
     {
-        IEnumerable<Customer> Find();
-        IEnumerable<Customer> Find(Expression<Func<Customer, bool>> predicate);
+        IEnumerable<Customer> Where();
+        IEnumerable<Customer> Where(Expression<Func<Customer, bool>> predicate);
         void Add(Customer customer);
         void Remove(Guid id);
     }

@@ -17,13 +17,13 @@ namespace VivesRental.Repository
             _context = context;
         }
 
-        public IEnumerable<Product> Find()
+        public IEnumerable<Product> Where()
         {
             return _context.Products
                 .AsEnumerable();
         }
 
-        public IEnumerable<Product> Find(Expression<Func<Product, bool>> predicate)
+        public IEnumerable<Product> Where(Expression<Func<Product, bool>> predicate)
         {
             return _context.Products
                 .Where(predicate)

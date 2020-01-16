@@ -22,13 +22,19 @@ namespace VivesRental.Repository
             _context.Customers.Add(customer);
         }
 
-        public IEnumerable<Customer> Find()
+        public Customer Find(Guid id)
+        {
+            return _context.Customers
+                .SingleOrDefault();
+        }
+
+        public IEnumerable<Customer> Where()
         {
             return _context.Customers
                 .AsEnumerable();
         }
 
-        public IEnumerable<Customer> Find(Expression<Func<Customer, bool>> predicate)
+        public IEnumerable<Customer> Where(Expression<Func<Customer, bool>> predicate)
         {
             return _context.Customers
                 .Where(predicate)

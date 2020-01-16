@@ -26,7 +26,7 @@ namespace VivesRental.Services
         public OrderLineResult Get(Guid id)
         {
             return _unitOfWork.OrderLines
-                .Find(ol => ol.Id == id)
+                .Where(ol => ol.Id == id)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefault();
         }
@@ -34,7 +34,7 @@ namespace VivesRental.Services
         public IList<OrderLineResult> FindByOrderId(Guid orderId)
         {
             return _unitOfWork.OrderLines
-                .Find(rol => rol.OrderId == orderId)
+                .Where(rol => rol.OrderId == orderId)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToList();
         }
@@ -44,7 +44,7 @@ namespace VivesRental.Services
             var fromDateTime = DateTime.Now;
 
             var article = _unitOfWork.Articles
-                .Find(ArticleExtensions.IsAvailable(articleId, fromDateTime), new ArticleIncludes { Product = true })
+                .Where(ArticleExtensions.IsAvailable(articleId, fromDateTime), new ArticleIncludes { Product = true })
                 .SingleOrDefault();
 
             if (article == null)
@@ -65,7 +65,7 @@ namespace VivesRental.Services
         {
             var fromDateTime = DateTime.Now;
             var articles = _unitOfWork.Articles
-                .Find(ArticleExtensions.IsAvailable(articleIds, fromDateTime), new ArticleIncludes { Product = true })
+                .Where(ArticleExtensions.IsAvailable(articleIds, fromDateTime), new ArticleIncludes { Product = true })
                 .ToList();
 
             //If the amount of articles is not the same as the requested ids, some articles are not available anymore
@@ -93,7 +93,7 @@ namespace VivesRental.Services
         public bool Return(Guid orderLineId, DateTime returnedAt)
         {
             var orderLine = _unitOfWork.OrderLines
-                .Find(ol => ol.Id == orderLineId)
+                .Where(ol => ol.Id == orderLineId)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefault();
 

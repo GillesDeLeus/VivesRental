@@ -21,14 +21,14 @@ namespace VivesRental.Repository
             _context = context;
         }
 
-        public IEnumerable<Order> Find(OrderIncludes includes = null)
+        public IEnumerable<Order> Where(OrderIncludes includes = null)
         {
             return _context.Orders
                 .AddIncludes(includes)
                 .AsEnumerable();
         }
 
-        public IEnumerable<Order> Find(Expression<Func<Order, bool>> predicate, OrderIncludes includes = null)
+        public IEnumerable<Order> Where(Expression<Func<Order, bool>> predicate, OrderIncludes includes = null)
         {
             return _context.Orders
                 .AddIncludes(includes)

@@ -44,7 +44,7 @@ namespace VivesRental.Repository.Tests
             var productRepository = new ProductRepository(context);
 
             //Act
-            var product = productRepository.Find(p => p.Id == Guid.NewGuid()).FirstOrDefault();
+            var product = productRepository.Where(p => p.Id == Guid.NewGuid()).FirstOrDefault();
 
             //Assert
             Assert.IsNull(product);
@@ -60,7 +60,7 @@ namespace VivesRental.Repository.Tests
             var productRepository = new ProductRepository(context);
 
             //Act
-            var product = productRepository.Find(p => p.Id == Guid.NewGuid()).FirstOrDefault();
+            var product = productRepository.Where(p => p.Id == Guid.NewGuid()).FirstOrDefault();
 
             //Assert
             Assert.IsNull(product);
@@ -84,7 +84,7 @@ namespace VivesRental.Repository.Tests
             {
                 //Act
                 var productRepository = new ProductRepository(context);
-                var product = productRepository.Find(p => p.Id == addedProductId).FirstOrDefault();
+                var product = productRepository.Where(p => p.Id == addedProductId).FirstOrDefault();
                 //Assert
                 Assert.IsNotNull(product);
             }
@@ -108,7 +108,7 @@ namespace VivesRental.Repository.Tests
             {
                 //Act
                 var productRepository = new ProductRepository(context);
-                var product = productRepository.Find(p => p.Id == addedProductId);
+                var product = productRepository.Where(p => p.Id == addedProductId);
                 //Assert
                 Assert.IsNotNull(product);
             }
@@ -130,7 +130,7 @@ namespace VivesRental.Repository.Tests
                 context.SaveChanges();
 
                 //Act
-                var products = productRepository.Find().ToList();
+                var products = productRepository.Where().ToList();
 
                 //Assert
                 Assert.AreEqual(10, products.Count());
@@ -160,7 +160,7 @@ namespace VivesRental.Repository.Tests
                 context.SaveChanges();
 
                 var product = productRepository
-                    .Find(p => p.Id == productId)
+                    .Where(p => p.Id == productId)
                     .FirstOrDefault();
 
                 //Assert

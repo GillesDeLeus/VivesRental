@@ -43,14 +43,14 @@ namespace VivesRental.Repository
             _context.Articles.Add(article);
         }
 
-        public IEnumerable<Article> Find(ArticleIncludes includes = null)
+        public IEnumerable<Article> Where(ArticleIncludes includes = null)
         {
             return _context.Articles
                 .AddIncludes(includes)
                 .AsEnumerable();
         }
 
-        public IEnumerable<Article> Find(Expression<Func<Article, bool>> predicate, ArticleIncludes includes = null)
+        public IEnumerable<Article> Where(Expression<Func<Article, bool>> predicate, ArticleIncludes includes = null)
         {
             return _context.Articles
                 .AddIncludes(includes)

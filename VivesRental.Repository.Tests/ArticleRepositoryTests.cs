@@ -46,7 +46,7 @@ namespace VivesRental.Repository.Tests
                 var articleRepository = new ArticleRepository(context);
 
                 //Act
-                var article = articleRepository.Find(a => a.Id == Guid.NewGuid()).FirstOrDefault();
+                var article = articleRepository.Where(a => a.Id == Guid.NewGuid()).FirstOrDefault();
 
                 //Assert
                 Assert.IsNull(article);
@@ -70,7 +70,7 @@ namespace VivesRental.Repository.Tests
                 context.SaveChanges();
 
                 //Act
-                var article = articleRepository.Find(a => a.Id == articleToAdd.Id).FirstOrDefault();
+                var article = articleRepository.Where(a => a.Id == articleToAdd.Id).FirstOrDefault();
 
                 //Assert
                 Assert.IsNotNull(article);
@@ -96,7 +96,7 @@ namespace VivesRental.Repository.Tests
                 context.SaveChanges();
 
                 //Act
-                var articles = articleRepository.Find().ToList();
+                var articles = articleRepository.Where().ToList();
 
                 //Assert
                 Assert.AreEqual(10, articles.Count());
@@ -156,7 +156,7 @@ namespace VivesRental.Repository.Tests
             using (var context = DbContextFactory.CreateInstance(databaseName))
             {
                 var articleRepository = new ArticleRepository(context);
-                var article = articleRepository.Find(a => a.Id == articleId).FirstOrDefault();
+                var article = articleRepository.Where(a => a.Id == articleId).FirstOrDefault();
                 Assert.IsNull(article);
             }
         }

@@ -23,7 +23,7 @@ namespace VivesRental.Services
         public OrderResult Get(Guid id, OrderIncludes includes = null)
         {
             return _unitOfWork.Orders
-                .Find(o => o.Id == id, includes)
+                .Where(o => o.Id == id, includes)
                 .MapToResults()
                 .FirstOrDefault();
         }
@@ -31,7 +31,7 @@ namespace VivesRental.Services
         public IList<OrderResult> FindByCustomerId(Guid customerId, OrderIncludes includes = null)
         {
             return _unitOfWork.Orders
-                .Find(o => o.CustomerId == customerId, includes)
+                .Where(o => o.CustomerId == customerId, includes)
                 .MapToResults()
                 .ToList();
         }
@@ -39,14 +39,14 @@ namespace VivesRental.Services
         public IList<OrderResult> All()
         {
             return _unitOfWork.Orders
-                .Find()
+                .Where()
                 .MapToResults()
                 .ToList();
         }
         
         public OrderResult Create(Guid customerId)
         {
-            var customer = _unitOfWork.Customers.Find(c => c.Id == customerId)
+            var customer = _unitOfWork.Customers.Where(c => c.Id == customerId)
                 .MapToResults()
                 .FirstOrDefault();
 
@@ -76,7 +76,7 @@ namespace VivesRental.Services
 
         public bool Return(Guid orderId, DateTime returnedAt)
         {
-            var orderLines = _unitOfWork.OrderLines.Find(ol => ol.OrderId == orderId && !ol.ReturnedAt.HasValue);
+            var orderLines = _unitOfWork.OrderLines.Where(ol => ol.OrderId == orderId && !ol.ReturnedAt.HasValue);
             foreach (var orderLine in orderLines)
             {
                 orderLine.ReturnedAt = returnedAt;

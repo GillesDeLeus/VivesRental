@@ -24,7 +24,7 @@ namespace VivesRental.Services
         public ArticleReservationResult Get(Guid id)
         {
             return _unitOfWork.ArticleReservations
-                .Find(ar => ar.Id == id)
+                .Where(ar => ar.Id == id)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefault();
         }
@@ -32,7 +32,7 @@ namespace VivesRental.Services
         public ArticleReservationResult Get(Guid id, ArticleReservationIncludes includes)
         {
             return _unitOfWork.ArticleReservations
-                .Find(ar => ar.Id == id, includes)
+                .Where(ar => ar.Id == id, includes)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefault();
         }
@@ -40,7 +40,7 @@ namespace VivesRental.Services
         public IList<ArticleReservationResult> All()
         {
             return _unitOfWork.ArticleReservations
-                .Find()
+                .Where()
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToList();
         }
@@ -48,7 +48,7 @@ namespace VivesRental.Services
         public IList<ArticleReservationResult> All(ArticleReservationIncludes includes)
         {
             return _unitOfWork.ArticleReservations
-                .Find(includes)
+                .Where(includes)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToList();
         }
@@ -99,7 +99,7 @@ namespace VivesRental.Services
         public bool Remove(Guid id)
         {
             var article = _unitOfWork.ArticleReservations
-                .Find(a => a.Id == id)
+                .Where(a => a.Id == id)
                 .FirstOrDefault();
 
             if (article == null)

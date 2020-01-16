@@ -46,7 +46,7 @@ namespace VivesRental.Repository.Tests
 
                 //Act
                 var order = orderRepository
-                    .Find(o => o.Id == Guid.NewGuid())
+                    .Where(o => o.Id == Guid.NewGuid())
                     .FirstOrDefault();
 
                 //Assert
@@ -72,7 +72,7 @@ namespace VivesRental.Repository.Tests
                 context.SaveChanges();
 
                 //Act
-                var order = orderRepository.Find(o => o.Id == orderToAdd.Id);
+                var order = orderRepository.Where(o => o.Id == orderToAdd.Id);
 
                 //Assert
                 Assert.IsNotNull(order);
@@ -98,7 +98,7 @@ namespace VivesRental.Repository.Tests
                 context.SaveChanges();
 
                 //Act
-                var orders = orderRepository.Find().ToList();
+                var orders = orderRepository.Where().ToList();
 
                 //Assert
                 Assert.AreEqual(10, orders.Count());

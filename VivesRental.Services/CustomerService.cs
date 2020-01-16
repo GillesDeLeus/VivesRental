@@ -23,7 +23,7 @@ namespace VivesRental.Services
         public CustomerResult Get(Guid id)
         {
             return _unitOfWork.Customers
-                .Find(c => c.Id == id)
+                .Where(c => c.Id == id)
                 .MapToResults()
                 .FirstOrDefault();
         }
@@ -31,7 +31,7 @@ namespace VivesRental.Services
         public IList<CustomerResult> All()
         {
             return _unitOfWork.Customers
-                .Find()
+                .Where()
                 .MapToResults()
                 .ToList();
         }
@@ -69,7 +69,7 @@ namespace VivesRental.Services
 
             //Get Product from unitOfWork
             var customer = _unitOfWork.Customers
-                .Find(c => c.Id==entity.Id)
+                .Where(c => c.Id==entity.Id)
                 .FirstOrDefault();
 
             if (customer == null)
@@ -97,7 +97,7 @@ namespace VivesRental.Services
         public bool Remove(Guid id)
         {
             var customer = _unitOfWork.Customers
-                .Find(c => c.Id == id)
+                .Where(c => c.Id == id)
                 .FirstOrDefault();
 
             if (customer == null)

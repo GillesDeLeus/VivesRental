@@ -24,7 +24,7 @@ namespace VivesRental.Services
         public ProductResult Get(Guid id)
         {
             return _unitOfWork.Products
-                .Find(p => p.Id == id)
+                .Where(p => p.Id == id)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefault();
         }
@@ -41,7 +41,7 @@ namespace VivesRental.Services
         public IList<ProductResult> All(DateTime fromDateTime, DateTime untilDateTime)
         {
             return _unitOfWork.Products
-                .Find()
+                .Where()
                 .MapToResults(fromDateTime, untilDateTime)
                 .ToList();
         }
@@ -81,7 +81,7 @@ namespace VivesRental.Services
 
             //Get Product from unitOfWork
             var product = _unitOfWork.Products
-                .Find(p => p.Id == entity.Id)
+                .Where(p => p.Id == entity.Id)
                 .FirstOrDefault();
 
             if (product == null)
@@ -112,7 +112,7 @@ namespace VivesRental.Services
         public bool Remove(Guid id)
         {
             var product = _unitOfWork.Products
-                .Find(p => p.Id == id)
+                .Where(p => p.Id == id)
                 .FirstOrDefault();
 
             if (product == null)
@@ -173,7 +173,7 @@ namespace VivesRental.Services
         public IList<ProductResult> GetAvailableProductResults(DateTime fromDateTime, DateTime untilDateTime)
         {
             return _unitOfWork.Products
-                .Find(ProductExtensions.IsAvailable(fromDateTime, untilDateTime)) //Only articles that are not reserved in this period
+                .Where(ProductExtensions.IsAvailable(fromDateTime, untilDateTime)) //Only articles that are not reserved in this period
                 .MapToResults(fromDateTime, untilDateTime)
                 .ToList();
         }

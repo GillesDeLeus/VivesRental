@@ -12,7 +12,8 @@ namespace VivesRental.Repository.Contracts
         void RemoveByArticleId(Guid articleId);
         void RemoveByProductId(Guid productId);
         void Add(ArticleReservation article);
-        IEnumerable<ArticleReservation> Find(ArticleReservationIncludes includes = null);
-        IEnumerable<ArticleReservation> Find(Expression<Func<ArticleReservation, bool>> predicate, ArticleReservationIncludes includes = null);
+
+        IEnumerable<ArticleReservation> Where(ArticleReservationIncludes includes = null);
+        IEnumerable<ArticleReservation> Where(Expression<Func<ArticleReservation, bool>> predicate, ArticleReservationIncludes includes = null);
     }
 }

@@ -48,14 +48,14 @@ namespace VivesRental.Repository
             _context.ArticleReservations.Add(article);
         }
 
-        public IEnumerable<ArticleReservation> Find(ArticleReservationIncludes includes = null)
+        public IEnumerable<ArticleReservation> Where(ArticleReservationIncludes includes = null)
         {
             return _context.ArticleReservations
                 .AddIncludes(includes)
                 .AsEnumerable();
         }
 
-        public IEnumerable<ArticleReservation> Find(Expression<Func<ArticleReservation, bool>> predicate = null, ArticleReservationIncludes includes = null)
+        public IEnumerable<ArticleReservation> Where(Expression<Func<ArticleReservation, bool>> predicate = null, ArticleReservationIncludes includes = null)
         {
             return _context.ArticleReservations
                 .AddIncludes(includes)

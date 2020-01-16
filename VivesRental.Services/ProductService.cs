@@ -146,11 +146,11 @@ namespace VivesRental.Services
             return numberOfObjectsUpdated > 0;
         }
 
-        public IList<ProductResult> GetAvailableProductResults()
+        public IList<ProductResult> GetAvailableProductResults(ProductIncludes includes = null)
         {
             return _unitOfWork.Products
                 .FindResult(p => p.Articles.Any(a => a.Status == ArticleStatus.Normal &&
-                                                   a.OrderLines.All(ol => ol.ReturnedAt.HasValue)))
+                                                   a.OrderLines.All(ol => ol.ReturnedAt.HasValue)), includes)
                 .ToList();
         }
 

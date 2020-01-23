@@ -190,13 +190,23 @@ namespace VivesRental.Services
                     orderLine.Article = null;
                     orderLine.ArticleId = null;
                 }
+
                 return;
             }
 
-            var commandText = "UPDATE OrderLine SET ArticleId = null from OrderLine inner join Article on Article.ProductId = @ProductId";
+            var commandText =
+                "UPDATE OrderLine SET ArticleId = null from OrderLine inner join Article on Article.ProductId = @ProductId";
             var articleIdParameter = new SqlParameter("@ProductId", productId);
 
             await _context.Database.ExecuteSqlRawAsync(commandText, articleIdParameter);
+        }
+
+        public IList<ProductResult> GetAvailableProductResults(ProductIncludes includes = null)
+        {
+            return _unitOfWork.Products
+                .FindResult(p => p.Articles.Any(a => a.Status == ArticleStatus.Normal &&
+                                                   a.OrderLines.All(ol => ol.ReturnedAt.HasValue)), includes)
+                .ToList();
         }
 
     }

@@ -10,5 +10,6 @@ namespace VivesRental.Services.Results
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
         public int NumberOfOrders { get; set; }
+        public int NumberOfPendingOrders { get; set; }
     }
 }

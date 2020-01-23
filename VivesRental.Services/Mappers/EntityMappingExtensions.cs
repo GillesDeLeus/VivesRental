@@ -56,7 +56,8 @@ namespace VivesRental.Services.Mappers
                 LastName = customer.LastName,
                 Email = customer.Email,
                 PhoneNumber = customer.PhoneNumber,
-                NumberOfOrders = customer.Orders.Count()
+                NumberOfOrders = customer.Orders.Count(),
+                NumberOfPendingOrders = customer.Orders.Count(o => o.OrderLines.Any(ol => !ol.ReturnedAt.HasValue))
             };
         }
 

@@ -1,93 +1,93 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
 using VivesRental.Repository.Core;
+using VivesRental.Repository.Extensions;
 using VivesRental.Repository.Includes;
 using VivesRental.Services.Contracts;
 using VivesRental.Services.Extensions;
+using VivesRental.Services.Mappers;
+using VivesRental.Services.Results;
 
 namespace VivesRental.Services
 {
     public class ArticleService : IArticleService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IVivesRentalDbContext _context;
 
-        public ArticleService(IUnitOfWork unitOfWork)
+        public ArticleService(IVivesRentalDbContext context)
         {
-            _unitOfWork = unitOfWork;
-        }
-        public Article Get(Guid id)
-        {
-            return _unitOfWork.Articles.Get(id);
+            _context = context;
         }
 
-        public Article Get(Guid id, ArticleIncludes includes)
+        public Task<ArticleResult> GetAsync(Guid id, ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles.Get(id, includes);
+            return _context.Articles
+                .AddIncludes(includes)
+                .Where(a => a.Id == id)
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .FirstOrDefaultAsync();
         }
 
-        public IList<Article> All()
+        public Task<List<ArticleResult>> AllAsync(ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles.GetAll().ToList();
+            return _context.Articles
+                .AddIncludes(includes)
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .ToListAsync();
         }
 
-        public IList<Article> All(ArticleIncludes includes)
+        public Task<List<ArticleResult>> GetAvailableArticlesAsync(ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles.GetAll(includes).ToList();
+            var fromDateTime = DateTime.Now;
+            var untilDateTime = DateTime.MaxValue;
+
+            return GetAvailableArticlesAsync(fromDateTime, untilDateTime, includes);
         }
 
-        public IList<Article> GetAvailableArticles()
+        public Task<List<ArticleResult>> GetAvailableArticlesAsync(DateTime fromDateTime, DateTime untilDateTime, ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles.Find(a => a.Status == ArticleStatus.Normal &&
-                                                         a.OrderLines.All(ol => ol.ReturnedAt.HasValue)).ToList();
+            return _context.Articles
+                .AddIncludes(includes)
+                .Where(ArticleExtensions.IsAvailable(fromDateTime, untilDateTime))
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .ToListAsync();
         }
 
-        public IList<Article> GetAvailableArticles(ArticleIncludes includes)
+        public Task<List<ArticleResult>> GetAvailableArticlesAsync(Guid productId, ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles.Find(a => a.Status == ArticleStatus.Normal &&
-                                                         a.OrderLines.All(ol => ol.ReturnedAt.HasValue), includes).ToList();
-        }
-
-        public IList<Article> GetAvailableArticles(Guid productId)
-        {
-            return _unitOfWork.Articles.Find(a => a.ProductId == productId &&
+            return _context.Articles
+                .AddIncludes(includes)
+                .Where(a => a.ProductId == productId &&
                                                   a.Status == ArticleStatus.Normal &&
-                                                  a.OrderLines.All(ol => ol.ReturnedAt.HasValue)).ToList();
+                                                  a.OrderLines.All(ol => ol.ReturnedAt.HasValue))
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .ToListAsync();
         }
 
-        public IList<Article> GetAvailableArticles(Guid productId, ArticleIncludes includes)
+        public Task<List<ArticleResult>> GetRentedArticlesAsync(ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles.Find(a => a.ProductId == productId && 
-                                                  a.Status == ArticleStatus.Normal &&
-                                                  a.OrderLines.All(ol => ol.ReturnedAt.HasValue), includes).ToList();
+            return _context.Articles
+                .AddIncludes(includes)
+                .Where(a => a.IsRented())
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .ToListAsync();
         }
 
-        public IList<Article> GetRentedArticles()
+        public Task<List<ArticleResult>> GetRentedArticlesAsync(Guid customerId, ArticleIncludes includes = null)
         {
-            return _unitOfWork.Articles.Find(ri => ri.Status == ArticleStatus.Normal &&
-                                                         ri.OrderLines.Any(rol => !rol.ReturnedAt.HasValue)).ToList();
+            return _context.Articles
+                .AddIncludes(includes)
+                .Where(a => a.IsRented(customerId))
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .ToListAsync();
         }
 
-        public IList<Article> GetRentedArticles(ArticleIncludes includes)
-        {
-            return _unitOfWork.Articles.Find(ri => ri.Status == ArticleStatus.Normal &&
-                                                         ri.OrderLines.Any(rol => !rol.ReturnedAt.HasValue), includes).ToList();
-        }
-
-        public IList<Article> GetRentedArticles(Guid customerId)
-        {
-            return _unitOfWork.Articles.Find(ri => ri.Status == ArticleStatus.Normal &&
-                                                         ri.OrderLines.Any(rol => !rol.ReturnedAt.HasValue && rol.Order.CustomerId == customerId)).ToList();
-        }
-
-        public IList<Article> GetRentedArticles(Guid customerId, ArticleIncludes includes)
-        {
-            return _unitOfWork.Articles.Find(ri => ri.Status == ArticleStatus.Normal &&
-                                                         ri.OrderLines.Any(rol => !rol.ReturnedAt.HasValue && rol.Order.CustomerId == customerId), includes).ToList();
-        }
-
-        public Article Create(Article entity)
+        public async Task<ArticleResult> CreateAsync(Article entity)
         {
 
             if (!entity.IsValid())
@@ -101,47 +101,25 @@ namespace VivesRental.Services
                 Status = entity.Status
             };
 
-            _unitOfWork.Articles.Add(article);
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
+            _context.Articles.Add(article);
+
+            var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             if (numberOfObjectsUpdated > 0)
             {
                 //Detach and return
-                return article;
+                return article.MapToResult(DateTime.Now, DateTime.MaxValue);
             }
             return null;
         }
 
-        [Obsolete("Edit has been replaced by the UpdateStatus method. Use the UpdateStatus method in stead.")]
-        public Article Edit(Article entity)
-        {
-            if (!entity.IsValid())
-            {
-                return null;
-            }
-
-            //Get Product from unitOfWork
-            var article = _unitOfWork.Articles.Get(entity.Id);
-            if (article == null)
-            {
-                return null;
-            }
-
-            //Only update the properties we want to update
-            article.ProductId = entity.ProductId;
-            article.Status = entity.Status;
-
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
-            if (numberOfObjectsUpdated > 0)
-            {
-                return entity;
-            }
-            return null;
-        }
-
-        public bool UpdateStatus(Guid articleId, ArticleStatus status)
+        public async Task<bool> UpdateStatusAsync(Guid articleId, ArticleStatus status)
         {
             //Get Product from unitOfWork
-            var article = _unitOfWork.Articles.Get(articleId);
+            var article = await _context.Articles
+                .Where(a => a.Id == articleId)
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .FirstOrDefaultAsync();
+
             if (article == null)
             {
                 return false;
@@ -150,26 +128,61 @@ namespace VivesRental.Services
             //Only update the properties we want to update
             article.Status = status;
 
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
+            var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             return numberOfObjectsUpdated > 0;
         }
 
-        public bool Remove(Guid id)
+        /// <summary>
+        /// Removes one Article, Removes the ArticleReservations and disconnects OrderLines from the Article
+        /// </summary>
+        /// <param name="id">The id of the Article</param>
+        /// <returns>True if the article was deleted</returns>
+        public async Task<bool> RemoveAsync(Guid id)
         {
-            var article = _unitOfWork.Articles.Get(id, new ArticleIncludes { OrderLines = true });
-            if (article == null)
-                return false;
-
-            foreach (var orderLine in article.OrderLines)
+            var result = await _context.RunInTransactionAsync(async () =>
             {
-                orderLine.Article = null;
-                orderLine.ArticleId = null;
+                await ClearArticleByArticleId(id);
+                _context.ArticleReservations.RemoveRange(_context.ArticleReservations.Where(ar => ar.ArticleId == id));
+                _context.Articles.Remove(id);
+
+                var numberOfObjectsUpdated = await _context.SaveChangesWithConcurrencyIgnoreAsync();
+                return numberOfObjectsUpdated > 0;
+            });
+
+            return await result;
+        }
+
+        public Task<bool> IsAvailableAsync(Guid articleId, DateTime fromDateTime, DateTime? untilDateTime = null)
+        {
+            return _context.Articles
+                .Where(a => a.Id == articleId)
+                .AllAsync(ArticleExtensions.IsAvailable(articleId, fromDateTime, untilDateTime));
+        }
+
+        public Task<bool> IsAvailableAsync(IList<Guid> articleIds, DateTime fromDateTime, DateTime? untilDateTime = null)
+        {
+            return _context.Articles
+                .Where(a => articleIds.Contains(a.Id))
+                .AllAsync(ArticleExtensions.IsAvailable(articleIds, fromDateTime, untilDateTime));
+        }
+
+        private async Task ClearArticleByArticleId(Guid articleId)
+        {
+            if (_context.Database.IsInMemory())
+            {
+                var orderLines = await _context.OrderLines.Where(ol => ol.ArticleId == articleId).ToListAsync();
+                foreach (var orderLine in orderLines)
+                {
+                    orderLine.Article = null;
+                    orderLine.ArticleId = null;
+                }
+                return;
             }
 
-            _unitOfWork.Articles.Remove(article.Id);
+            var commandText = "UPDATE OrderLine SET ArticleId = null WHERE ArticleId = @ArticleId";
+            var articleIdParameter = new SqlParameter("@ArticleId", articleId);
 
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
-            return numberOfObjectsUpdated > 0;
+            await _context.Database.ExecuteSqlRawAsync(commandText, articleIdParameter);
         }
 
     }

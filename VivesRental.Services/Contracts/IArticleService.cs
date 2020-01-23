@@ -1,30 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using VivesRental.Model;
 using VivesRental.Repository.Includes;
+using VivesRental.Services.Results;
 
 namespace VivesRental.Services.Contracts
 {
     public interface IArticleService
     {
-        Article Get(Guid id);
-        Article Get(Guid id, ArticleIncludes includes);
-        IList<Article> All();
-        IList<Article> All(ArticleIncludes includes);
-        IList<Article> GetAvailableArticles();
-        IList<Article> GetAvailableArticles(ArticleIncludes includes);
-        IList<Article> GetAvailableArticles(Guid productId);
-        IList<Article> GetAvailableArticles(Guid productId, ArticleIncludes includes);
-        IList<Article> GetRentedArticles();
-        IList<Article> GetRentedArticles(ArticleIncludes includes);
+        Task<ArticleResult> GetAsync(Guid id, ArticleIncludes includes = null);
+        Task<List<ArticleResult>> AllAsync(ArticleIncludes includes = null);
+        Task<List<ArticleResult>> GetAvailableArticlesAsync(ArticleIncludes includes = null);
+        Task<List<ArticleResult>> GetAvailableArticlesAsync(Guid productId, ArticleIncludes includes = null);
+        Task<List<ArticleResult>> GetRentedArticlesAsync(ArticleIncludes includes = null);
 
-        IList<Article> GetRentedArticles(Guid customerId);
-        IList<Article> GetRentedArticles(Guid customerId, ArticleIncludes includes);
+        Task<List<ArticleResult>> GetRentedArticlesAsync(Guid customerId, ArticleIncludes includes = null);
 
-        Article Create(Article entity);
-        [Obsolete("Edit has been replaced by the UpdateStatus method. Use the UpdateStatus method in stead.")]
-        Article Edit(Article entity);
-        bool UpdateStatus(Guid articleId, ArticleStatus status);
-        bool Remove(Guid id);
+        Task<ArticleResult> CreateAsync(Article entity);
+       
+        Task<bool> UpdateStatusAsync(Guid articleId, ArticleStatus status);
+        Task<bool> RemoveAsync(Guid id);
+
+        Task<bool> IsAvailableAsync(Guid articleId, DateTime fromDateTime, DateTime? untilDateTime = null);
+        Task<bool> IsAvailableAsync(IList<Guid> articleIds, DateTime fromDateTime, DateTime? untilDateTime = null);
     }
 }

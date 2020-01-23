@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using VivesRental.Model;
+using System.Threading.Tasks;
 using VivesRental.Repository.Includes;
-using VivesRental.Repository.Results;
+using VivesRental.Services.Results;
 
 namespace VivesRental.Services.Contracts
 {
     public interface IOrderService
     {
-        Order Get(Guid id, OrderIncludes includes = null);
+        Task<OrderResult> GetAsync(Guid id, OrderIncludes includes = null);
 
-        IList<OrderResult> FindByCustomerIdResult(Guid customerId, OrderIncludes includes = null);
-        IList<Order> All();
-        IList<OrderResult> AllResult();
+        Task<List<OrderResult>> FindByCustomerIdAsync(Guid customerId, OrderIncludes includes = null);
+        Task<List<OrderResult>> AllAsync();
 
-        Order Create(Guid customerId);
-		bool Return(Guid id, DateTime returnedAt);
+        Task<OrderResult> CreateAsync(Guid customerId);
+		Task<bool> ReturnAsync(Guid id, DateTime returnedAt);
     }
 }

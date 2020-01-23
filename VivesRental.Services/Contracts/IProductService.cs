@@ -1,24 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using VivesRental.Model;
-using VivesRental.Repository.Includes;
-using VivesRental.Repository.Results;
+using VivesRental.Services.Results;
 
 namespace VivesRental.Services.Contracts
 {
     public interface IProductService
     {
-        Product Get(Guid id);
-        Product Get(Guid id, ProductIncludes includes);
-        IList<Product> All();
-        IList<ProductResult> AllResult();
-        IList<Product> All(ProductIncludes includes);
-        IList<ProductResult> AllResult(ProductIncludes includes);
-        Product Create(Product entity);
-        Product Edit(Product entity);
-        bool Remove(Guid id);
-        bool GenerateArticles(Guid productId, int amount);
-        IList<ProductResult> GetAvailableProductResults(ProductIncludes includes = null);
+        Task<ProductResult> GetAsync(Guid id);
+        Task<List<ProductResult>> AllAsync();
+        Task<List<ProductResult>> AllAsync(DateTime fromDateTime, DateTime untilDateTime);
+        Task<ProductResult> CreateAsync(Product entity);
+        Task<ProductResult> EditAsync(Product entity);
+        Task<bool> RemoveAsync(Guid id);
+        Task<bool> GenerateArticlesAsync(Guid productId, int amount);
+        Task<List<ProductResult>> GetAvailableProductResultsAsync();
+        Task<List<ProductResult>> GetAvailableProductResultsAsync(DateTime fromDateTime, DateTime untilDateTime);
 
     }
 }

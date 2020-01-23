@@ -1,51 +1,59 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
 using VivesRental.Repository.Core;
+using VivesRental.Repository.Extensions;
 using VivesRental.Repository.Includes;
-using VivesRental.Repository.Results;
 using VivesRental.Services.Contracts;
+using VivesRental.Services.Mappers;
+using VivesRental.Services.Results;
 
 namespace VivesRental.Services
 {
 
     public class OrderService : IOrderService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IVivesRentalDbContext _context;
 
-        public OrderService(IUnitOfWork unitOfWork)
+        public OrderService(IVivesRentalDbContext context)
         {
-            _unitOfWork = unitOfWork;
+            _context = context;
         }
 
-        public Order Get(Guid id, OrderIncludes includes = null)
+        public Task<OrderResult> GetAsync(Guid id, OrderIncludes includes = null)
         {
-            return _unitOfWork.Orders.Get(id, includes);
+            return _context.Orders
+                .AddIncludes(includes)
+                .Where(o => o.Id == id)
+                .MapToResults()
+                .FirstOrDefaultAsync();
         }
 
-        public IList<OrderResult> FindByCustomerIdResult(Guid customerId, OrderIncludes includes = null)
+        public Task<List<OrderResult>> FindByCustomerIdAsync(Guid customerId, OrderIncludes includes = null)
         {
-            return _unitOfWork.Orders.FindResult(o => o.CustomerId == customerId, includes).ToList();
+            return _context.Orders
+                .AddIncludes(includes)
+                .Where(o => o.CustomerId == customerId)
+                .MapToResults()
+                .ToListAsync();
         }
 
-        public IList<Order> All()
+        public Task<List<OrderResult>> AllAsync()
         {
-            return _unitOfWork.Orders
-                .GetAll()
-                .ToList();
+            return _context.Orders
+                .MapToResults()
+                .ToListAsync();
         }
-
-        public IList<OrderResult> AllResult()
+        
+        public async Task<OrderResult> CreateAsync(Guid customerId)
         {
-            return _unitOfWork.Orders
-                .GetAllResult()
-                .ToList();
-        }
-
-        public Order Create(Guid customerId)
-        {
-            var customer = _unitOfWork.Customers.Get(customerId);
+            var customer = await _context.Customers
+                .Where(c => c.Id == customerId)
+                .MapToResults()
+                .FirstOrDefaultAsync();
 
             if (customer == null)
             {
@@ -62,24 +70,26 @@ namespace VivesRental.Services
                 CreatedAt = DateTime.Now
             };
 
-            _unitOfWork.Orders.Add(order);
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
+            _context.Orders.Add(order);
+            var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             if (numberOfObjectsUpdated > 0)
             {
-                return order;
+                return order.MapToResult();
             }
             return null;
         }
 
-        public bool Return(Guid orderId, DateTime returnedAt)
+        public async Task<bool> ReturnAsync(Guid orderId, DateTime returnedAt)
         {
-            var orderLines = _unitOfWork.OrderLines.Find(ol => ol.OrderId == orderId && !ol.ReturnedAt.HasValue);
+            var orderLines = await _context.OrderLines
+                .Where(ol => ol.OrderId == orderId && !ol.ReturnedAt.HasValue)
+                .ToListAsync();
             foreach (var orderLine in orderLines)
             {
                 orderLine.ReturnedAt = returnedAt;
             }
 
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
+            var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             return numberOfObjectsUpdated > 0;
         }
     }

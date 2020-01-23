@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using VivesRental.Model.Contracts;
 
 namespace VivesRental.Model
 {
     [Table(nameof(Article))]
-    public class Article
+    public class Article: IIdentifiable
     {
         public Article()
         {
             OrderLines = new List<OrderLine>();
+            ArticleReservations = new List<ArticleReservation>();
         }
         [Key]
         public Guid Id { get; set; }
@@ -19,6 +21,7 @@ namespace VivesRental.Model
         public ArticleStatus Status { get; set; }
 
         public IList<OrderLine> OrderLines { get; set; }
+        public IList<ArticleReservation> ArticleReservations { get; set; }
     }
 
     public enum ArticleStatus

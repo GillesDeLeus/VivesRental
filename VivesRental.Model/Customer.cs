@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using VivesRental.Model.Contracts;
 
 namespace VivesRental.Model
 {
     [Table(nameof(Customer))]
-    public class Customer
+    public class Customer: IIdentifiable
     {
         public Customer()
         {
             Orders = new List<Order>();
+            ArticleReservations = new List<ArticleReservation>();
         }
 
         [Key]
@@ -21,5 +23,6 @@ namespace VivesRental.Model
         public string PhoneNumber { get; set; }
 
         public IList<Order> Orders { get; set; }
+        public IList<ArticleReservation> ArticleReservations { get; set; }
     }
 }

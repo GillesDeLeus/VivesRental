@@ -1,11 +1,12 @@
 ﻿using System;
 
-namespace VivesRental.Repository.Results
+namespace VivesRental.Services.Results
 {
     public class OrderResult
     {
         public Guid Id { get; set; }
         public Guid? CustomerId { get; set; }
+        public CustomerResult Customer { get; set; }
         public string CustomerFirstName { get; set; }
         public string CustomerLastName { get; set; }
         public string CustomerEmail { get; set; }

@@ -1,9 +1,6 @@
-﻿using System;
+﻿using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using VivesRental.Repository.Contracts;
-using VivesRental.Repository.Core;
-using VivesRental.Repository.Includes;
+using VivesRental.Tests.Data.Extensions;
 using VivesRental.Tests.Data.Factories;
 
 namespace VivesRental.Services.Tests
@@ -12,58 +9,48 @@ namespace VivesRental.Services.Tests
 	public class ArticleServiceTests
 	{
 		[TestMethod]
-		public void Remove_Deletes_Article()
+		public async Task Remove_Deletes_Article()
         {
             //Arrange
-            var productToAdd = ProductFactory.CreateValidEntity();
-            var articleToAdd = ArticleFactory.CreateValidEntity(productToAdd);
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            var articleRepositoryMock = new Mock<IArticleRepository>();
+            using var context = DbContextFactory.CreateInstance("Remove_Deletes_Product_With_Articles");
+            
+            var product = ProductFactory.CreateValidEntity();
+            context.Products.Add(product);
+            var article = ArticleFactory.CreateValidEntity(product);
+            context.Articles.Add(article);
+            context.SaveChanges();
 
-            //Setup ArticleRepository
-            articleRepositoryMock.Setup(ir => ir.Get(It.IsAny<Guid>(), It.IsAny<ArticleIncludes>())).Returns(articleToAdd);
-            articleRepositoryMock.Setup(ir => ir.Remove(It.IsAny<Guid>()));
-
-            //Setup UnitOfWork
-            unitOfWorkMock.Setup(uow => uow.Articles).Returns(articleRepositoryMock.Object);
-            unitOfWorkMock.Setup(uow => uow.Complete()).Returns(1);
-
-            var articleService = new ArticleService(unitOfWorkMock.Object);
+            var articleService = new ArticleService(context);
 
             //Act
-            var result = articleService.Remove(articleToAdd.Id);
+            var result = await articleService.RemoveAsync(article.Id);
 
             //Assert
             Assert.IsTrue(result);
         }
 
 		[TestMethod]
-		public void Remove_Deletes_Article_With_OrderLines()
+		public async Task Remove_Deletes_Article_With_OrderLines()
 		{
             //Arrange
+            using var context = DbContextFactory.CreateInstance("Remove_Deletes_Product_With_Articles");
+            
             var customer = CustomerFactory.CreateValidEntity();
-            var productToAdd = ProductFactory.CreateValidEntity();
-            var article = ArticleFactory.CreateValidEntity(productToAdd);
+            context.Customers.Add(customer);
+            var product = ProductFactory.CreateValidEntity();
+            context.Products.Add(product);
+            var article = ArticleFactory.CreateValidEntity(product);
+            context.Articles.Add(article);
             var order = OrderFactory.CreateValidEntity(customer);
+            context.Orders.Add(order);
             var orderLine = OrderLineFactory.CreateValidEntity(order, article);
+            context.OrderLines.Add(orderLine);
+            await context.SaveChangesAsync();
 
-            article.OrderLines.Add(orderLine);
-            productToAdd.Articles.Add(article);
-
-            //Setup ArticleRepository
-            var articleRepositoryMock = new Mock<IArticleRepository>();
-            articleRepositoryMock.Setup(ir => ir.Get(It.IsAny<Guid>(), It.IsAny<ArticleIncludes>())).Returns(article);
-            articleRepositoryMock.Setup(rir => rir.Remove(It.IsAny<Guid>()));
-
-            //Setup UnitOfWork
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            unitOfWorkMock.Setup(uow => uow.Articles).Returns(articleRepositoryMock.Object);
-            unitOfWorkMock.Setup(uow => uow.Complete()).Returns(1);
-
-            var articleService = new ArticleService(unitOfWorkMock.Object);
+            var articleService = new ArticleService(context);
 
             //Act
-            var result = articleService.Remove(productToAdd.Id);
+            var result = await articleService.RemoveAsync(article.Id);
 
             //Assert
             Assert.IsTrue(result);

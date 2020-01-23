@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VivesRental.Repository.Results
+namespace VivesRental.Services.Results
 {
     public class ProductResult
     {

@@ -12,6 +12,7 @@ namespace VivesRental.Repository.Core
     {
         DbSet<Product> Products { get; set; }
         DbSet<Article> Articles { get; set; }
+        DbSet<ArticleReservation> ArticleReservations { get; set; }
         DbSet<Order> Orders { get; set; }
         DbSet<OrderLine> OrderLines { get; set; }
         DbSet<Customer> Customers { get; set; }
@@ -24,6 +25,7 @@ namespace VivesRental.Repository.Core
 
         DbSet<T> Set<T>() where T : class;
         EntityEntry<T> Entry<T>(T entity) where T : class;
+
         DatabaseFacade Database { get; }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using VivesRental.Model;
-using VivesRental.Repository;
-using VivesRental.Repository.Core;
 using VivesRental.Services;
 using VivesRental.Tests.ConsoleApp.Factories;
 
@@ -9,21 +9,114 @@ namespace VivesRental.Tests.ConsoleApp
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            TestRemove2();
+            //TestNumberOfAvailableItems();
+            //TestIsAvailable();
+            //TestRemove();
+            await TestEdit2();
+            Console.WriteLine("Done...");
             Console.ReadLine();
         }
 
-        static void TestEdit()
+        static async Task TestNumberOfAvailableItems()
         {
-            using var context = new DbContextFactory().CreateDbContext();
-            var unitOfWork = CreateUnitOfWork(context);
-
-            var productService = new ProductService(unitOfWork);
+            await using var context = new DbContextFactory().CreateDbContext();
             
-            var articleService = new ArticleService(unitOfWork);
+            var customerService = new CustomerService(context);
+            var productService = new ProductService(context);
+            var articleService = new ArticleService(context);
+            var articleReservationService = new ArticleReservationService(context);
+            var orderService = new OrderService(context);
+            var orderLineService = new OrderLineService(context);
+
+            //Create Customer
+            var customer = await customerService.CreateAsync(new Customer { FirstName = "Bavo", LastName = "Ketels", Email = "bavo.ketels@vives.be", PhoneNumber = "test" });
+
+            //Create Product
+            var product = await productService.CreateAsync(new Product { Name = "Product", RentalExpiresAfterDays = 1 });
+
+            //Create Article
+            var article = await articleService.CreateAsync(new Article { ProductId = product.Id });
+            var productResults = await productService.GetAvailableProductResultsAsync();
+            Console.WriteLine($"availableProducts (1): {productResults.First().NumberOfAvailableArticles}");
+
+            //Edit Article
+            await articleService.UpdateStatusAsync(article.Id, ArticleStatus.Broken);
+            var productResultsBroken = await productService.GetAvailableProductResultsAsync();
+            Console.WriteLine($"availableProducts Broken (0): {productResultsBroken.Count}");
+
+            //Add OrderLine
+            await articleService.UpdateStatusAsync(article.Id, ArticleStatus.Normal);
+            var order = await orderService.CreateAsync(customer.Id);
+            await orderLineService.RentAsync(order.Id, article.Id);
+            var productResultsRented = await productService.GetAvailableProductResultsAsync();
+            Console.WriteLine($"availableProducts Rented (0): {productResultsRented.Count}");
+
+            //Return Order
+            await orderService.ReturnAsync(order.Id, DateTime.Now);
+            var productResultsReturned = await productService.GetAvailableProductResultsAsync();
+            Console.WriteLine($"availableProducts Returned (1): {productResultsReturned.First().NumberOfAvailableArticles}");
+
+            //Create ArticleReservation
+            var articleReservation = await articleReservationService.CreateAsync(customer.Id, article.Id);
+            var productResultsReserved = await productService.GetAvailableProductResultsAsync();
+            Console.WriteLine($"availableProducts Reserved (0): {productResultsReserved.Count}");
+        }
+
+        static async Task TestIsAvailable()
+        {
+            await using var context = new DbContextFactory().CreateDbContext();
+            
+            var customerService = new CustomerService(context);
+            var productService = new ProductService(context);
+            var articleService = new ArticleService(context);
+            var articleReservationService = new ArticleReservationService(context);
+            var orderService = new OrderService(context);
+            var orderLineService = new OrderLineService(context);
+
+            //Create Customer
+            var customer = await customerService.CreateAsync(new Customer { FirstName = "Bavo", LastName = "Ketels", Email = "bavo.ketels@vives.be", PhoneNumber = "test" });
+
+            //Create Product
+            var product = await productService.CreateAsync(new Product { Name = "Product", RentalExpiresAfterDays = 1 });
+
+            //Create Article
+            var article = await articleService.CreateAsync(new Article { ProductId = product.Id });
+            var isAvailableWithoutReservations = await articleService.IsAvailableAsync(article.Id, DateTime.Now);
+            Console.WriteLine($"isAvailableWithoutReservations (true): {isAvailableWithoutReservations}");
+
+            //Edit Article
+            await articleService.UpdateStatusAsync(article.Id, ArticleStatus.Broken);
+            var isAvailableBroken = await articleService.IsAvailableAsync(article.Id, DateTime.Now);
+            Console.WriteLine($"isAvailableBroken (false): {isAvailableBroken}");
+
+            //Add OrderLine
+            await articleService.UpdateStatusAsync(article.Id, ArticleStatus.Normal);
+            var order = await orderService.CreateAsync(customer.Id);
+            await orderLineService.RentAsync(order.Id, article.Id);
+            var isAvailableRented = await articleService.IsAvailableAsync(article.Id, DateTime.Now);
+            Console.WriteLine($"isAvailableRented (false): {isAvailableRented}");
+
+            //Return Order
+            await orderService.ReturnAsync(order.Id, DateTime.Now);
+            var isAvailableReturned = await articleService.IsAvailableAsync(article.Id, DateTime.Now);
+            Console.WriteLine($"isAvailableReturned (true): {isAvailableReturned}");
+
+            //Create ArticleReservation
+            var articleReservation = await articleReservationService.CreateAsync(customer.Id, article.Id);
+            var isAvailableWithReservations = await articleService.IsAvailableAsync(article.Id, DateTime.Now);
+            Console.WriteLine($"isAvailableWithReservations (false): {isAvailableWithReservations}");
+        }
+
+        static async Task TestEdit()
+        {
+            await using var context = new DbContextFactory().CreateDbContext();
+            
+            var productService = new ProductService(context);
+
+            var articleService = new ArticleService(context);
 
             var product = new Product
             {
@@ -33,33 +126,63 @@ namespace VivesRental.Tests.ConsoleApp
                 Publisher = "Test",
                 RentalExpiresAfterDays = 10
             };
-            var createdProduct = productService.Create(product);
+            var createdProduct = await productService.CreateAsync(product);
             var article = new Article
             {
                 ProductId = createdProduct.Id,
                 Status = ArticleStatus.Normal
             };
-            var createdArticle = articleService.Create(article);
-            
-            var updateStatusResult = articleService.UpdateStatus(createdArticle.Id, ArticleStatus.Broken);
+            var createdArticle = await articleService.CreateAsync(article);
 
-            productService.Remove(createdProduct.Id);
+            var updateStatusResult = await articleService.UpdateStatusAsync(createdArticle.Id, ArticleStatus.Broken);
+
+            await productService.RemoveAsync(createdProduct.Id);
         }
 
-        static void TestRemove()
+        static async Task TestEdit2()
+        {
+            await using var context = new DbContextFactory().CreateDbContext();
+
+            var productService = new ProductService(context);
+
+            var articleService = new ArticleService(context);
+
+            var product = new Product
+            {
+                Name = "Test",
+                Description = "Test",
+                Manufacturer = "Test",
+                Publisher = "Test",
+                RentalExpiresAfterDays = 10
+            };
+            var createdProduct = await productService.CreateAsync(product);
+            var article = new Article
+            {
+                ProductId = createdProduct.Id,
+                Status = ArticleStatus.Normal
+            };
+            var createdArticle = await articleService.CreateAsync(article);
+
+            var fakeUpdateStatusResult = await articleService.UpdateStatusAsync(Guid.NewGuid(), ArticleStatus.Broken);
+            product.Id = Guid.NewGuid();
+            var fakeUpdateResult = await productService.EditAsync(product);
+
+            await productService.RemoveAsync(createdProduct.Id);
+        }
+
+        static async Task TestRemove()
         {
             using var context = new DbContextFactory().CreateDbContext();
-            var unitOfWork = CreateUnitOfWork(context);
+            
+            var productService = new ProductService(context);
+            var articleService = new ArticleService(context);
+            var customerService = new CustomerService(context);
+            var orderService = new OrderService(context);
+            var orderLineService = new OrderLineService(context);
 
-            var productService = new ProductService(unitOfWork);
-            var articleService = new ArticleService(unitOfWork);
-            var customerService = new CustomerService(unitOfWork);
-            var orderService = new OrderService(unitOfWork);
-            var orderLineService = new OrderLineService(unitOfWork);
-
-            var customer = customerService.Create(new Customer
+            var customer = await customerService.CreateAsync(new Customer
                 {FirstName = "Test", LastName = "Test", Email = "test@test.com"});
-            var product = productService.Create(new Product
+            var product = await productService.CreateAsync(new Product
             {
                 Name = "Test",
                 Description = "Test",
@@ -68,37 +191,28 @@ namespace VivesRental.Tests.ConsoleApp
                 RentalExpiresAfterDays = 10
             });
            
-            var article = articleService.Create(new Article
+            var article = await articleService.CreateAsync(new Article
             {
                 ProductId = product.Id,
                 Status = ArticleStatus.Normal
             });
-            var order = orderService.Create(customer.Id);
-            var orderLine = orderLineService.Rent(order.Id, article.Id);
+            var order = await orderService.CreateAsync(customer.Id);
+            var orderLine = await orderLineService.RentAsync(order.Id, article.Id);
 
 
-            var deleteResult = customerService.Remove(product.Id);
+            var deleteResult = await customerService.RemoveAsync(product.Id);
+
+            var failingDeleteResult = await customerService.RemoveAsync(Guid.NewGuid());
+            var failingDeleteResult2 = await productService.RemoveAsync(Guid.NewGuid());
         }
 
-        static void TestRemove2()
+        static async Task TestRemove2()
         {
-            using var context = new DbContextFactory().CreateDbContext();
-            var unitOfWork = CreateUnitOfWork(context);
+            await using var context = new DbContextFactory().CreateDbContext();
+           
+            var customerService = new CustomerService(context);
 
-            var customerService = new CustomerService(unitOfWork);
-
-            var deleteResult = customerService.Remove(Guid.Parse("94EF2D02-FD9D-42AE-6461-08D799014437"));
-        }
-
-        static IUnitOfWork CreateUnitOfWork(IVivesRentalDbContext context)
-        {
-            
-            var productRepository = new ProductRepository(context);
-            var articleRepository = new ArticleRepository(context);
-            var orderRepository = new OrderRepository(context);
-            var orderLineRepository = new OrderLineRepository(context);
-            var customerRepository = new CustomerRepository(context);
-            return new UnitOfWork(context, productRepository, articleRepository, orderRepository, orderLineRepository, customerRepository);
+            var deleteResult = await customerService.RemoveAsync(Guid.Parse("94EF2D02-FD9D-42AE-6461-08D799014437"));
         }
     }
 }

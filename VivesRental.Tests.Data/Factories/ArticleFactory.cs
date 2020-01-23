@@ -6,12 +6,16 @@ namespace VivesRental.Tests.Data.Factories
     {
         public static Article CreateValidEntity(Product product)
         {
-            return new Article
+            var article = new Article
             {
                 ProductId = product.Id,
                 Product = product,
                 Status = ArticleStatus.Normal
             };
+
+            product.Articles.Add(article);
+
+            return article;
         }
 
         public static Article CreateInvalidEntity()

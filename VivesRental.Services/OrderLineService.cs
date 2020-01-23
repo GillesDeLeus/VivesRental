@@ -1,54 +1,84 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using VivesRental.Model;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using VivesRental.Repository.Core;
-using VivesRental.Repository.Includes;
+using VivesRental.Repository.Extensions;
 using VivesRental.Services.Contracts;
 using VivesRental.Services.Extensions;
+using VivesRental.Services.Mappers;
+using VivesRental.Services.Results;
 
 namespace VivesRental.Services
 {
     public class OrderLineService : IOrderLineService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IVivesRentalDbContext _context;
 
-        public OrderLineService(IUnitOfWork unitOfWork)
+        public OrderLineService(IVivesRentalDbContext context)
         {
-            _unitOfWork = unitOfWork;
+            _context = context;
         }
 
-        public OrderLine Get(Guid id)
+        public Task<OrderLineResult> GetAsync(Guid id)
         {
-            return _unitOfWork.OrderLines.Get(id);
+            return _context.OrderLines
+                .Where(ol => ol.Id == id)
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .FirstOrDefaultAsync();
         }
 
-        public IList<OrderLine> FindByOrderId(Guid orderId)
+        public Task<List<OrderLineResult>> FindByOrderIdAsync(Guid orderId)
         {
-            return _unitOfWork.OrderLines.Find(rol => rol.OrderId == orderId).ToList();
+            return _context.OrderLines
+                .Where(rol => rol.OrderId == orderId)
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .ToListAsync();
         }
 
-        public bool Rent(Guid orderId, Guid articleId)
+        public async Task<bool> RentAsync(Guid orderId, Guid articleId)
         {
-            var article = _unitOfWork.Articles.Get(articleId, new ArticleIncludes{Product = true});
+            var fromDateTime = DateTime.Now;
+
+            var article = await _context.Articles
+                .Where(ArticleExtensions.IsAvailable(articleId, fromDateTime))
+                .SingleOrDefaultAsync();
+
+            if (article == null)
+            {
+                //Article does not exist or is not available.
+                return false;
+            }
+
+
             var orderLine = article.CreateOrderLine(orderId);
 
-            _unitOfWork.OrderLines.Add(orderLine);
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
+            _context.OrderLines.Add(orderLine);
+            var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             return numberOfObjectsUpdated > 0;
         }
 
-        public bool Rent(Guid orderId, IList<Guid> articleIds)
+        public async Task<bool> RentAsync(Guid orderId, IList<Guid> articleIds)
         {
-            var articles = _unitOfWork.Articles.Find(a => articleIds.Contains(a.Id), new ArticleIncludes{Product = true});
+            var fromDateTime = DateTime.Now;
+            var articles = await _context.Articles
+                .Where(ArticleExtensions.IsAvailable(articleIds, fromDateTime))
+                .ToListAsync();
+
+            //If the amount of articles is not the same as the requested ids, some articles are not available anymore
+            if (articleIds.Count != articles.Count)
+            {
+                return false;
+            }
 
             foreach (var article in articles)
             {
                 var orderLine = article.CreateOrderLine(orderId);
-                _unitOfWork.OrderLines.Add(orderLine);
+                _context.OrderLines.Add(orderLine);
             }
 
-            var numberOfObjectsUpdated = _unitOfWork.Complete();
+            var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             return numberOfObjectsUpdated > 0;
         }
 
@@ -58,9 +88,12 @@ namespace VivesRental.Services
         /// <param name="orderLineId"></param>
         /// <param name="returnedAt"></param>
         /// <returns></returns>
-        public bool Return(Guid orderLineId, DateTime returnedAt)
+        public async Task<bool> ReturnAsync(Guid orderLineId, DateTime returnedAt)
         {
-            var orderLine = _unitOfWork.OrderLines.Get(orderLineId);
+            var orderLine = await _context.OrderLines
+                .Where(ol => ol.Id == orderLineId)
+                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .FirstOrDefaultAsync();
 
             if (orderLine == null)
             {
@@ -79,7 +112,7 @@ namespace VivesRental.Services
 
             orderLine.ReturnedAt = returnedAt;
 
-            _unitOfWork.Complete();
+            await _context.SaveChangesAsync();
             return true;
         }
     }

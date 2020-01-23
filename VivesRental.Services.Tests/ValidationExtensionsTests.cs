@@ -152,5 +152,39 @@ namespace VivesRental.Services.Tests
             //Assert
             Assert.IsFalse(result);
         }
+
+        [TestMethod]
+        public void ArticleReservation_IsValid_Returns_True_When_Valid()
+        {
+            //Arrange
+            var customer = CustomerFactory.CreateValidEntity();
+            customer.Id = Guid.NewGuid();
+            var order = OrderFactory.CreateValidEntity(customer);
+            order.Id = Guid.NewGuid();
+            var product = ProductFactory.CreateValidEntity();
+            product.Id = Guid.NewGuid();
+            var article = ArticleFactory.CreateValidEntity(product);
+            article.Id = Guid.NewGuid();
+            var entity = ArticleReservationFactory.CreateValidEntity(customer, article, DateTime.Now, DateTime.Now.AddDays(1));
+
+            //Act
+            var result = entity.IsValid();
+
+            //Assert
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void ArticleReservation_IsValid_Returns_False_When_Invalid()
+        {
+            //Arrange
+            var entity = ArticleReservationFactory.CreateInvalidEntity();
+
+            //Act
+            var result = entity.IsValid();
+
+            //Assert
+            Assert.IsFalse(result);
+        }
     }
 }

@@ -23,27 +23,27 @@ namespace VivesRental.Services
             _context = context;
         }
 
-        public async Task<OrderResult> GetAsync(Guid id, OrderIncludes includes = null)
+        public Task<OrderResult> GetAsync(Guid id, OrderIncludes includes = null)
         {
-            return await _context.Orders
+            return _context.Orders
                 .AddIncludes(includes)
                 .Where(o => o.Id == id)
                 .MapToResults()
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<List<OrderResult>> FindByCustomerIdAsync(Guid customerId, OrderIncludes includes = null)
+        public Task<List<OrderResult>> FindByCustomerIdAsync(Guid customerId, OrderIncludes includes = null)
         {
-            return await _context.Orders
+            return _context.Orders
                 .AddIncludes(includes)
                 .Where(o => o.CustomerId == customerId)
                 .MapToResults()
                 .ToListAsync();
         }
 
-        public async Task<List<OrderResult>> AllAsync()
+        public Task<List<OrderResult>> AllAsync()
         {
-            return await _context.Orders
+            return _context.Orders
                 .MapToResults()
                 .ToListAsync();
         }

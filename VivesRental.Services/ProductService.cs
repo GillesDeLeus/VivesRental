@@ -23,9 +23,9 @@ namespace VivesRental.Services
         }
 
 
-        public async Task<ProductResult> GetAsync(Guid id)
+        public Task<ProductResult> GetAsync(Guid id)
         {
-            return await _context.Products
+            return _context.Products
                 .Where(p => p.Id == id)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefaultAsync();
@@ -33,16 +33,16 @@ namespace VivesRental.Services
 
 
 
-        public async Task<List<ProductResult>> AllAsync()
+        public Task<List<ProductResult>> AllAsync()
         {
             var fromDateTime = DateTime.Now;
             var untilDateTime = DateTime.MaxValue;
-            return await AllAsync(fromDateTime, untilDateTime);
+            return AllAsync(fromDateTime, untilDateTime);
         }
 
-        public async Task<List<ProductResult>> AllAsync(DateTime fromDateTime, DateTime untilDateTime)
+        public Task<List<ProductResult>> AllAsync(DateTime fromDateTime, DateTime untilDateTime)
         {
-            return await _context.Products
+            return _context.Products
                 .MapToResults(fromDateTime, untilDateTime)
                 .ToListAsync();
         }
@@ -159,20 +159,20 @@ namespace VivesRental.Services
         /// Retrieves a list of products that are available from now
         /// </summary>
         /// <returns>A list of ProductResults</returns>
-        public async Task<List<ProductResult>> GetAvailableProductResultsAsync()
+        public Task<List<ProductResult>> GetAvailableProductResultsAsync()
         {
             var fromDateTime = DateTime.Now;
             var untilDateTime = DateTime.MaxValue;
-            return await GetAvailableProductResultsAsync(fromDateTime, untilDateTime);
+            return GetAvailableProductResultsAsync(fromDateTime, untilDateTime);
         }
 
         /// <summary>
         /// Retrieves a list of products that are available between a from and until date
         /// </summary>
         /// <returns>A list of ProductResults</returns>
-        public async Task<List<ProductResult>> GetAvailableProductResultsAsync(DateTime fromDateTime, DateTime untilDateTime)
+        public Task<List<ProductResult>> GetAvailableProductResultsAsync(DateTime fromDateTime, DateTime untilDateTime)
         {
-            return await _context.Products
+            return _context.Products
                 .Where(ProductExtensions.IsAvailable(fromDateTime, untilDateTime)) //Only articles that are not reserved in this period
                 .MapToResults(fromDateTime, untilDateTime)
                 .ToListAsync();
@@ -200,14 +200,5 @@ namespace VivesRental.Services
 
             await _context.Database.ExecuteSqlRawAsync(commandText, articleIdParameter);
         }
-
-        public IList<ProductResult> GetAvailableProductResults(ProductIncludes includes = null)
-        {
-            return _unitOfWork.Products
-                .FindResult(p => p.Articles.Any(a => a.Status == ArticleStatus.Normal &&
-                                                   a.OrderLines.All(ol => ol.ReturnedAt.HasValue)), includes)
-                .ToList();
-        }
-
     }
 }

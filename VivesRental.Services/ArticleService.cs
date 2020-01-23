@@ -24,43 +24,43 @@ namespace VivesRental.Services
             _context = context;
         }
 
-        public async Task<ArticleResult> GetAsync(Guid id, ArticleIncludes includes = null)
+        public Task<ArticleResult> GetAsync(Guid id, ArticleIncludes includes = null)
         {
-            return await _context.Articles
+            return _context.Articles
                 .AddIncludes(includes)
                 .Where(a => a.Id == id)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<List<ArticleResult>> AllAsync(ArticleIncludes includes = null)
+        public Task<List<ArticleResult>> AllAsync(ArticleIncludes includes = null)
         {
-            return await _context.Articles
+            return _context.Articles
                 .AddIncludes(includes)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToListAsync();
         }
 
-        public async Task<List<ArticleResult>> GetAvailableArticlesAsync(ArticleIncludes includes = null)
+        public Task<List<ArticleResult>> GetAvailableArticlesAsync(ArticleIncludes includes = null)
         {
             var fromDateTime = DateTime.Now;
             var untilDateTime = DateTime.MaxValue;
 
-            return await GetAvailableArticlesAsync(fromDateTime, untilDateTime, includes);
+            return GetAvailableArticlesAsync(fromDateTime, untilDateTime, includes);
         }
 
-        public async Task<List<ArticleResult>> GetAvailableArticlesAsync(DateTime fromDateTime, DateTime untilDateTime, ArticleIncludes includes = null)
+        public Task<List<ArticleResult>> GetAvailableArticlesAsync(DateTime fromDateTime, DateTime untilDateTime, ArticleIncludes includes = null)
         {
-            return await _context.Articles
+            return _context.Articles
                 .AddIncludes(includes)
                 .Where(ArticleExtensions.IsAvailable(fromDateTime, untilDateTime))
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToListAsync();
         }
 
-        public async Task<List<ArticleResult>> GetAvailableArticlesAsync(Guid productId, ArticleIncludes includes = null)
+        public Task<List<ArticleResult>> GetAvailableArticlesAsync(Guid productId, ArticleIncludes includes = null)
         {
-            return await _context.Articles
+            return _context.Articles
                 .AddIncludes(includes)
                 .Where(a => a.ProductId == productId &&
                                                   a.Status == ArticleStatus.Normal &&
@@ -69,18 +69,18 @@ namespace VivesRental.Services
                 .ToListAsync();
         }
 
-        public async Task<List<ArticleResult>> GetRentedArticlesAsync(ArticleIncludes includes = null)
+        public Task<List<ArticleResult>> GetRentedArticlesAsync(ArticleIncludes includes = null)
         {
-            return await _context.Articles
+            return _context.Articles
                 .AddIncludes(includes)
                 .Where(a => a.IsRented())
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToListAsync();
         }
 
-        public async Task<List<ArticleResult>> GetRentedArticlesAsync(Guid customerId, ArticleIncludes includes = null)
+        public Task<List<ArticleResult>> GetRentedArticlesAsync(Guid customerId, ArticleIncludes includes = null)
         {
-            return await _context.Articles
+            return _context.Articles
                 .AddIncludes(includes)
                 .Where(a => a.IsRented(customerId))
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
@@ -152,16 +152,16 @@ namespace VivesRental.Services
             return await result;
         }
 
-        public async Task<bool> IsAvailableAsync(Guid articleId, DateTime fromDateTime, DateTime? untilDateTime = null)
+        public Task<bool> IsAvailableAsync(Guid articleId, DateTime fromDateTime, DateTime? untilDateTime = null)
         {
-            return await _context.Articles
+            return _context.Articles
                 .Where(a => a.Id == articleId)
                 .AllAsync(ArticleExtensions.IsAvailable(articleId, fromDateTime, untilDateTime));
         }
 
-        public async Task<bool> IsAvailableAsync(IList<Guid> articleIds, DateTime fromDateTime, DateTime? untilDateTime = null)
+        public Task<bool> IsAvailableAsync(IList<Guid> articleIds, DateTime fromDateTime, DateTime? untilDateTime = null)
         {
-            return await _context.Articles
+            return _context.Articles
                 .Where(a => articleIds.Contains(a.Id))
                 .AllAsync(ArticleExtensions.IsAvailable(articleIds, fromDateTime, untilDateTime));
         }

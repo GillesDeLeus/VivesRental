@@ -23,39 +23,39 @@ namespace VivesRental.Services
         {
             _context = context;
         }
-        public async Task<ArticleReservationResult> GetAsync(Guid id)
+        public Task<ArticleReservationResult> GetAsync(Guid id)
         {
-            return await _context.ArticleReservations
+            return _context.ArticleReservations
                 .Where(ar => ar.Id == id)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<ArticleReservationResult> GetAsync(Guid id, ArticleReservationIncludes includes)
+        public Task<ArticleReservationResult> GetAsync(Guid id, ArticleReservationIncludes includes)
         {
-            return await _context.ArticleReservations
+            return _context.ArticleReservations
                 .AddIncludes(includes)
                 .Where(ar => ar.Id == id)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<List<ArticleReservationResult>> AllAsync()
+        public Task<List<ArticleReservationResult>> AllAsync()
         {
-            return await _context.ArticleReservations
+            return _context.ArticleReservations
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToListAsync();
         }
 
-        public async Task<List<ArticleReservationResult>> AllAsync(ArticleReservationIncludes includes)
+        public Task<List<ArticleReservationResult>> AllAsync(ArticleReservationIncludes includes)
         {
-            return await _context.ArticleReservations
+            return _context.ArticleReservations
                 .AddIncludes(includes)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToListAsync();
         }
 
-        public async Task<ArticleReservationResult> CreateAsync(Guid customerId, Guid articleId)
+        public Task<ArticleReservationResult> CreateAsync(Guid customerId, Guid articleId)
         {
             var articleReservation = new ArticleReservation
             {
@@ -64,7 +64,7 @@ namespace VivesRental.Services
                 FromDateTime = DateTime.Now,
                 UntilDateTime = DateTime.Now.AddMinutes(5)
             };
-            return await CreateAsync(articleReservation);
+            return CreateAsync(articleReservation);
         }
 
         public async Task<ArticleReservationResult> CreateAsync(ArticleReservation entity)

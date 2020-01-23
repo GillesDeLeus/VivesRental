@@ -23,17 +23,17 @@ namespace VivesRental.Services
         }
 
 
-        public async Task<CustomerResult> GetAsync(Guid id)
+        public Task<CustomerResult> GetAsync(Guid id)
         {
-            return await _context.Customers
+            return _context.Customers
                 .Where(c => c.Id == id)
                 .MapToResults()
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<List<CustomerResult>> AllAsync()
+        public Task<List<CustomerResult>> AllAsync()
         {
-            return await _context.Customers
+            return _context.Customers
                 .MapToResults()
                 .ToListAsync();
         }

@@ -21,17 +21,17 @@ namespace VivesRental.Services
             _context = context;
         }
 
-        public async Task<OrderLineResult> GetAsync(Guid id)
+        public Task<OrderLineResult> GetAsync(Guid id)
         {
-            return await _context.OrderLines
+            return _context.OrderLines
                 .Where(ol => ol.Id == id)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<List<OrderLineResult>> FindByOrderIdAsync(Guid orderId)
+        public Task<List<OrderLineResult>> FindByOrderIdAsync(Guid orderId)
         {
-            return await _context.OrderLines
+            return _context.OrderLines
                 .Where(rol => rol.OrderId == orderId)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToListAsync();
@@ -115,7 +115,5 @@ namespace VivesRental.Services
             await _context.SaveChangesAsync();
             return true;
         }
-
-
     }
 }

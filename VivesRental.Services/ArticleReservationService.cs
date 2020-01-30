@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
 using VivesRental.Repository.Core;
-using VivesRental.Repository.Extensions;
-using VivesRental.Repository.Includes;
 using VivesRental.Services.Contracts;
 using VivesRental.Services.Extensions;
 using VivesRental.Services.Mappers;
@@ -31,26 +29,9 @@ namespace VivesRental.Services
                 .FirstOrDefaultAsync();
         }
 
-        public Task<ArticleReservationResult> GetAsync(Guid id, ArticleReservationIncludes includes)
-        {
-            return _context.ArticleReservations
-                .AddIncludes(includes)
-                .Where(ar => ar.Id == id)
-                .MapToResults(DateTime.Now, DateTime.MaxValue)
-                .FirstOrDefaultAsync();
-        }
-
         public Task<List<ArticleReservationResult>> AllAsync()
         {
             return _context.ArticleReservations
-                .MapToResults(DateTime.Now, DateTime.MaxValue)
-                .ToListAsync();
-        }
-
-        public Task<List<ArticleReservationResult>> AllAsync(ArticleReservationIncludes includes)
-        {
-            return _context.ArticleReservations
-                .AddIncludes(includes)
                 .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .ToListAsync();
         }
@@ -88,7 +69,7 @@ namespace VivesRental.Services
             if (numberOfObjectsUpdated > 0)
             {
                 //Detach and return
-                return articleReservation.MapToResult(DateTime.Now, DateTime.MaxValue);
+                return await GetAsync(articleReservation.Id);
             }
             return null;
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using VivesRental.Model;
 
 namespace VivesRental.Services.Results
 {
@@ -8,7 +9,7 @@ namespace VivesRental.Services.Results
         public Guid OrderId { get; set; }
         public OrderResult Order { get; set; }
         public Guid? ArticleId { get; set; }
-        public ArticleResult Article { get; set; }
+        public ArticleStatus ArticleStatus { get; set; }
         public string ProductName { get; set; }
         public string ProductDescription { get; set; }
         public DateTime RentedAt { get; set; }

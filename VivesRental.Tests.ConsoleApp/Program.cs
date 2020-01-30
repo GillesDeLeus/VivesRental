@@ -12,10 +12,11 @@ namespace VivesRental.Tests.ConsoleApp
         static async Task Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            //TestNumberOfAvailableItems();
+            //await TestNumberOfAvailableItems();
             //TestIsAvailable();
             //TestRemove();
-            await TestEdit2();
+            //await TestEdit2();
+            await GetOrder(new Guid("EAAC2797-C0FE-4FE2-029C-08D79A9866A1"));
             Console.WriteLine("Done...");
             Console.ReadLine();
         }
@@ -213,6 +214,16 @@ namespace VivesRental.Tests.ConsoleApp
             var customerService = new CustomerService(context);
 
             var deleteResult = await customerService.RemoveAsync(Guid.Parse("94EF2D02-FD9D-42AE-6461-08D799014437"));
+        }
+
+        static async Task GetOrder(Guid orderId)
+        {
+            await using var context = new DbContextFactory().CreateDbContext();
+            var orderService = new OrderService(context);
+            var orderResult = await orderService.GetAsync(orderId);
+
+            Console.WriteLine($"orderResult.NumberOfOrderLines (1): {orderResult.NumberOfOrderLines}");
+
         }
     }
 }

@@ -57,7 +57,9 @@ namespace VivesRental.Services
             var numberOfObjectsUpdated = await _context.SaveChangesAsync();
 
             if (numberOfObjectsUpdated > 0)
-                return customer.MapToResult();
+            {
+                return await GetAsync(customer.Id);
+            }
 
             return null;
         }
@@ -86,7 +88,9 @@ namespace VivesRental.Services
 
             var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             if (numberOfObjectsUpdated > 0)
-                return entity.MapToResult();
+            {
+                return await GetAsync(customer.Id);
+            }
             return null;
         }
 

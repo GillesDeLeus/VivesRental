@@ -110,7 +110,6 @@ namespace VivesRental.Services
             //Get Product from unitOfWork
             var article = await _context.Articles
                 .Where(a => a.Id == articleId)
-                .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefaultAsync();
 
             if (article == null)

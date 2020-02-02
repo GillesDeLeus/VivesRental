@@ -84,6 +84,32 @@ namespace VivesRental.Services.Tests
         }
 
         [TestMethod]
+        public async Task RentAsync_IdList_Returns_False_When_One_Rented_And_Does_Not_Exist()
+        {
+            //Arrange
+            using var context = DbContextFactory.CreateInstance(nameof(RentAsync_IdList_Returns_False_When_One_Rented_And_Does_Not_Exist));
+
+            var customer = CustomerFactory.CreateInvalidEntity();
+            context.Customers.Add(customer);
+            var product = ProductFactory.CreateValidEntity();
+            context.Products.Add(product);
+            var article = ArticleFactory.CreateValidEntity(product);
+            context.Articles.Add(article);
+            var order = OrderFactory.CreateValidEntity(customer);
+            context.Orders.Add(order);
+            context.SaveChanges();
+
+            var orderLineService = new OrderLineService(context);
+            var idList = new List<Guid> { Guid.NewGuid() };
+
+            //Act
+            var result = await orderLineService.RentAsync(order.Id, idList);
+
+            //Assert
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
         public async Task RentAsync_IdList_Returns_True_When_Multiple_Rented()
         {
             //Arrange

@@ -43,6 +43,7 @@ namespace VivesRental.Services
             var fromDateTime = DateTime.Now;
 
             var article = await _context.Articles
+                .Include(a => a.Product)
                 .Where(ArticleExtensions.IsAvailable(articleId, fromDateTime))
                 .SingleOrDefaultAsync();
 

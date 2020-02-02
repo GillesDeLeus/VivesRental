@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using VivesRental.Model;
 using VivesRental.Repository.Core;
 using VivesRental.Repository.Extensions;
 using VivesRental.Services.Contracts;
@@ -62,7 +63,9 @@ namespace VivesRental.Services
         public async Task<bool> RentAsync(Guid orderId, IList<Guid> articleIds)
         {
             var fromDateTime = DateTime.Now;
+            //DateTime? untilDateTime = null;
             var articles = await _context.Articles
+                .Include(a => a.Product) //Needs include for the CreateOrderLine extension method.
                 .Where(ArticleExtensions.IsAvailable(articleIds, fromDateTime))
                 .ToListAsync();
 

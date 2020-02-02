@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using VivesRental.Model;
@@ -16,7 +17,9 @@ namespace VivesRental.Tests.ConsoleApp
             //TestIsAvailable();
             //TestRemove();
             //await TestEdit2();
-            await GetOrder(new Guid("EAAC2797-C0FE-4FE2-029C-08D79A9866A1"));
+            //await GetOrder(new Guid("EAAC2797-C0FE-4FE2-029C-08D79A9866A1"));
+            await RentArticles(new Guid("EAAC2797-C0FE-4FE2-029C-08D79A9866A1"),
+                new Guid("1FBAC675-CE6D-4BAA-09C7-08D79A986674"));
             Console.WriteLine("Done...");
             Console.ReadLine();
         }
@@ -224,6 +227,18 @@ namespace VivesRental.Tests.ConsoleApp
 
             Console.WriteLine($"orderResult.NumberOfOrderLines (1): {orderResult.NumberOfOrderLines}");
 
+        }
+
+        static async Task RentArticles(Guid orderId, Guid articleId)
+        {
+            await using var context = new DbContextFactory().CreateDbContext();
+            var orderLineService = new OrderLineService(context);
+
+            var articleIds = new List<Guid> {articleId};
+
+            var orderLineResult = await orderLineService.RentAsync(orderId, articleIds);
+            
+            Console.WriteLine($"orderLineResult (True): {orderLineResult.ToString()}");
         }
     }
 }

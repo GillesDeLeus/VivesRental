@@ -96,7 +96,6 @@ namespace VivesRental.Services
         {
             var orderLine = await _context.OrderLines
                 .Where(ol => ol.Id == orderLineId)
-                .MapToResults(DateTime.Now, DateTime.MaxValue)
                 .FirstOrDefaultAsync();
 
             if (orderLine == null)

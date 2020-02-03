@@ -48,7 +48,6 @@ namespace VivesRental.Services
         {
             var customer = await _context.Customers
                 .Where(c => c.Id == customerId)
-                .MapToResults()
                 .FirstOrDefaultAsync();
 
             if (customer == null)

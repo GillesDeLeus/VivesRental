@@ -111,6 +111,18 @@ namespace VivesRental.Services
         /// <returns>True if the product was deleted</returns>
         public async Task<bool> RemoveAsync(Guid id)
         {
+            if (_context.Database.IsInMemory())
+            {
+                await ClearArticleByProductIdAsync(id);
+                _context.ArticleReservations.RemoveRange(
+                    _context.ArticleReservations.Where(a => a.Article.ProductId == id));
+                _context.Articles.RemoveRange(_context.Articles.Where(a => a.ProductId == id));
+
+                //Remove product
+                _context.Products.Remove(id);
+                return true;
+            }
+
             await using var transaction = await _context.Database.BeginTransactionAsync();
 
             try

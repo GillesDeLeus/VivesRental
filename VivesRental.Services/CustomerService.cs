@@ -101,6 +101,15 @@ namespace VivesRental.Services
         /// <returns>True if the customer was deleted</returns>
         public async Task<bool> RemoveAsync(Guid id)
         {
+            if (_context.Database.IsInMemory())
+            {
+                //Remove the Customer from the Orders
+                await ClearCustomerAsync(id);
+                //Remove the Order
+                _context.Customers.Remove(id);
+                return true;
+            }
+
             await using var transaction = await _context.Database.BeginTransactionAsync();
 
             try

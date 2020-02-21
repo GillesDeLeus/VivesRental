@@ -131,6 +131,14 @@ namespace VivesRental.Services
         /// <returns>True if the article was deleted</returns>
         public async Task<bool> RemoveAsync(Guid id)
         {
+            if (_context.Database.IsInMemory())
+            {
+                await ClearArticleByArticleId(id);
+                _context.ArticleReservations.RemoveRange(_context.ArticleReservations.Where(ar => ar.ArticleId == id));
+                _context.Articles.Remove(id);
+                return true;
+            }
+
             await using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
@@ -140,6 +148,7 @@ namespace VivesRental.Services
                 _context.Articles.Remove(id);
 
                 var numberOfObjectsUpdated = await _context.SaveChangesWithConcurrencyIgnoreAsync();
+                await transaction.CommitAsync();
                 return numberOfObjectsUpdated > 0;
             }
             catch

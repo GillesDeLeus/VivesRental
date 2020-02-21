@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using VivesRental.Model;
 using VivesRental.Services;
+using VivesRental.Services.Results;
 using VivesRental.Tests.ConsoleApp.Factories;
 
 namespace VivesRental.Tests.ConsoleApp
@@ -18,8 +19,11 @@ namespace VivesRental.Tests.ConsoleApp
             //TestRemove();
             //await TestEdit2();
             //await GetOrder(new Guid("EAAC2797-C0FE-4FE2-029C-08D79A9866A1"));
-            await RentArticles(new Guid("EAAC2797-C0FE-4FE2-029C-08D79A9866A1"),
-                new Guid("1FBAC675-CE6D-4BAA-09C7-08D79A986674"));
+            //await RentArticles(new Guid("EAAC2797-C0FE-4FE2-029C-08D79A9866A1"),
+            //    new Guid("1FBAC675-CE6D-4BAA-09C7-08D79A986674"));
+            var product = await CreateProduct("Test");
+            await GenerateArticles(product.Id, 3);
+            await DeleteProduct(product.Id);
             Console.WriteLine("Done...");
             Console.ReadLine();
         }
@@ -239,6 +243,45 @@ namespace VivesRental.Tests.ConsoleApp
             var orderLineResult = await orderLineService.RentAsync(orderId, articleIds);
             
             Console.WriteLine($"orderLineResult (True): {orderLineResult.ToString()}");
+        }
+
+        static async Task<ProductResult> CreateProduct(string name)
+        {
+            await using var context = new DbContextFactory().CreateDbContext();
+
+            var productService = new ProductService(context);
+            var result = await productService.CreateAsync(new Product
+            {
+                Name=name,
+                Description = name,
+                Manufacturer = name,
+                Publisher = name,
+                RentalExpiresAfterDays = 10
+            });
+
+            Console.WriteLine($"Created ({name}): {result.Name}");
+
+            return result;
+        }
+
+        static async Task GenerateArticles(Guid productId, int amount)
+        {
+            await using var context = new DbContextFactory().CreateDbContext();
+
+            var productService = new ProductService(context);
+            var result = await productService.GenerateArticlesAsync(productId, amount);
+
+            Console.WriteLine($"generateArticles (True): {result.ToString()}");
+        }
+
+        static async Task DeleteProduct(Guid productId)
+        {
+            await using var context = new DbContextFactory().CreateDbContext();
+
+            var productService = new ProductService(context);
+            var result = await productService.RemoveAsync(productId);
+
+            Console.WriteLine($"Deleted (true): {result}");
         }
     }
 }

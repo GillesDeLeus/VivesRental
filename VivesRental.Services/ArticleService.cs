@@ -131,7 +131,9 @@ namespace VivesRental.Services
         /// <returns>True if the article was deleted</returns>
         public async Task<bool> RemoveAsync(Guid id)
         {
-            var result = await _context.RunInTransactionAsync(async () =>
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
             {
                 await ClearArticleByArticleId(id);
                 _context.ArticleReservations.RemoveRange(_context.ArticleReservations.Where(ar => ar.ArticleId == id));
@@ -139,9 +141,12 @@ namespace VivesRental.Services
 
                 var numberOfObjectsUpdated = await _context.SaveChangesWithConcurrencyIgnoreAsync();
                 return numberOfObjectsUpdated > 0;
-            });
-
-            return await result;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         public Task<bool> IsAvailableAsync(Guid articleId, DateTime fromDateTime, DateTime? untilDateTime = null)

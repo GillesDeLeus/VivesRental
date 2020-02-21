@@ -10,47 +10,47 @@ namespace VivesRental.Services.Extensions
 {
     public static class VivesRentalDbContextExtensions
     {
-        public static T RunInTransaction<T>(this IVivesRentalDbContext context, Func<T> logic)
-        {
-            if (context.Database.IsInMemory())
-            {
-                return logic();
-            }
+        //public static T RunInTransaction<T>(this IVivesRentalDbContext context, Func<T> logic)
+        //{
+        //    if (context.Database.IsInMemory())
+        //    {
+        //        return logic();
+        //    }
 
-            using var transaction = context.Database.BeginTransaction();
-            try
-            {
-                var result = logic();
-                transaction.Commit();
-                return result;
-            }
-            catch
-            {
-                transaction.Rollback();
-                throw;
-            }
-        }
+        //    using var transaction = context.Database.BeginTransaction();
+        //    try
+        //    {
+        //        var result = logic();
+        //        transaction.Commit();
+        //        return result;
+        //    }
+        //    catch
+        //    {
+        //        transaction.Rollback();
+        //        throw;
+        //    }
+        //}
 
-        public static async Task<T> RunInTransactionAsync<T>(this IVivesRentalDbContext context, Func<T> logic)
-        {
-            if (context.Database.IsInMemory())
-            {
-                return logic();
-            }
+        //public static async Task<T> RunInTransactionAsync<T>(this IVivesRentalDbContext context, Func<T> logic)
+        //{
+        //    if (context.Database.IsInMemory())
+        //    {
+        //        return logic();
+        //    }
 
-            await using var transaction = await context.Database.BeginTransactionAsync();
-            try
-            {
-                var result = logic();
-                await transaction.CommitAsync();
-                return result;
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                throw;
-            }
-        }
+        //    await using var transaction = await context.Database.BeginTransactionAsync();
+        //    try
+        //    {
+        //        var result = logic();
+        //        await transaction.CommitAsync();
+        //        return result;
+        //    }
+        //    catch
+        //    {
+        //        await transaction.RollbackAsync();
+        //        throw;
+        //    }
+        //}
 
         public static EntityEntry<T> Remove<T>(this DbSet<T> dbSet, Guid id)
             where T : class, IIdentifiable

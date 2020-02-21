@@ -111,7 +111,9 @@ namespace VivesRental.Services
         /// <returns>True if the product was deleted</returns>
         public async Task<bool> RemoveAsync(Guid id)
         {
-            var result = await _context.RunInTransactionAsync(async () =>
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
             {
                 await ClearArticleByProductIdAsync(id);
                 _context.ArticleReservations.RemoveRange(
@@ -122,10 +124,14 @@ namespace VivesRental.Services
                 _context.Products.Remove(id);
 
                 var numberOfObjectsUpdated = await _context.SaveChangesWithConcurrencyIgnoreAsync();
-
+                await transaction.CommitAsync();
                 return numberOfObjectsUpdated > 0;
-            });
-            return await result;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         /// <summary>
@@ -138,21 +144,17 @@ namespace VivesRental.Services
             if (amount <= 0 && amount > 10.000) //Set a limit
                 return false;
 
-            var result = await _context.RunInTransactionAsync(async () =>
+            for (int i = 0; i < amount; i++)
             {
-                for (int i = 0; i < amount; i++)
+                var article = new Article
                 {
-                    var article = new Article
-                    {
-                        ProductId = productId
-                    };
-                    _context.Articles.Add(article);
-                }
+                    ProductId = productId
+                };
+                _context.Articles.Add(article);
+            }
 
-                var numberOfObjectsUpdated = await _context.SaveChangesAsync();
-                return numberOfObjectsUpdated > 0;
-            });
-            return await result;
+            var numberOfObjectsUpdated = await _context.SaveChangesAsync();
+            return numberOfObjectsUpdated > 0;
         }
 
         /// <summary>

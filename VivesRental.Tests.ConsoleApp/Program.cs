@@ -12,12 +12,27 @@ namespace VivesRental.Tests.ConsoleApp
         static async Task Main(string[] args)
         {
             Console.WriteLine("Hello World!");
+            await TestGetArticleResults();
             //TestNumberOfAvailableItems();
             //TestIsAvailable();
             //TestRemove();
-            await TestEdit2();
+            //await TestEdit2();
             Console.WriteLine("Done...");
             Console.ReadLine();
+        }
+
+        static async Task TestGetArticleResults()
+        {
+            await using var context = new DbContextFactory().CreateDbContext();
+
+            var articleService = new ArticleService(context);
+
+            var articles = await articleService.AllAsync();
+
+            foreach (var article in articles)
+            {
+                Console.WriteLine($"{article.Id}: {article.Product.Name}");
+            }
         }
 
         static async Task TestNumberOfAvailableItems()

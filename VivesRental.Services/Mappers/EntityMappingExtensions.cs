@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
 using VivesRental.Model;
 using VivesRental.Repository.Extensions;
 using VivesRental.Services.Results;
 
 namespace VivesRental.Services.Mappers
 {
+    /// <summary>
+    /// https://stackoverflow.com/questions/39585427/projection-of-single-entities-in-ef-with-extension-methods
+    /// </summary>
     public static class EntityMappingExtensions
     {
         public static ArticleResult MapToResult(this Article article, DateTime fromDateTime, DateTime? untilDateTime)
@@ -15,14 +19,20 @@ namespace VivesRental.Services.Mappers
                 return null;
             }
 
-            return new ArticleResult
+            return ProjectToArticleResult(fromDateTime, untilDateTime).Compile()(article);
+        }
+
+        private static Expression<Func<Article, ArticleResult>> ProjectToArticleResult(DateTime fromDateTime, DateTime? untilDateTime)
+        {
+            return entity => new ArticleResult
             {
-                Id = article.Id,
-                ProductId = article.ProductId,
-                Product = article.Product.MapToResult(fromDateTime, untilDateTime),
-                Status = article.Status
+                Id = entity.Id,
+                ProductId = entity.ProductId,
+                Product = entity.Product.MapToResult(fromDateTime, untilDateTime),
+                Status = entity.Status
             };
         }
+       
         public static ArticleReservationResult MapToResult(this ArticleReservation articleReservation, DateTime fromDateTime, DateTime? untilDateTime)
         {
             if (articleReservation == null)
@@ -30,15 +40,21 @@ namespace VivesRental.Services.Mappers
                 return null;
             }
 
-            return new ArticleReservationResult
+            return ProjectToArticleReservationResult(fromDateTime, untilDateTime).Compile()(articleReservation);
+        }
+
+        private static Expression<Func<ArticleReservation, ArticleReservationResult>> ProjectToArticleReservationResult(
+            DateTime fromDateTime, DateTime? untilDateTime)
+        {
+            return entity => new ArticleReservationResult
             {
-                Id = articleReservation.Id,
-                ArticleId = articleReservation.ArticleId,
-                Article = articleReservation.Article.MapToResult(fromDateTime, untilDateTime),
-                FromDateTime = articleReservation.FromDateTime,
-                UntilDateTime = articleReservation.UntilDateTime,
-                CustomerId = articleReservation.CustomerId,
-                Customer = articleReservation.Customer.MapToResult()
+                Id = entity.Id,
+                ArticleId = entity.ArticleId,
+                Article = entity.Article.MapToResult(fromDateTime, untilDateTime),
+                FromDateTime = entity.FromDateTime,
+                UntilDateTime = entity.UntilDateTime,
+                CustomerId = entity.CustomerId,
+                Customer = entity.Customer.MapToResult()
             };
         }
 

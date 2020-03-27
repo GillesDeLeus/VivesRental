@@ -31,7 +31,7 @@ namespace VivesRental.Tests.ConsoleApp
 
             foreach (var article in articles)
             {
-                Console.WriteLine($"{article.Id}: {article.Product.Name}");
+                Console.WriteLine($"{article.Id}: {article.ProductName}");
             }
         }
 

@@ -15,7 +15,7 @@ namespace VivesRental.Services.Mappers
             {
                 Id = entity.Id,
                 ProductId = entity.ProductId,
-                Product = entity.Product.MapToResult(fromDateTime, untilDateTime),
+                ProductName = entity.Product.Name,
                 Status = entity.Status
             };
         }
@@ -27,11 +27,13 @@ namespace VivesRental.Services.Mappers
             {
                 Id = entity.Id,
                 ArticleId = entity.ArticleId,
-                Article = entity.Article.MapToResult(fromDateTime, untilDateTime),
+                ArticleStatus = entity.Article.Status,
                 FromDateTime = entity.FromDateTime,
                 UntilDateTime = entity.UntilDateTime,
                 CustomerId = entity.CustomerId,
-                Customer = entity.Customer.MapToResult()
+                CustomerFirstName = entity.Customer.FirstName,
+                CustomerLastName = entity.Customer.LastName,
+                ProductName = entity.Article.Product.Name
             };
         }
 
@@ -74,7 +76,6 @@ namespace VivesRental.Services.Mappers
             {
                 Id = entity.Id,
                 ArticleId = entity.ArticleId,
-                Article = entity.Article.MapToResult(fromDateTime, untilDateTime),
                 OrderId = entity.OrderId,
                 Order = entity.Order.MapToResult(),
                 ProductName = entity.ProductName,

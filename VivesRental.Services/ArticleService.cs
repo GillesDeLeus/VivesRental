@@ -27,14 +27,14 @@ namespace VivesRental.Services
         {
             return _context.Articles
                 .Where(a => a.Id == id)
-                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .MapToResults()
                 .FirstOrDefaultAsync();
         }
 
         public Task<List<ArticleResult>> AllAsync()
         {
             return _context.Articles
-                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .MapToResults()
                 .ToListAsync();
         }
 
@@ -50,7 +50,7 @@ namespace VivesRental.Services
         {
             return _context.Articles
                 .Where(ArticleExtensions.IsAvailable(fromDateTime, untilDateTime))
-                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .MapToResults()
                 .ToListAsync();
         }
 
@@ -60,7 +60,7 @@ namespace VivesRental.Services
                 .Where(a => a.ProductId == productId &&
                                                   a.Status == ArticleStatus.Normal &&
                                                   a.OrderLines.All(ol => ol.ReturnedAt.HasValue))
-                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .MapToResults()
                 .ToListAsync();
         }
 
@@ -68,7 +68,7 @@ namespace VivesRental.Services
         {
             return _context.Articles
                 .Where(a => a.IsRented())
-                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .MapToResults()
                 .ToListAsync();
         }
 
@@ -76,7 +76,7 @@ namespace VivesRental.Services
         {
             return _context.Articles
                 .Where(a => a.IsRented(customerId))
-                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .MapToResults()
                 .ToListAsync();
         }
 

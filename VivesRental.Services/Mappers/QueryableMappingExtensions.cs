@@ -12,14 +12,14 @@ namespace VivesRental.Services.Mappers
             return query.Select(ProjectionExpressions.ProjectToCustomerResult());
         }
 
-        public static IQueryable<ArticleResult> MapToResults(this IQueryable<Article> query, DateTime fromDateTime, DateTime? untilDateTime)
+        public static IQueryable<ArticleResult> MapToResults(this IQueryable<Article> query)
         {
-            return query.Select(ProjectionExpressions.ProjectToArticleResult(fromDateTime, untilDateTime));
+            return query.Select(ProjectionExpressions.ProjectToArticleResult());
         }
 
-        public static IQueryable<ArticleReservationResult> MapToResults(this IQueryable<ArticleReservation> query, DateTime fromDateTime, DateTime? untilDateTime)
+        public static IQueryable<ArticleReservationResult> MapToResults(this IQueryable<ArticleReservation> query)
         {
-            return query.Select(ProjectionExpressions.ProjectToArticleReservationResult(fromDateTime, untilDateTime));
+            return query.Select(ProjectionExpressions.ProjectToArticleReservationResult());
         }
 
         public static IQueryable<OrderResult> MapToResults(this IQueryable<Order> query)
@@ -27,9 +27,9 @@ namespace VivesRental.Services.Mappers
             return query.Select(ProjectionExpressions.ProjectToOrderResult());
         }
 
-        public static IQueryable<OrderLineResult> MapToResults(this IQueryable<OrderLine> query, DateTime fromDateTime, DateTime? untilDateTime)
+        public static IQueryable<OrderLineResult> MapToResults(this IQueryable<OrderLine> query)
         {
-            return query.Select(ProjectionExpressions.ProjectToOrderLineResult(fromDateTime, untilDateTime));
+            return query.Select(ProjectionExpressions.ProjectToOrderLineResult());
         }
 
         public static IQueryable<ProductResult> MapToResults(this IQueryable<Product> query, DateTime fromDateTime, DateTime? untilDateTime)

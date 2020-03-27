@@ -25,14 +25,14 @@ namespace VivesRental.Services
         {
             return _context.ArticleReservations
                 .Where(ar => ar.Id == id)
-                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .MapToResults()
                 .FirstOrDefaultAsync();
         }
 
         public Task<List<ArticleReservationResult>> AllAsync()
         {
             return _context.ArticleReservations
-                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .MapToResults()
                 .ToListAsync();
         }
 

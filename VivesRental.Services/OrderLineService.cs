@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using VivesRental.Model;
 using VivesRental.Repository.Core;
 using VivesRental.Repository.Extensions;
 using VivesRental.Services.Contracts;
@@ -26,7 +25,7 @@ namespace VivesRental.Services
         {
             return _context.OrderLines
                 .Where(ol => ol.Id == id)
-                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .MapToResults()
                 .FirstOrDefaultAsync();
         }
 
@@ -34,7 +33,7 @@ namespace VivesRental.Services
         {
             return _context.OrderLines
                 .Where(rol => rol.OrderId == orderId)
-                .MapToResults(DateTime.Now, DateTime.MaxValue)
+                .MapToResults()
                 .ToListAsync();
         }
 

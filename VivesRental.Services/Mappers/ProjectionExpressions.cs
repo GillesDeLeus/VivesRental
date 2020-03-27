@@ -9,7 +9,7 @@ namespace VivesRental.Services.Mappers
 {
     public static class ProjectionExpressions
     {
-        public static Expression<Func<Article, ArticleResult>> ProjectToArticleResult(DateTime fromDateTime, DateTime? untilDateTime)
+        public static Expression<Func<Article, ArticleResult>> ProjectToArticleResult()
         {
             return entity => new ArticleResult
             {
@@ -20,8 +20,7 @@ namespace VivesRental.Services.Mappers
             };
         }
 
-        public static Expression<Func<ArticleReservation, ArticleReservationResult>> ProjectToArticleReservationResult(
-            DateTime fromDateTime, DateTime? untilDateTime)
+        public static Expression<Func<ArticleReservation, ArticleReservationResult>> ProjectToArticleReservationResult()
         {
             return entity => new ArticleReservationResult
             {
@@ -56,7 +55,6 @@ namespace VivesRental.Services.Mappers
             return entity => new OrderResult
             {
                 Id = entity.Id,
-                Customer = entity.Customer.MapToResult(),
                 CustomerFirstName = entity.CustomerFirstName,
                 CustomerLastName = entity.CustomerLastName,
                 CustomerEmail = entity.CustomerEmail,
@@ -70,7 +68,7 @@ namespace VivesRental.Services.Mappers
             };
         }
 
-        public static Expression<Func<OrderLine, OrderLineResult>> ProjectToOrderLineResult(DateTime fromDateTime, DateTime? untilDateTime)
+        public static Expression<Func<OrderLine, OrderLineResult>> ProjectToOrderLineResult()
         {
             return entity => new OrderLineResult
             {

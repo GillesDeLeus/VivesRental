@@ -9,26 +9,26 @@ namespace VivesRental.Services.Mappers
     /// </summary>
     public static class EntityMappingExtensions
     {
-        public static ArticleResult MapToResult(this Article article, DateTime fromDateTime, DateTime? untilDateTime)
+        public static ArticleResult MapToResult(this Article article)
         {
             if (article == null)
             {
                 return null;
             }
 
-            return ProjectionExpressions.ProjectToArticleResult(fromDateTime, untilDateTime).Compile()(article);
+            return ProjectionExpressions.ProjectToArticleResult().Compile()(article);
         }
 
         
        
-        public static ArticleReservationResult MapToResult(this ArticleReservation articleReservation, DateTime fromDateTime, DateTime? untilDateTime)
+        public static ArticleReservationResult MapToResult(this ArticleReservation articleReservation)
         {
             if (articleReservation == null)
             {
                 return null;
             }
 
-            return ProjectionExpressions.ProjectToArticleReservationResult(fromDateTime, untilDateTime).Compile()(articleReservation);
+            return ProjectionExpressions.ProjectToArticleReservationResult().Compile()(articleReservation);
         }
 
         
@@ -53,14 +53,14 @@ namespace VivesRental.Services.Mappers
             return ProjectionExpressions.ProjectToOrderResult().Compile()(order);
         }
 
-        public static OrderLineResult MapToResult(this OrderLine orderLine, DateTime fromDateTime, DateTime? untilDateTime)
+        public static OrderLineResult MapToResult(this OrderLine orderLine)
         {
             if (orderLine == null)
             {
                 return null;
             }
 
-            return ProjectionExpressions.ProjectToOrderLineResult(fromDateTime, untilDateTime).Compile()(orderLine);
+            return ProjectionExpressions.ProjectToOrderLineResult().Compile()(orderLine);
         }
 
         public static ProductResult MapToResult(this Product product, DateTime fromDateTime, DateTime? untilDateTime)

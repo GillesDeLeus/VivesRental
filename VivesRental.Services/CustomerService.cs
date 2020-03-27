@@ -57,7 +57,9 @@ namespace VivesRental.Services
             var numberOfObjectsUpdated = await _context.SaveChangesAsync();
 
             if (numberOfObjectsUpdated > 0)
-                return customer.MapToResult();
+            {
+                return await GetAsync(customer.Id);
+            }
 
             return null;
         }
@@ -86,7 +88,9 @@ namespace VivesRental.Services
 
             var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             if (numberOfObjectsUpdated > 0)
-                return entity.MapToResult();
+            {
+                return await GetAsync(customer.Id);
+            }
             return null;
         }
 
@@ -97,7 +101,18 @@ namespace VivesRental.Services
         /// <returns>True if the customer was deleted</returns>
         public async Task<bool> RemoveAsync(Guid id)
         {
-            var result = await _context.RunInTransactionAsync(async () =>
+            if (_context.Database.IsInMemory())
+            {
+                //Remove the Customer from the Orders
+                await ClearCustomerAsync(id);
+                //Remove the Order
+                _context.Customers.Remove(id);
+                return true;
+            }
+
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
             {
                 //Remove the Customer from the Orders
                 await ClearCustomerAsync(id);
@@ -105,10 +120,14 @@ namespace VivesRental.Services
                 _context.Customers.Remove(id);
 
                 var numberOfObjectsUpdated = await _context.SaveChangesWithConcurrencyIgnoreAsync();
-
+                await transaction.CommitAsync();
                 return numberOfObjectsUpdated > 0;
-            });
-            return await result;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         private async Task ClearCustomerAsync(Guid customerId)

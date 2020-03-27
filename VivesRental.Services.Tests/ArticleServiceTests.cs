@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using VivesRental.Model;
 using VivesRental.Tests.Data.Extensions;
 using VivesRental.Tests.Data.Factories;
 
@@ -55,5 +56,28 @@ namespace VivesRental.Services.Tests
             //Assert
             Assert.IsTrue(result);
         }
-	}
+
+        [TestMethod]
+        public async Task UpdateStatus_Returns_True()
+        {
+            //Arrange
+            using var context = DbContextFactory.CreateInstance("Remove_Deletes_Product_With_Articles");
+
+            var customer = CustomerFactory.CreateValidEntity();
+            context.Customers.Add(customer);
+            var product = ProductFactory.CreateValidEntity();
+            context.Products.Add(product);
+            var article = ArticleFactory.CreateValidEntity(product);
+            context.Articles.Add(article);
+            await context.SaveChangesAsync();
+
+            var articleService = new ArticleService(context);
+
+            //Act
+            var result = await articleService.UpdateStatusAsync(article.Id, ArticleStatus.Broken);
+
+            //Assert
+            Assert.IsTrue(result);
+        }
+    }
 }

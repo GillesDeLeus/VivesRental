@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using VivesRental.Model;
 using VivesRental.Repository.Core;
-using VivesRental.Repository.Extensions;
-using VivesRental.Repository.Includes;
 using VivesRental.Services.Contracts;
 using VivesRental.Services.Mappers;
 using VivesRental.Services.Results;
@@ -23,19 +21,17 @@ namespace VivesRental.Services
             _context = context;
         }
 
-        public Task<OrderResult> GetAsync(Guid id, OrderIncludes includes = null)
+        public Task<OrderResult> GetAsync(Guid id)
         {
             return _context.Orders
-                .AddIncludes(includes)
                 .Where(o => o.Id == id)
                 .MapToResults()
                 .FirstOrDefaultAsync();
         }
 
-        public Task<List<OrderResult>> FindByCustomerIdAsync(Guid customerId, OrderIncludes includes = null)
+        public Task<List<OrderResult>> FindByCustomerIdAsync(Guid customerId)
         {
             return _context.Orders
-                .AddIncludes(includes)
                 .Where(o => o.CustomerId == customerId)
                 .MapToResults()
                 .ToListAsync();
@@ -52,7 +48,6 @@ namespace VivesRental.Services
         {
             var customer = await _context.Customers
                 .Where(c => c.Id == customerId)
-                .MapToResults()
                 .FirstOrDefaultAsync();
 
             if (customer == null)
@@ -74,7 +69,7 @@ namespace VivesRental.Services
             var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             if (numberOfObjectsUpdated > 0)
             {
-                return order.MapToResult();
+                return await GetAsync(order.Id);
             }
             return null;
         }

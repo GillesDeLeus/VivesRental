@@ -68,7 +68,7 @@ namespace VivesRental.Services
             var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             if (numberOfObjectsUpdated > 0)
             {
-                return product.MapToResult(DateTime.Now, DateTime.MaxValue);
+                return await GetAsync(product.Id);
             }
             return null;
         }
@@ -99,7 +99,7 @@ namespace VivesRental.Services
             var numberOfObjectsUpdated = await _context.SaveChangesAsync();
             if (numberOfObjectsUpdated > 0)
             {
-                return entity.MapToResult(DateTime.Now, DateTime.MaxValue);
+                return await GetAsync(product.Id);
             }
             return null;
         }
@@ -111,7 +111,21 @@ namespace VivesRental.Services
         /// <returns>True if the product was deleted</returns>
         public async Task<bool> RemoveAsync(Guid id)
         {
-            var result = await _context.RunInTransactionAsync(async () =>
+            if (_context.Database.IsInMemory())
+            {
+                await ClearArticleByProductIdAsync(id);
+                _context.ArticleReservations.RemoveRange(
+                    _context.ArticleReservations.Where(a => a.Article.ProductId == id));
+                _context.Articles.RemoveRange(_context.Articles.Where(a => a.ProductId == id));
+
+                //Remove product
+                _context.Products.Remove(id);
+                return true;
+            }
+
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
             {
                 await ClearArticleByProductIdAsync(id);
                 _context.ArticleReservations.RemoveRange(
@@ -122,10 +136,14 @@ namespace VivesRental.Services
                 _context.Products.Remove(id);
 
                 var numberOfObjectsUpdated = await _context.SaveChangesWithConcurrencyIgnoreAsync();
-
+                await transaction.CommitAsync();
                 return numberOfObjectsUpdated > 0;
-            });
-            return await result;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         /// <summary>
@@ -138,21 +156,17 @@ namespace VivesRental.Services
             if (amount <= 0 && amount > 10.000) //Set a limit
                 return false;
 
-            var result = await _context.RunInTransactionAsync(async () =>
+            for (int i = 0; i < amount; i++)
             {
-                for (int i = 0; i < amount; i++)
+                var article = new Article
                 {
-                    var article = new Article
-                    {
-                        ProductId = productId
-                    };
-                    _context.Articles.Add(article);
-                }
+                    ProductId = productId
+                };
+                _context.Articles.Add(article);
+            }
 
-                var numberOfObjectsUpdated = await _context.SaveChangesAsync();
-                return numberOfObjectsUpdated > 0;
-            });
-            return await result;
+            var numberOfObjectsUpdated = await _context.SaveChangesAsync();
+            return numberOfObjectsUpdated > 0;
         }
 
         /// <summary>

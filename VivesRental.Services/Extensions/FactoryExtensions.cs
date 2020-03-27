@@ -1,6 +1,5 @@
 ﻿using System;
 using VivesRental.Model;
-using VivesRental.Services.Results;
 
 namespace VivesRental.Services.Extensions
 {
@@ -13,8 +12,8 @@ namespace VivesRental.Services.Extensions
                 ArticleId = article.Id,
                 OrderId = orderId,
                 ProductName = article.Product.Name,
-                ProductDescription = article.Product.Description,
-                ExpiresAt = DateTime.Now.AddDays(article.Product.RentalExpiresAfterDays),
+                ProductDescription = article.Product?.Description,
+                ExpiresAt = DateTime.Now.AddDays(article.Product?.RentalExpiresAfterDays ?? 0),
                 RentedAt = DateTime.Now
             };
         }

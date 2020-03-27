@@ -2,20 +2,19 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using VivesRental.Model;
-using VivesRental.Repository.Includes;
 using VivesRental.Services.Results;
 
 namespace VivesRental.Services.Contracts
 {
     public interface IArticleService
     {
-        Task<ArticleResult> GetAsync(Guid id, ArticleIncludes includes = null);
-        Task<List<ArticleResult>> AllAsync(ArticleIncludes includes = null);
-        Task<List<ArticleResult>> GetAvailableArticlesAsync(ArticleIncludes includes = null);
-        Task<List<ArticleResult>> GetAvailableArticlesAsync(Guid productId, ArticleIncludes includes = null);
-        Task<List<ArticleResult>> GetRentedArticlesAsync(ArticleIncludes includes = null);
+        Task<ArticleResult> GetAsync(Guid id);
+        Task<List<ArticleResult>> AllAsync();
+        Task<List<ArticleResult>> GetAvailableArticlesAsync();
+        Task<List<ArticleResult>> GetAvailableArticlesAsync(Guid productId);
+        Task<List<ArticleResult>> GetRentedArticlesAsync();
 
-        Task<List<ArticleResult>> GetRentedArticlesAsync(Guid customerId, ArticleIncludes includes = null);
+        Task<List<ArticleResult>> GetRentedArticlesAsync(Guid customerId);
 
         Task<ArticleResult> CreateAsync(Article entity);
        

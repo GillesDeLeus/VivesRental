@@ -28,21 +28,6 @@ namespace VivesRental.Services.Tests
         }
 
         [TestMethod]
-        public async Task Remove_Returns_False_When_Product_Is_Null()
-        {
-            //Arrange
-            using var context = DbContextFactory.CreateInstance("Remove_Returns_False_When_Product_Is_Null");
-            
-            var productService = new ProductService(context);
-
-            //Act
-            var result = await productService.RemoveAsync(Guid.NewGuid());
-
-            //Assert
-            Assert.IsFalse(result);
-        }
-
-        [TestMethod]
         public async Task Remove_Deletes_Product_With_Articles()
         {
             //Arrange

@@ -153,7 +153,7 @@ namespace VivesRental.Services
         /// <returns>True if articles are added</returns>
         public async Task<bool> GenerateArticlesAsync(Guid productId, int amount)
         {
-            if (amount <= 0 && amount > 10.000) //Set a limit
+            if (amount <= 0 || amount > 10.000) //Set a limit
                 return false;
 
             for (int i = 0; i < amount; i++)

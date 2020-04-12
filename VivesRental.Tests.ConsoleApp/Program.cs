@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using VivesRental.Model;
+using VivesRental.Repository.Core;
 using VivesRental.Services;
+using VivesRental.Services.Results;
 using VivesRental.Tests.ConsoleApp.Factories;
 
 namespace VivesRental.Tests.ConsoleApp
@@ -12,7 +16,8 @@ namespace VivesRental.Tests.ConsoleApp
         static async Task Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            await TestGetArticleResults();
+            await TestGetRentedArticles();
+            //await TestGetArticleResults();
             //TestNumberOfAvailableItems();
             //TestIsAvailable();
             //TestRemove();
@@ -21,14 +26,45 @@ namespace VivesRental.Tests.ConsoleApp
             Console.ReadLine();
         }
 
+        static async Task TestGetRentedArticles()
+        {
+            await using var context = new DbContextFactory().CreateDbContext();
+
+            var customerService = new CustomerService(context);
+            var productService = new ProductService(context);
+            var articleService = new ArticleService(context);
+            var orderService = new OrderService(context);
+            var orderLineService = new OrderLineService(context);
+
+            //Create Customer
+            var customer = await customerService.CreateAsync(new Customer { FirstName = "Bavo", LastName = "Ketels", Email = "bavo.ketels@vives.be", PhoneNumber = "test" });
+            //Create Product
+            var product = await productService.CreateAsync(new Product { Name = "Product", RentalExpiresAfterDays = 1 });
+            //Create Article
+            var article = await articleService.CreateAsync(new Article { ProductId = product.Id });
+            //Rent article
+            var order = await orderService.CreateAsync(customer.Id);
+            await orderLineService.RentAsync(order.Id, article.Id);
+
+            //Get articles
+            var articles = await articleService.GetRentedArticlesAsync();
+
+            ShowArticles(articles);
+        }
+
         static async Task TestGetArticleResults()
         {
             await using var context = new DbContextFactory().CreateDbContext();
 
             var articleService = new ArticleService(context);
 
-            var articles = await articleService.AllAsync();
+            var articles = await articleService.FindAsync();
 
+            ShowArticles(articles);
+        }
+
+        static void ShowArticles(IList<ArticleResult> articles)
+        {
             foreach (var article in articles)
             {
                 Console.WriteLine($"{article.Id}: {article.ProductName}");

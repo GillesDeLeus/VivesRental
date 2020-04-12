@@ -9,6 +9,7 @@ using VivesRental.Repository.Core;
 using VivesRental.Repository.Extensions;
 using VivesRental.Services.Contracts;
 using VivesRental.Services.Extensions;
+using VivesRental.Services.Filters;
 using VivesRental.Services.Mappers;
 using VivesRental.Services.Results;
 
@@ -31,9 +32,16 @@ namespace VivesRental.Services
                 .FirstOrDefaultAsync();
         }
 
+        [Obsolete("This method is obsolete, use FindAsync in stead", false)]
         public Task<List<ArticleResult>> AllAsync()
         {
+            return FindAsync();
+        }
+
+        public Task<List<ArticleResult>> FindAsync(ArticleFilter filter = null)
+        {
             return _context.Articles
+                .ApplyFilter(filter)
                 .MapToResults()
                 .ToListAsync();
         }
@@ -67,7 +75,7 @@ namespace VivesRental.Services
         public Task<List<ArticleResult>> GetRentedArticlesAsync()
         {
             return _context.Articles
-                .Where(a => a.IsRented())
+                .Where(ArticleExtensions.IsRented())
                 .MapToResults()
                 .ToListAsync();
         }
@@ -75,7 +83,7 @@ namespace VivesRental.Services
         public Task<List<ArticleResult>> GetRentedArticlesAsync(Guid customerId)
         {
             return _context.Articles
-                .Where(a => a.IsRented(customerId))
+                .Where(ArticleExtensions.IsRented(customerId))
                 .MapToResults()
                 .ToListAsync();
         }

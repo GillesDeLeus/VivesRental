@@ -40,17 +40,29 @@ namespace VivesRental.Repository.Extensions
                 ) //If we do not have an UntilDateTime, just add the expiry days to the FromDate
                 && ar.UntilDateTime > fromDateTime;
         }
-        
-        public static bool IsRented(this Article article)
+
+        public static Expression<Func<Article,bool>> IsRented()
         {
-            return article.Status == ArticleStatus.Normal && //Only articles that are "Normal"
+            return article => article.Status == ArticleStatus.Normal && //Only articles that are "Normal"
                    article.OrderLines.Any(rol => !rol.ReturnedAt.HasValue); //Only articles that are rented
         }
 
-        public static bool IsRented(this Article article, Guid customerId)
+        public static Expression<Func<Article, bool>> IsRented(Guid customerId)
         {
-            return article.Status == ArticleStatus.Normal && //Only articles that are "Normal"
+            return article => article.Status == ArticleStatus.Normal && //Only articles that are "Normal"
                    article.OrderLines.Any(rol => !rol.ReturnedAt.HasValue && rol.Order.CustomerId == customerId); //Only articles that are rented for a customer
         }
+
+        //public static bool IsRented(this Article article)
+        //{
+        //    return article.Status == ArticleStatus.Normal && //Only articles that are "Normal"
+        //           article.OrderLines.Any(rol => !rol.ReturnedAt.HasValue); //Only articles that are rented
+        //}
+
+        //public static bool IsRented(this Article article, Guid customerId)
+        //{
+        //    return article.Status == ArticleStatus.Normal && //Only articles that are "Normal"
+        //           article.OrderLines.Any(rol => !rol.ReturnedAt.HasValue && rol.Order.CustomerId == customerId); //Only articles that are rented for a customer
+        //}
     }
 }

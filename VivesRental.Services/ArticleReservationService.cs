@@ -7,6 +7,7 @@ using VivesRental.Model;
 using VivesRental.Repository.Core;
 using VivesRental.Services.Contracts;
 using VivesRental.Services.Extensions;
+using VivesRental.Services.Filters;
 using VivesRental.Services.Mappers;
 using VivesRental.Services.Results;
 
@@ -29,9 +30,16 @@ namespace VivesRental.Services
                 .FirstOrDefaultAsync();
         }
 
+        [Obsolete("This method is obsolete, use FindAsync in stead", false)]
         public Task<List<ArticleReservationResult>> AllAsync()
         {
+            return FindAsync();
+        }
+
+        public Task<List<ArticleReservationResult>> FindAsync(ArticleReservationFilter filter = null)
+        {
             return _context.ArticleReservations
+                .ApplyFilter(filter)
                 .MapToResults()
                 .ToListAsync();
         }

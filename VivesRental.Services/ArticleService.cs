@@ -64,10 +64,14 @@ namespace VivesRental.Services
 
         public Task<List<ArticleResult>> GetAvailableArticlesAsync(Guid productId)
         {
+            return GetAvailableArticlesAsync(productId, DateTime.UtcNow);
+        }
+
+        public Task<List<ArticleResult>> GetAvailableArticlesAsync(Guid productId, DateTime fromDateTime, DateTime? untilDateTime = null)
+        {
             return _context.Articles
-                .Where(a => a.ProductId == productId &&
-                                                  a.Status == ArticleStatus.Normal &&
-                                                  a.OrderLines.All(ol => ol.ReturnedAt.HasValue))
+                .Where(a => a.ProductId == productId)
+                .Where(ArticleExtensions.IsAvailable(fromDateTime, untilDateTime))
                 .MapToResults()
                 .ToListAsync();
         }

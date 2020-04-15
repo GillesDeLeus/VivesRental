@@ -16,9 +16,9 @@ namespace VivesRental.Tests.ConsoleApp
         static async Task Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            await TestGetRentedArticles();
+            //await TestGetRentedArticles();
             //await TestGetArticleResults();
-            //TestNumberOfAvailableItems();
+            await TestNumberOfAvailableItems();
             //TestIsAvailable();
             //TestRemove();
             //await TestEdit2();
@@ -82,38 +82,49 @@ namespace VivesRental.Tests.ConsoleApp
             var orderService = new OrderService(context);
             var orderLineService = new OrderLineService(context);
 
-            //Create Customer
-            var customer = await customerService.CreateAsync(new Customer { FirstName = "Bavo", LastName = "Ketels", Email = "bavo.ketels@vives.be", PhoneNumber = "test" });
+            ////Create Customer
+            //var customer = await customerService.CreateAsync(new Customer { FirstName = "Bavo", LastName = "Ketels", Email = "bavo.ketels@vives.be", PhoneNumber = "test" });
 
-            //Create Product
-            var product = await productService.CreateAsync(new Product { Name = "Product", RentalExpiresAfterDays = 1 });
+            ////Create Product
+            //var product = await productService.CreateAsync(new Product { Name = "Product", RentalExpiresAfterDays = 1 });
 
-            //Create Article
-            var article = await articleService.CreateAsync(new Article { ProductId = product.Id });
-            var productResults = await productService.GetAvailableProductResultsAsync();
-            Console.WriteLine($"availableProducts (1): {productResults.First().NumberOfAvailableArticles}");
+            ////Create Article
+            //var article = await articleService.CreateAsync(new Article { ProductId = product.Id });
+            //var productResults = await productService.GetAvailableProductResultsAsync();
+            //Console.WriteLine($"availableProducts (1): {productResults.First().NumberOfAvailableArticles}");
 
-            //Edit Article
-            await articleService.UpdateStatusAsync(article.Id, ArticleStatus.Broken);
-            var productResultsBroken = await productService.GetAvailableProductResultsAsync();
-            Console.WriteLine($"availableProducts Broken (0): {productResultsBroken.Count}");
+            ////Edit Article
+            //await articleService.UpdateStatusAsync(article.Id, ArticleStatus.Broken);
+            //var productResultsBroken = await productService.GetAvailableProductResultsAsync();
+            //Console.WriteLine($"availableProducts Broken (0): {productResultsBroken.Count}");
 
-            //Add OrderLine
-            await articleService.UpdateStatusAsync(article.Id, ArticleStatus.Normal);
-            var order = await orderService.CreateAsync(customer.Id);
-            await orderLineService.RentAsync(order.Id, article.Id);
-            var productResultsRented = await productService.GetAvailableProductResultsAsync();
-            Console.WriteLine($"availableProducts Rented (0): {productResultsRented.Count}");
+            ////Add OrderLine
+            //await articleService.UpdateStatusAsync(article.Id, ArticleStatus.Normal);
+            //var order = await orderService.CreateAsync(customer.Id);
+            //await orderLineService.RentAsync(order.Id, article.Id);
+            //var productResultsRented = await productService.GetAvailableProductResultsAsync();
+            //Console.WriteLine($"availableProducts Rented (0): {productResultsRented.Count}");
 
-            //Return Order
-            await orderService.ReturnAsync(order.Id, DateTime.Now);
-            var productResultsReturned = await productService.GetAvailableProductResultsAsync();
-            Console.WriteLine($"availableProducts Returned (1): {productResultsReturned.First().NumberOfAvailableArticles}");
+            ////Return Order
+            //await orderService.ReturnAsync(order.Id, DateTime.Now);
+            //var productResultsReturned = await productService.GetAvailableProductResultsAsync();
+            //Console.WriteLine($"availableProducts Returned (1): {productResultsReturned.First().NumberOfAvailableArticles}");
 
-            //Create ArticleReservation
-            var articleReservation = await articleReservationService.CreateAsync(customer.Id, article.Id);
-            var productResultsReserved = await productService.GetAvailableProductResultsAsync();
-            Console.WriteLine($"availableProducts Reserved (0): {productResultsReserved.Count}");
+            ////Create ArticleReservation
+            //var articleReservation = await articleReservationService.CreateAsync(customer.Id, article.Id);
+            //var productResultsReserved = await productService.GetAvailableProductResultsAsync();
+            //Console.WriteLine($"availableProducts Reserved (0): {productResultsReserved.Count}");
+
+            var productIdToTest = new Guid("5475cdd2-256c-4097-aaa5-3ce1327a2cf5");
+
+            var products = await productService.AllAsync();
+            foreach (var productItem in products)
+            {
+                Console.WriteLine($"Product {productItem.Id},  Available Articles: {productItem.NumberOfAvailableArticles}");
+            }
+
+            var availableArticlesResult = await articleService.GetAvailableArticlesAsync(productIdToTest);
+            Console.WriteLine($"available Articles for Product {productIdToTest}: {availableArticlesResult.Count}");
         }
 
         static async Task TestIsAvailable()
